@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #B11010;
+    --primary-color2: #D71616;
+    --line-color: #D1D1D1;
+    --text-color: #333333;
+    --icon-color: #A6A6A6;
+    --star-color: #FFCC51;
+}
+
+.ant-btn {
+    padding: 12px 24px;
+}
+
+h2 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.4;
+    line-height: 36px;
+    word-break: break-all;
+    overflow-wrap: break-word !important;
+    color: var(--text-title);
+}
+
+p {
+    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0px;
+    line-height: 20px;
+    color: rgb(45, 46, 47);
+    text-align: left;
+    text-decoration: none;
+}
+
+span {
+    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0px;
+    line-height: 16px;
+    color: rgb(110, 112, 114);
+    text-align: left;
+    text-decoration: none;
+}
+
+main {
+    margin: auto;
+    width: 100%;
+    padding: 56px 40px;
+}
+
+.primaryButton {
+    border-color: #fff !important;
+    outline: none !important;
+    background-color: var(--primary-color2);
+}
+
