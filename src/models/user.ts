@@ -19,4 +19,12 @@ export interface User {
     activeCode: string
     dateOfBirth: Date
 }
+export interface TableFilters {
+    search: string
+    joinDate?: Date
+    location?: string
+    postCount?: number
+}
+
+
 

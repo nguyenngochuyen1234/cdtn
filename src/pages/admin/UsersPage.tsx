@@ -1,9 +1,10 @@
-import React from 'react'
+import { UserTable } from "@/components/admin/UserTable";
 
-const UsersPage = () => {
+export default function UsersPage() {
     return (
-        <div>UsersPage</div>
+        <main className="min-h-screen bg-gray-50">
+            <UserTable />
+        </main>
     )
 }
 
-export default UsersPage
