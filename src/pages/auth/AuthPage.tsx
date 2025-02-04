@@ -13,20 +13,27 @@ import {
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
 import CarouselComponent from '@/components/CarouselComponent';
-import { Outlet, useNavigate } from "react-router-dom"
-
+import { Outlet, useNavigate } from 'react-router-dom';
 
 function AuthPage() {
-    const navigate = useNavigate()
-
+    const navigate = useNavigate();
 
     return (
         <Grid container sx={{ height: '100vh' }}>
             <Grid item xs={12} sx={{ textAlign: 'center', mt: 3 }}>
-                <Typography variant="h4" fontWeight="bold">Logo</Typography>
+                <Button onClick={() => navigate('/')}>
+                    <Typography variant="h4" fontWeight="bold">
+                        Logo
+                    </Typography>
+                </Button>
             </Grid>
 
-            <Grid item xs={12} md={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Grid
+                item
+                xs={12}
+                md={6}
+                sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            >
                 <Outlet />
             </Grid>
 
@@ -37,4 +44,4 @@ function AuthPage() {
     );
 }
 
-export default AuthPage
+export default AuthPage;

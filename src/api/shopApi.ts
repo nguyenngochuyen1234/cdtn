@@ -1,40 +1,71 @@
-import axiosClient from "./axiosClient"
-const userApi = {
-    uploadMultipeImage() {
-        const url = "/shops/upload-multiple-image"
-        return axiosClient.put(url)
+import { StoreCreation } from '@/models';
+import axiosClient from './axiosClient';
+const shopApi = {
+    uploadMultipeImage(files: File[], email: string) {
+        const url = '/shops/upload-multiple-image';
+        const formData = new FormData();
+        files.forEach((file) => {
+            formData.append('images', file);
+        });
+
+        return axiosClient.put(
+            url,
+            { files: formData, email: email },
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        );
     },
-    uploadImageShop() {
-        const url = "/shops/upload-image-shop"
-        return axiosClient.put(url)
+    uploadImageShop(file: File, email: string) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('email', email);
+        console.log(file);
+        console.log('Dữ liệu trong FormData trước khi gửi:');
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        const url = '/shops/upload-image-shop';
+        return axiosClient.put(url, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     },
     updateActiveShop(id: string) {
-        const url = `/shops/update-active-shop/${id}`
-        return axiosClient.put(url)
+        const url = `/shops/update-active-shop/${id}`;
+        return axiosClient.put(url);
     },
-    createShop() {
-        const url = "/shops/create-shop"
-        return axiosClient.post(url)
+    getListShopDeactive(id: string) {
+        const url = `/shops/update-active-shop/${id}`;
+        return axiosClient.put(url);
+    },
+    createShop(data: StoreCreation) {
+        const url = '/shops/create-shop';
+        return axiosClient.post(url, data);
     },
     getShopById(id: string) {
-        const url = `/shops/${id}`
-        return axiosClient.get(url)
+        const url = `/shops/${id}`;
+        return axiosClient.get(url);
     },
     getAllShopService() {
-        const url = "/shops/service"
-        return axiosClient.get(url)
+        const url = '/shops/service';
+        return axiosClient.get(url);
     },
     deleteShopService(id: string) {
-        const url = `/shops/service/${id}`
-        return axiosClient.get(url)
+        const url = `/shops/service/${id}`;
+        return axiosClient.get(url);
     },
     getScoreByIdShop(id: string) {
-        const url = `/shops/score/${id}`
-        return axiosClient.get(url)
+        const url = `/shops/score/${id}`;
+        return axiosClient.get(url);
     },
     getOpenTimeByIdShop(idShop: string) {
-        const url = `/shops/get-open-time/${idShop}`
-        return axiosClient.get(url)
+        const url = `/shops/get-open-time/${idShop}`;
+        return axiosClient.get(url);
     },
-}
-export default userApi
+};
+export default shopApi;

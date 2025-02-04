@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 * {
     margin: 0;
     padding: 0;
@@ -10,12 +9,12 @@
 }
 
 :root {
-    --primary-color: #B11010;
-    --primary-color2: #D71616;
-    --line-color: #D1D1D1;
+    --primary-color: #b11010;
+    --primary-color2: #d71616;
+    --line-color: #d1d1d1;
     --text-color: #333333;
-    --icon-color: #A6A6A6;
-    --star-color: #FFCC51;
+    --icon-color: #a6a6a6;
+    --star-color: #ffcc51;
 }
 
 .ant-btn {
@@ -30,10 +29,11 @@ h2 {
     word-break: break-all;
     overflow-wrap: break-word !important;
     color: var(--text-title);
+    margin-bottom: 24px;
 }
 
 p {
-    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 0px;
@@ -44,7 +44,7 @@ p {
 }
 
 span {
-    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 12px;
     font-weight: 400;
     letter-spacing: 0px;
@@ -65,4 +65,3 @@ main {
     outline: none !important;
     background-color: var(--primary-color2);
 }
-

@@ -17,7 +17,6 @@ import {
     ChevronRight,
     HelpOutline,
     Logout,
-    Settings
 } from '@mui/icons-material'
 import { MenuItem, User } from '@/models'
 
@@ -44,14 +43,7 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
             }} />,
             link: "/"
         },
-        {
-            id: 'settings',
-            label: 'Cài đặt',
-            icon: <Settings sx={{
-                color: "#000"
-            }} />,
-            link: "/"
-        },
+
         {
             id: 'support',
             label: 'Hỗ trợ',

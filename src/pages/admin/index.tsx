@@ -21,7 +21,6 @@ const NAVIGATION = [
     { segment: 'moderation', title: 'Kiểm duyệt', icon: <AdminPanelSettings /> },
     { segment: 'categories', title: 'Danh mục', icon: <Category /> },
     { segment: 'users', title: 'Người dùng', icon: <People /> },
-    { segment: 'settings', title: 'Cài đặt', icon: <Settings /> },
     { segment: 'logout', title: 'Đăng xuất', icon: <Logout /> },
 ];
 
@@ -69,7 +68,7 @@ const AdminPage = () => {
                     ))}
                 </List>
             </Drawer>
-            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', p: 3 }}>
+            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', p: 3, height:"100vh" }}>
                 <AppBar position="fixed" sx={{ width: `calc(100% - 240px)`, ml: '240px' }}>
                     <Header />
                 </AppBar>

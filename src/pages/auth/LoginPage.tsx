@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Button,
@@ -13,33 +13,77 @@ import {
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
 import CarouselComponent from '@/components/CarouselComponent';
-import { useNavigate } from "react-router-dom"
-
+import { useNavigate } from 'react-router-dom';
+import authApi from '@/api/authApi';
 
 const LoginPage: React.FC = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleLogin = async () => {
+        try {
+            const result = await authApi.login({ username, password });
+            console.log(result.data);
+            if (result.data.data.accessToken) {
+                localStorage.setItem('access_token', result.data.data.accessToken);
+                navigate('/');
+            }
+        } catch (err) {}
+    };
 
     return (
         <Box sx={{ width: '80%', maxWidth: 400 }}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom>Đăng nhập</Typography>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+                Đăng nhập
+            </Typography>
             <Typography variant="body2" color="textSecondary" gutterBottom>
                 Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
             </Typography>
 
-            <TextField label="Email" variant="outlined" fullWidth margin="normal" />
-            <TextField label="Password" type="password" variant="outlined" fullWidth margin="normal" />
+            {/* Email input */}
+            <TextField
+                label="Email"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={username} // Set the value to the state
+                onChange={(e) => setUsername(e.target.value)} // Update state on change
+            />
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                <FormControlLabel
-                    control={<Checkbox />}
-                    label="Nhớ tài khoản"
-                />
+            {/* Password input */}
+            <TextField
+                label="Password"
+                type="password"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={password} // Set the value to the state
+                onChange={(e) => setPassword(e.target.value)} // Update state on change
+            />
+
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mt: 1,
+                }}
+            >
+                <FormControlLabel control={<Checkbox />} label="Nhớ tài khoản" />
                 <Link href="/auth/forgot-password" underline="hover">
                     Quên mật khẩu?
                 </Link>
             </Box>
-            <Button variant="contained" color="primary" fullWidth sx={{ mb: 2 }} onClick={() => navigate("/")}>
+
+            <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ mb: 2 }}
+                onClick={handleLogin}
+            >
                 Login
             </Button>
 
@@ -50,16 +94,9 @@ const LoginPage: React.FC = () => {
             <Divider sx={{ my: 3 }}>or login with</Divider>
 
             <Grid container spacing={2}>
-                <Grid item xs={6}>
-                    <Button variant="outlined" color="primary" fullWidth startIcon={<FacebookIcon />}>
-                        Facebook
-                    </Button>
-                </Grid>
-                <Grid item xs={6}>
-                    <Button variant="outlined" color="error" fullWidth startIcon={<GoogleIcon />}>
-                        Google
-                    </Button>
-                </Grid>
+                <Button variant="outlined" color="error" fullWidth startIcon={<GoogleIcon />}>
+                    Google
+                </Button>
             </Grid>
         </Box>
     );

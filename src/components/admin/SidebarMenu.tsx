@@ -38,7 +38,6 @@ const MENU_ITEMS: MenuAdminItem[] = [
 ]
 
 const BOTTOM_MENU_ITEMS: MenuAdminItem[] = [
-    { key: 'settings', label: 'Cài đặt', icon: <Settings />, path: '/settings' },
     { key: 'logout', label: 'Đăng xuất', icon: <Logout />, path: '/logout' },
 ]
 

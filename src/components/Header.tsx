@@ -2,40 +2,22 @@ import logo from '@/assets/images/logo.svg';
 import { Avatar, Box, Button, Divider, Stack, Typography } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { colors } from '@/themes/colors';
 import { deepOrange } from '@mui/material/colors';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ProfileMenu from './user/ProfilteMenu';
 import { MenuItem, User } from '@/models';
-
+import userApi from '@/api/userApi';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/stores';
 export const HeaderComponent = () => {
+    const user = useSelector((state: RootState) => state.user.user);
     const handleSearch = (value: string) => {
         console.log('Search:', value);
     };
     const [openMenu, setOpenMenu] = useState(false);
     const navigate = useNavigate();
-    const user: User = {
-        id: "user001",
-        username: "coffeelover99",
-        avatar: "https://source.unsplash.com/random/100x100?person",
-        email: "coffeelover99@example.com",
-        role: ["user"],
-        phone: "0123456789",
-        statusUser: "ACTIVE",
-        city: "Ho Chi Minh City",
-        district: "District 1",
-        ward: "Ward 4",
-        ratingUser: 4.7,
-        quantityImage: 10,
-        helpful: 120,
-        notLike: 5,
-        like: 200,
-        firstName: "Linh",
-        lastName: "Nguyen",
-        activeCode: "ABC123",
-        dateOfBirth: new Date("1995-08-12"),
-    };
     const handelNavigate = (item: MenuItem) => {
         setOpenMenu(false);
         navigate(item.link);
@@ -61,21 +43,66 @@ export const HeaderComponent = () => {
             }}
         >
             <Typography variant="h6">Logo</Typography>
-            <Stack direction="row" spacing={2}>
-                <Button startIcon={<NotificationsIcon sx={{ color: colors.textColor }} />} sx={{ textTransform: 'none' }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: colors.textColor }}>Đăng ký</Typography>
+            <Stack direction="row" alignItems="center" spacing={2}>
+                <Button
+                    variant="contained"
+                    onClick={() => navigate('biz/register-shop')}
+                    startIcon={<NotificationsIcon sx={{ color: '#fff' }} />}
+                    sx={{ textTransform: 'none' }}
+                >
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        Bắt đầu tạo cửa hàng
+                    </Typography>
                 </Button>
-                <div className='w-[1px] h-4 bg-black'></div>
-                <Button startIcon={<FavoriteIcon sx={{ color: colors.textColor }} />} sx={{ textTransform: 'none' }} onClick={() => navigate("auth/login")}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: colors.textColor }}>Đăng nhập</Typography>
-                </Button>
-                <div className='w-[1px] h-4 bg-black'></div>
-                <Button startIcon={<Avatar sx={{ bgcolor: deepOrange[500] }}>N</Avatar>} sx={{ textTransform: 'none', position: "relative" }} onClick={() => setOpenMenu(true)}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: colors.textColor }}>User 1</Typography>
-                </Button>
-                {openMenu && <div className='absolute top-20 right-1 z-10 w-[330px]'>
-                    <ProfileMenu user={user} onMenuItemClick={handelNavigate} />
-                </div>}
+                <div className="w-[1px] h-4 bg-black "></div>
+                {user ? (
+                    <>
+                        <Button
+                            startIcon={<Avatar sx={{ bgcolor: deepOrange[500] }}>N</Avatar>}
+                            sx={{ textTransform: 'none', position: 'relative' }}
+                            onClick={() => setOpenMenu(true)}
+                        >
+                            <Typography
+                                variant="subtitle2"
+                                sx={{ fontWeight: 600, color: colors.textColor }}
+                            >
+                                {user.username}
+                            </Typography>
+                        </Button>
+                        {openMenu && (
+                            <div className="absolute top-20 right-1 z-10 w-[330px]">
+                                <ProfileMenu user={user} onMenuItemClick={handelNavigate} />
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <Button
+                            startIcon={<NotificationsIcon sx={{ color: colors.textColor }} />}
+                            sx={{ textTransform: 'none' }}
+                        >
+                            <Typography
+                                variant="subtitle2"
+                                sx={{ fontWeight: 600, color: colors.textColor }}
+                            >
+                                Đăng ký
+                            </Typography>
+                        </Button>
+                        <div className="w-[1px] h-4 bg-black "></div>
+                        <Button
+                            startIcon={<FavoriteIcon sx={{ color: colors.textColor }} />}
+                            sx={{ textTransform: 'none' }}
+                            onClick={() => navigate('auth/login')}
+                        >
+                            <Typography
+                                variant="subtitle2"
+                                sx={{ fontWeight: 600, color: colors.textColor }}
+                            >
+                                Đăng nhập
+                            </Typography>
+                        </Button>
+                    </>
+                )}
             </Stack>
         </Box>
     );
