@@ -38,13 +38,13 @@ const LoginPage: React.FC = () => {
             <Typography variant="h5" fontWeight="bold" gutterBottom>
                 Đăng nhập
             </Typography>
-            <Typography variant="body2" color="textSecondary" gutterBottom>
+            {/* <Typography variant="body2" color="textSecondary" gutterBottom>
                 Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-            </Typography>
+            </Typography> */}
 
             {/* Email input */}
             <TextField
-                label="Email"
+                label="Tên đăng nhập"
                 variant="outlined"
                 fullWidth
                 margin="normal"
@@ -84,14 +84,14 @@ const LoginPage: React.FC = () => {
                 sx={{ mb: 2 }}
                 onClick={handleLogin}
             >
-                Login
+                Đăng nhập
             </Button>
 
             <Typography variant="body2" align="center">
                 Bạn chưa có tài khoản? <Link href="/auth/signup">Đăng ký</Link>
             </Typography>
 
-            <Divider sx={{ my: 3 }}>or login with</Divider>
+            <Divider sx={{ my: 3 }}>Hoặc đăng nhập bằng</Divider>
 
             <Grid container spacing={2}>
                 <Button variant="outlined" color="error" fullWidth startIcon={<GoogleIcon />}>

@@ -45,9 +45,9 @@ const RegisterPage: React.FC = () => {
     return (
         <Box sx={{ width: '80%', maxWidth: 400 }}>
             <Typography variant="h5" fontWeight="bold" gutterBottom>Đăng ký</Typography>
-            <Typography variant="body2" color="textSecondary" gutterBottom>
+            {/* <Typography variant="body2" color="textSecondary" gutterBottom>
                 Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-            </Typography>
+            </Typography> */}
 
 
             <TextField
@@ -112,19 +112,11 @@ const RegisterPage: React.FC = () => {
             <Typography variant="body2" align="center">
                 Bạn đã có tài khoản? <Link href="/auth/login">Đăng nhập</Link>
             </Typography>
-            <Divider sx={{ my: 3 }}>or sign up with</Divider>
-
+            <Divider sx={{ my: 3 }}>Hoặc đăng nhập bằng</Divider>
             <Grid container spacing={2}>
-                <Grid item xs={6}>
-                    <Button variant="outlined" color="primary" fullWidth startIcon={<FacebookIcon />}>
-                        Facebook
-                    </Button>
-                </Grid>
-                <Grid item xs={6}>
-                    <Button variant="outlined" color="error" fullWidth startIcon={<GoogleIcon />}>
-                        Google
-                    </Button>
-                </Grid>
+                <Button variant="outlined" color="error" fullWidth startIcon={<GoogleIcon />}>
+                    Google
+                </Button>
             </Grid>
         </Box>
     );

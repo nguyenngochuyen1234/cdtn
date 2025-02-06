@@ -30,6 +30,7 @@ import { User } from './models';
 import userApi from './api/userApi';
 import { useDispatch } from 'react-redux';
 import { setUser } from './redux/userSlice';
+import ActiveCodeUser from './pages/auth/ActiveUser';
 export default function App() {
     const dispatch = useDispatch();
     const fetchUser = async () => {
@@ -60,6 +61,7 @@ export default function App() {
                     <Route path="reset-password" element={<ResetPasswordPage />} />
                     <Route path="forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="verfication" element={<VerificationCodePage />} />
+                    <Route path="verify-account" element={<ActiveCodeUser></ActiveCodeUser>}></Route>
                 </Route>
                 <Route path="/biz" element={<CreateShop />}>
                     <Route path="register-shop" element={<RegisterAccountShopPage />} />
