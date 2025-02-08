@@ -1,14 +1,15 @@
 import { StoreCreation } from '@/models';
 import axiosClient from './axiosClient';
+import axios from 'axios';
 const shopApi = {
     uploadMultipeImage(files: File[], email: string) {
-        const url = '/shops/upload-multiple-image';
+        const url = `http://localhost:8080/shops/upload-multiple-image`;
         const formData = new FormData();
         files.forEach((file) => {
-            formData.append('images', file);
+            formData.append('files', file);
         });
 
-        return axiosClient.put(
+        return axios.put(
             url,
             { files: formData, email: email },
             {

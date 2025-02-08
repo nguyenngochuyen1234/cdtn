@@ -22,7 +22,7 @@ export interface Category {
     type: string;
     description: string;
     tags?: string[];
-    id: string;
+    id?: string;
 }
 
 export interface Tag {

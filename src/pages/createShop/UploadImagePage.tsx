@@ -3,9 +3,14 @@ import { Box, Button, Typography, CircularProgress } from '@mui/material';
 import axios from 'axios';
 import axiosClient from '@/api/axiosClient';
 import { useNavigate } from 'react-router-dom';
+import { AppDispatch, RootState } from '@/redux/stores';
+import { useDispatch, useSelector } from 'react-redux';
+import { setNewShop } from '@/redux/createShop';
 
 function UploadImagePage() {
     const navigate = useNavigate();
+    const dispatch: AppDispatch = useDispatch();
+    const store = useSelector((state: RootState) => state.newShop.newShop);
 
     const [imageFiles, setImageFiles] = useState<{ [key: string]: File | null }>({
         'shop-logo': null,
@@ -40,7 +45,7 @@ function UploadImagePage() {
         setUploadSuccess('');
         const email = localStorage.getItem('EMAIL_BIZ');
         if (email) {
-            const uploadPromises = Object.entries(imageFiles).map(async ([type, file]) => {
+            const uploadPromises = Object.entries(imageFiles).map(async ([type, file], index) => {
                 if (!file) return null;
 
                 const formData = new FormData();
@@ -57,13 +62,14 @@ function UploadImagePage() {
                             },
                         }
                     );
-
-                    // if (response.status === 200) {
-                    // navigate('/finish-create-shop');
-                    //     return `${type} tải lên thành công.`;
-                    // } else {
-                    //     throw new Error(`${type} tải lên thất bại.`);
-                    // }
+                    if (response.data.success) {
+                        if (index === 0) {
+                            dispatch(setNewShop({ avatar: response.data.data, ...store }));
+                        } else if (index === 1) {
+                            dispatch(setNewShop({ imageBusiness: response.data.data, ...store }));
+                            navigate('/finish-create-shop');
+                        }
+                    }
                 } catch (error) {
                     throw new Error(`Không thể tải lên ${type}.`);
                 }

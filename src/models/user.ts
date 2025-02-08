@@ -38,7 +38,7 @@ export interface TableFilters {
 }
 
 export interface RegisterUser {
-    username: string;
+    username?: string;
     password: string;
     email: string;
     phone: string;

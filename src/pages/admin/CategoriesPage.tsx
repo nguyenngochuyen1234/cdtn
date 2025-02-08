@@ -91,9 +91,6 @@ const CategoriesPage: React.FC = () => {
 
     const handleDeleteTag = async (categoryId: string, tag: string) => {
         try {
-            // Xóa tag thông qua API
-            // await cmsApi.deleteTag(categoryId, tag);
-            // Cập nhật danh sách tag trong state
             setCategories((prevCategories) =>
                 prevCategories.map((category) =>
                     category.id === categoryId
@@ -106,6 +103,28 @@ const CategoriesPage: React.FC = () => {
             );
         } catch (err) {
             console.error('Error deleting tag', err);
+        }
+    };
+    const handleSubmit = async (newCategory: Category, tags: string[]) => {
+        try {
+            console.log({ newCategory, tags });
+            if (!currentCategory) {
+                // Update existing category
+                const newCategoryData = await cmsApi.addCategories({
+                    name: newCategory.name,
+                    type: newCategory.type,
+                    description: newCategory.description,
+                    tags: tags,
+                });
+                setCategories((prev) => [...prev, newCategoryData.data]);
+            } else {
+                // Create new category
+                // const response = await cmsApi.createCategory({ ...newCategory, tags });
+                // setCategories((prevCategories) => [...prevCategories, response.data.data]);
+            }
+            handleModalClose(); // Close the modal after submit
+        } catch (err) {
+            console.error('Error saving category', err);
         }
     };
 
@@ -204,7 +223,7 @@ const CategoriesPage: React.FC = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <CategoryModal open={openModal} onClose={handleModalClose} onSubmit={() => {}} />
+            <CategoryModal open={openModal} onClose={handleModalClose} onSubmit={handleSubmit} />
         </div>
     );
 };

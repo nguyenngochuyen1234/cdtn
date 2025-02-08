@@ -32,33 +32,6 @@ const RegisterAccountShopPage = () => {
         formState: { errors },
     } = useForm<RegisterUser>();
 
-    const onSubmit = async (data: RegisterUser) => {
-        setLoading(true);
-        try {
-            const result: AxiosResponse = await authApi.registerShop(data);
-            if (result?.data?.success) {
-                localStorage.setItem('EMAIL_BIZ', data.email);
-                dispatch(setNewShop({ ...data, ...store }));
-                setSnackbar({ open: true, message: 'Đăng ký thành công!', severity: 'success' });
-                navigate('/biz/create-tag');
-            } else {
-                setSnackbar({
-                    open: true,
-                    message: result?.data?.message,
-                    severity: 'error',
-                });
-            }
-        } catch (err) {
-            console.log(err);
-            setSnackbar({
-                open: true,
-                message: 'Có lỗi xảy ra. Vui lòng thử lại.',
-                severity: 'error',
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
@@ -97,7 +70,40 @@ const RegisterAccountShopPage = () => {
             console.error('Lỗi khi lấy danh sách xã/phường:', error);
         }
     };
-
+    const onSubmit = async (data: RegisterUser) => {
+        setLoading(true);
+        try {
+            const result: AxiosResponse = await authApi.registerShop({
+                email: data.email,
+                password: data.password,
+                phone: data.phone,
+                city: selectedProvince,
+                ward: selectedWard,
+                district: selectedDistrict,
+            });
+            if (result?.data?.success) {
+                localStorage.setItem('EMAIL_BIZ', data.email);
+                dispatch(setNewShop({ ...data, ...store }));
+                setSnackbar({ open: true, message: 'Đăng ký thành công!', severity: 'success' });
+                navigate('/biz/create-tag');
+            } else {
+                setSnackbar({
+                    open: true,
+                    message: result?.data?.message,
+                    severity: 'error',
+                });
+            }
+        } catch (err) {
+            console.log(err);
+            setSnackbar({
+                open: true,
+                message: 'Có lỗi xảy ra. Vui lòng thử lại.',
+                severity: 'error',
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
     const handleProvinceChange = (provinceCode: string) => {
         setSelectedProvince(provinceCode);
         setSelectedDistrict('');

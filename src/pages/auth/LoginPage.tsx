@@ -62,89 +62,71 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <>
-            <Box sx={{ width: '80%', maxWidth: 400 }}>
-                <Typography variant="h5" fontWeight="bold" gutterBottom>
-                    Đăng nhập
-                </Typography>
-                <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-                </Typography>
+        <Box sx={{ width: '80%', maxWidth: 400 }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+                Đăng nhập
+            </Typography>
+            {/* <Typography variant="body2" color="textSecondary" gutterBottom>
+                Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
+            </Typography> */}
 
-                {/* Email input */}
-                <TextField
-                    label="Email"
-                    variant="outlined"
-                    fullWidth
-                    margin="normal"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
+            {/* Email input */}
+            <TextField
+                label="Tên đăng nhập"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={username} // Set the value to the state
+                onChange={(e) => setUsername(e.target.value)} // Update state on change
+            />
 
-                {/* Password input */}
-                <TextField
-                    label="Password"
-                    type="password"
-                    variant="outlined"
-                    fullWidth
-                    margin="normal"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+            {/* Password input */}
+            <TextField
+                label="Password"
+                type="password"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+            />
 
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        mt: 1,
-                    }}
-                >
-                    <FormControlLabel control={<Checkbox />} label="Nhớ tài khoản" />
-                    <Link href="/auth/forgot-password" underline="hover">
-                        Quên mật khẩu?
-                    </Link>
-                </Box>
-
-                <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ mb: 2 }}
-                    onClick={handleLogin}
-                >
-                    Login
-                </Button>
-
-                <Typography variant="body2" align="center">
-                    Bạn chưa có tài khoản? <Link href="/auth/signup">Đăng ký</Link>
-                </Typography>
-
-                <Divider sx={{ my: 3 }}>or login with</Divider>
-
-                <Grid container spacing={2}>
-                    <Button variant="outlined" color="error" fullWidth startIcon={<GoogleIcon />}>
-                        Google
-                    </Button>
-                </Grid>
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mt: 1,
+                }}
+            >
+                <FormControlLabel control={<Checkbox />} label="Nhớ tài khoản" />
+                <Link href="/auth/forgot-password" underline="hover">
+                    Quên mật khẩu?
+                </Link>
             </Box>
 
-            {/* Snackbar thông báo */}
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={6000}
-                onClose={handleSnackbarClose}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ mb: 2 }}
+                onClick={handleLogin}
             >
-                <Alert
-                    onClose={handleSnackbarClose}
-                    severity={snackbarSeverity}
-                    sx={{ width: '100%' }}
-                >
-                    {snackbarMessage}
-                </Alert>
-            </Snackbar>
-        </>
+                Đăng nhập
+            </Button>
+
+            <Typography variant="body2" align="center">
+                Bạn chưa có tài khoản? <Link href="/auth/signup">Đăng ký</Link>
+            </Typography>
+
+            <Divider sx={{ my: 3 }}>Hoặc đăng nhập bằng</Divider>
+
+            <Grid container spacing={2}>
+                <Button variant="outlined" color="error" fullWidth startIcon={<GoogleIcon />}>
+                    Google
+                </Button>
+            </Grid>
+        </Box>
     );
 };
 
