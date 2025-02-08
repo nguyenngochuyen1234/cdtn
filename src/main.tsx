@@ -5,6 +5,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { colors } from './themes/colors';
 import { store } from './redux/stores';
 import { Provider } from 'react-redux';
+import React from 'react';
 const theme = createTheme({
     palette: {
         primary: {
@@ -30,7 +31,9 @@ const theme = createTheme({
 createRoot(document.getElementById('root')!).render(
     <ThemeProvider theme={theme}>
         <Provider store={store}>
-            <App />
+            <React.StrictMode>
+                <App />
+            </React.StrictMode>
         </Provider>
     </ThemeProvider>
 );

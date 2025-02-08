@@ -30,6 +30,7 @@ import { User } from './models';
 import userApi from './api/userApi';
 import { useDispatch } from 'react-redux';
 import { setUser } from './redux/userSlice';
+import BusinessSearch from './pages/reviewShop/BusinessSearch';
 export default function App() {
     const dispatch = useDispatch();
     const fetchUser = async () => {
@@ -68,6 +69,7 @@ export default function App() {
                     <Route path="upload-image" element={<UploadImagePage />} />
                 </Route>
                 <Route path="finish-create-shop" element={<FinishCreateShop />} />
+                <Route path="writeareview" element={<BusinessSearch />} />
                 <Route path="/admin" element={<AdminPage />}>
                     <Route index element={<OverviewPage />} />
                     <Route path="posts" element={<PostsPage />} />

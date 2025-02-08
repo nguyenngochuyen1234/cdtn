@@ -3,16 +3,18 @@ import { useForm, Controller } from 'react-hook-form';
 import { TextField, Button, Grid, Container, Box, Snackbar, CircularProgress } from '@mui/material';
 import { RegisterUser } from '@/models';
 import authApi from '@/api/authApi';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { AxiosResponse } from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { AppDispatch } from '@/redux/stores';
+import { AppDispatch, RootState } from '@/redux/stores';
 import provincesApi from '@/api/provincesApi';
 import AddressSelector from '@/components/AddressSelector';
+import { setNewShop } from '@/redux/createShop';
 
 const RegisterAccountShopPage = () => {
     const navigate = useNavigate();
     const dispatch: AppDispatch = useDispatch();
+    const store = useSelector((state: RootState) => state.newShop.newShop);
     const [loading, setLoading] = useState(false);
     const [snackbar, setSnackbar] = useState<{
         open: boolean;
@@ -33,14 +35,10 @@ const RegisterAccountShopPage = () => {
     const onSubmit = async (data: RegisterUser) => {
         setLoading(true);
         try {
-            const birthDate = data.dateOfBirth ? new Date(data.dateOfBirth) : new Date();
-            const formData = {
-                ...data,
-                dateOfBirth: birthDate.toISOString(),
-            };
-            const result: AxiosResponse = await authApi.registerShop(formData);
+            const result: AxiosResponse = await authApi.registerShop(data);
             if (result?.data?.success) {
                 localStorage.setItem('EMAIL_BIZ', data.email);
+                dispatch(setNewShop({ ...data, ...store }));
                 setSnackbar({ open: true, message: 'Đăng ký thành công!', severity: 'success' });
                 navigate('/biz/create-tag');
             } else {
@@ -134,9 +132,6 @@ const RegisterAccountShopPage = () => {
                                 { name: 'password', label: 'Password', type: 'password' },
                                 { name: 'email', label: 'Email' },
                                 { name: 'phone', label: 'Phone' },
-                                { name: 'firstName', label: 'First Name' },
-                                { name: 'lastName', label: 'Last Name' },
-                                { name: 'dateOfBirth', label: 'Date of Birth', type: 'date' },
                             ].map(({ name, label, type = 'text' }) => (
                                 <Grid item xs={12} sm={6} key={name}>
                                     <Controller

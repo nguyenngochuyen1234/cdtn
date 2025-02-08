@@ -47,18 +47,23 @@ function UploadImagePage() {
                 formData.append('file', file);
                 formData.append('email', email);
                 try {
-                    const response = await axiosClient.put('/shop/upload-image-shop', formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    });
+                    const response = await axios.put(
+                        'http://localhost:8080/shops/upload-image-shop',
+                        formData,
+                        {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                                Accept: 'application/json',
+                            },
+                        }
+                    );
 
-                    if (response.status === 200) {
-                        // navigate('/finish-create-shop');
-                        return `${type} tải lên thành công.`;
-                    } else {
-                        throw new Error(`${type} tải lên thất bại.`);
-                    }
+                    // if (response.status === 200) {
+                    // navigate('/finish-create-shop');
+                    //     return `${type} tải lên thành công.`;
+                    // } else {
+                    //     throw new Error(`${type} tải lên thất bại.`);
+                    // }
                 } catch (error) {
                     throw new Error(`Không thể tải lên ${type}.`);
                 }

@@ -15,9 +15,15 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Category } from '@/models';
 import usersCategory from '@/api/usersCategory';
+import { AppDispatch, RootState } from '@/redux/stores';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from '@/redux/userSlice';
+import { setNewShop } from '@/redux/createShop';
 
 function CreateTagPage() {
     const [parentCategories, setParentCategories] = useState<Category[]>([]);
+    const dispatch: AppDispatch = useDispatch();
+    const store = useSelector((state: RootState) => state.newShop.newShop);
     const [selectedParent, setSelectedParent] = useState('');
     const [childCategory, setChildCategory] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -77,7 +83,7 @@ function CreateTagPage() {
                     tags: selectedChildCategories,
                 });
                 if (result.data.success) {
-                    localStorage.setItem('IDCATEGORY_BIZ', result.data.data.id);
+                    dispatch(setNewShop({ idCategory: result.data.data.id, ...store }));
                     navigate('/biz/upload-image');
                 }
             }
