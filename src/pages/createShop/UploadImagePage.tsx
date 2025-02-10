@@ -118,7 +118,7 @@ function UploadImagePage() {
             )}
 
             <Typography variant="body1" sx={{ mt: 3 }}>
-                Chọn ảnh chứng nhận an toàn thực phẩm:
+                Chọn ảnh giấy phép kinh doanh của cửa hàng
             </Typography>
             <input
                 type="file"

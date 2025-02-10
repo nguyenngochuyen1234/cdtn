@@ -179,7 +179,7 @@ function CreateTagPage() {
                 onClick={handleNext}
                 sx={{ mt: 3, width: '100%' }}
             >
-                Next
+                Tiếp theo
             </Button>
         </Box>
     );

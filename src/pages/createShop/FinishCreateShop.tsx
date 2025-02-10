@@ -46,7 +46,7 @@ const App: React.FC = () => {
         categoryEnum: 'RESTAURANT',
         idCategory: '',
         phone: '',
-        owner: false,
+        // owner: false,
     });
 
     const [imagePreviews, setImagePreviews] = useState<{
@@ -120,7 +120,7 @@ const App: React.FC = () => {
         console.log(formData);
         const newErrors: { [key: string]: string } = {};
 
-        if (!formData.name) newErrors.name = 'Name is required';
+        if (!formData.name) newErrors.name = 'Tên cửa hàng là trường bắt buộc';
 
         console.log(newErrors);
         setErrors(newErrors);
@@ -157,7 +157,7 @@ const App: React.FC = () => {
                     formData.mediaUrls as File[],
                     formData.email as string
                 );
-                setSnackbarMessage('Form submitted successfully!');
+                setSnackbarMessage('Gửi yêu cầu đăng ký cửa hàng thành công vui lòng đợi admin xét duyệt!');
                 setSnackbarSeverity('success');
                 setSnackbarOpen(true);
             } else {
@@ -183,11 +183,12 @@ const App: React.FC = () => {
                         Tạo cửa hàng
                     </Typography>
                     <TextField
-                        label="Name"
+                        label="Tên cửa hàng"
                         fullWidth
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
                         margin="normal"
+                        required
                     />
 
                     <TextField
@@ -198,7 +199,7 @@ const App: React.FC = () => {
                         margin="normal"
                     />
                     <TextField
-                        label="Description"
+                        label="Mô tả"
                         fullWidth
                         multiline
                         rows={4}
@@ -207,7 +208,7 @@ const App: React.FC = () => {
                         margin="normal"
                     />
 
-                    <FormControlLabel
+                    {/* <FormControlLabel
                         control={
                             <Checkbox
                                 checked={formData.owner}
@@ -215,9 +216,9 @@ const App: React.FC = () => {
                             />
                         }
                         label="Owner"
-                    />
+                    /> */}
                     <Grid item xs={24} sm={12}>
-                        <Typography variant="h6">Open Time Requests</Typography>
+                        <Typography variant="h6">Thời gian hoạt động của cửa hàng</Typography>
                         {(formData?.openTimeRequests || []).map((request, index) => (
                             <Box key={index} className="mb-4">
                                 <Grid container spacing={2} alignItems="center">
@@ -251,7 +252,7 @@ const App: React.FC = () => {
                                     </Grid>
                                     <Grid item xs={3}>
                                         <TextField
-                                            label="Open Time"
+                                            label="Thời gian mở cửa"
                                             fullWidth
                                             value={request.openTime}
                                             onChange={(e) =>
@@ -265,7 +266,7 @@ const App: React.FC = () => {
                                     </Grid>
                                     <Grid item xs={3}>
                                         <TextField
-                                            label="Close Time"
+                                            label="Thời gian đóng cửa"
                                             fullWidth
                                             value={request.closeTime}
                                             onChange={(e) =>
@@ -283,7 +284,7 @@ const App: React.FC = () => {
                                             color="error"
                                             onClick={() => handleRemoveOpenTime(index)}
                                         >
-                                            Remove
+                                            Xóa
                                         </Button>
                                     </Grid>
                                 </Grid>
@@ -296,7 +297,7 @@ const App: React.FC = () => {
                     <Grid item xs={24} sm={12}>
                         <Box mt={4}>
                             <Typography variant="h6" className="mb-2">
-                                Media URLs
+                                Tải nhiều ảnh
                             </Typography>
                             <input
                                 type="file"
