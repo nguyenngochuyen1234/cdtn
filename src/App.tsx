@@ -32,6 +32,7 @@ import { useDispatch } from 'react-redux';
 import { setUser } from './redux/userSlice';
 import ActiveCodeUser from './pages/auth/ActiveUser';
 import BusinessSearch from './pages/reviewShop/BusinessSearch';
+import ReviewBusiness from './pages/reviewShop/ReviewBusiness';
 export default function App() {
     const dispatch = useDispatch();
     const fetchUser = async () => {
@@ -75,6 +76,7 @@ export default function App() {
                 </Route>
                 <Route path="finish-create-shop" element={<FinishCreateShop />} />
                 <Route path="writeareview" element={<BusinessSearch />} />
+                <Route path="writeareview/biz/:id" element={<ReviewBusiness />} />
                 <Route path="/admin" element={<AdminPage />}>
                     <Route index element={<OverviewPage />} />
                     <Route path="posts" element={<PostsPage />} />

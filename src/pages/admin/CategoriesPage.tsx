@@ -130,9 +130,9 @@ const CategoriesPage: React.FC = () => {
 
     return (
         <div className="container mx-auto mt-10">
-            <h1 className="text-3xl font-bold text-center mb-5">Category List</h1>
+            <h1 className="text-3xl font-bold text-center mb-5">Danh sách danh mục</h1>
             <Button variant="contained" color="primary" onClick={() => handleModalOpen()}>
-                Add New Category
+                Thêm mới danh mục
             </Button>
             <TableContainer component={Paper} className="mt-5">
                 <Table>
@@ -152,9 +152,9 @@ const CategoriesPage: React.FC = () => {
                                     <StyledTableCell>
                                         <IconButton
                                             size="small"
-                                            onClick={() => handleToggleRow(category.id)}
+                                            onClick={() => handleToggleRow(category?.id || '')}
                                         >
-                                            {openRows[category.id] ? (
+                                            {openRows[category.id || ''] ? (
                                                 <KeyboardArrowUpIcon />
                                             ) : (
                                                 <KeyboardArrowDownIcon />
@@ -173,7 +173,7 @@ const CategoriesPage: React.FC = () => {
                                         </IconButton>
                                         <IconButton
                                             color="secondary"
-                                            onClick={() => handleDeleteCategory(category.id)}
+                                            onClick={() => handleDeleteCategory(category.id || '')}
                                         >
                                             <DeleteIcon />
                                         </IconButton>
@@ -185,7 +185,7 @@ const CategoriesPage: React.FC = () => {
                                         colSpan={5}
                                     >
                                         <Collapse
-                                            in={openRows[category.id]}
+                                            in={openRows[category.id || '']}
                                             timeout="auto"
                                             unmountOnExit
                                         >
@@ -202,7 +202,7 @@ const CategoriesPage: React.FC = () => {
                                                                         color="secondary"
                                                                         onClick={() =>
                                                                             handleDeleteTag(
-                                                                                category.id,
+                                                                                category.id || '',
                                                                                 tag
                                                                             )
                                                                         }

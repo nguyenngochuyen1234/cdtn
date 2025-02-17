@@ -1,5 +1,5 @@
-import { Box, Typography, Rating, LinearProgress, Avatar, Stack, Grid } from '@mui/material'
-import { styled } from '@mui/material/styles'
+import { Box, Typography, Rating, LinearProgress, Avatar, Stack, Grid } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import {
     Person,
     Star,
@@ -10,17 +10,18 @@ import {
     NetworkCheck,
     LocalBar,
     Wifi,
-    Inventory
-} from '@mui/icons-material'
-import StarRating from './StarRating'
+    Inventory,
+} from '@mui/icons-material';
+import StarRating from './StarRating';
+import { useState } from 'react';
 
 const BorderLinearProgress = styled(LinearProgress)({
     height: 8,
     borderRadius: 4,
     '& .MuiLinearProgress-bar': {
-        backgroundColor: '#ff4444'
-    }
-})
+        backgroundColor: '#ff4444',
+    },
+});
 const services = [
     { icon: <Person fontSize="small" />, text: 'Bể bơi miễn phí' },
     { icon: <CleaningServices fontSize="small" />, text: 'Làm đẹp và chăm sóc' },
@@ -32,6 +33,7 @@ const services = [
     { icon: <Inventory fontSize="small" />, text: 'Có phế dịch vụ' },
 ];
 export default function RateArticle() {
+    const [rating, setRating] = useState<number>(0);
     return (
         <Box sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
@@ -44,16 +46,14 @@ export default function RateArticle() {
                         <Person />
                     </Avatar>
                     <Typography>Đánh giá của bạn cho bài viết này</Typography>
-                    <StarRating />
+                    <StarRating rating={rating} setRating={setRating} />
                     <Typography>Tốt</Typography>
                 </Stack>
             </Box>
 
             <Grid container spacing={4}>
-                <Grid item xs={12} md={6} >
-                    <Typography variant="subtitle1">
-                        Thông tin liên quan
-                    </Typography>
+                <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle1">Thông tin liên quan</Typography>
                     <Stack spacing={2} sx={{ paddingTop: 2 }}>
                         <Grid container spacing={2}>
                             {services.map((service, index) => (
@@ -93,17 +93,24 @@ export default function RateArticle() {
                                 <Typography sx={{ minWidth: 60 }}>{rating} sao</Typography>
                                 <BorderLinearProgress
                                     variant="determinate"
-                                    value={rating === 5 ? 80 : rating === 4 ? 60 : rating === 3 ? 40 : rating === 2 ? 20 : 10}
+                                    value={
+                                        rating === 5
+                                            ? 80
+                                            : rating === 4
+                                              ? 60
+                                              : rating === 3
+                                                ? 40
+                                                : rating === 2
+                                                  ? 20
+                                                  : 10
+                                    }
                                     sx={{ flexGrow: 1 }}
                                 />
                             </Stack>
                         ))}
                     </Stack>
-
-
                 </Grid>
             </Grid>
         </Box>
-    )
+    );
 }
-

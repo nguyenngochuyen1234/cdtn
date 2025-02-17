@@ -1,24 +1,29 @@
-import { StoreCreation } from '@/models';
+import { ParamFilterShop, StoreCreation } from '@/models';
 import axiosClient from './axiosClient';
 import axios from 'axios';
 const shopApi = {
-    uploadMultipeImage(files: File[], email: string) {
+    uploadMultipleImage(files: File[], email: string) {
+        if (files.length === 0) {
+            console.error('No files selected');
+            return Promise.reject('No files selected');
+        }
+
         const url = `http://localhost:8080/shops/upload-multiple-image`;
         const formData = new FormData();
+
         files.forEach((file) => {
-            formData.append('files', file);
+            formData.append('files', file); // Đảm bảo key là 'files' nếu server yêu cầu như vậy
         });
 
-        return axios.put(
-            url,
-            { files: formData, email: email },
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }
-        );
+        formData.append('email', email); // Thêm email vào formData
+
+        return axios.put(url, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     },
+
     uploadImageShop(file: File, email: string) {
         const formData = new FormData();
         formData.append('file', file);
@@ -38,7 +43,7 @@ const shopApi = {
     },
     updateActiveShop(id: string) {
         const url = `/shops/update-active-shop/${id}`;
-        return axiosClient.put(url);
+        return axiosClient.put(url, { id });
     },
     getListShopDeactive(id: string) {
         const url = `/shops/update-active-shop/${id}`;
@@ -67,6 +72,10 @@ const shopApi = {
     getOpenTimeByIdShop(idShop: string) {
         const url = `/shops/get-open-time/${idShop}`;
         return axiosClient.get(url);
+    },
+    searchShop(data: ParamFilterShop) {
+        const url = `/shops/search`;
+        return axiosClient.post(url, data);
     },
 };
 export default shopApi;

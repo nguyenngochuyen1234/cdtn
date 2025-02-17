@@ -39,20 +39,13 @@ const LoginPage: React.FC = () => {
     const handleLogin = async () => {
         try {
             const result = await authApi.login({ username, password });
-            console.log(result.data);
+            setSnackbarMessage(result.data.message);
+            setSnackbarSeverity(result.data.success ? 'success' : 'error');
+            setSnackbarOpen(true);
+
             if (result.data.success) {
                 localStorage.setItem('access_token', result.data.data.accessToken);
-                setSnackbarMessage('Đăng nhập thành công');
-                setSnackbarSeverity('success');
-                setSnackbarOpen(true);
-
-                setTimeout(() => {
-                    navigate('/');
-                }, 1500);
-            } else {
-                setSnackbarMessage(result.data.message);
-                setSnackbarSeverity('error');
-                setSnackbarOpen(true);
+                setTimeout(() => navigate('/'), 1500);
             }
         } catch (err) {
             setSnackbarMessage('Đăng nhập thất bại');
@@ -126,6 +119,15 @@ const LoginPage: React.FC = () => {
                     Google
                 </Button>
             </Grid>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarOpen(false)}
+            >
+                <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

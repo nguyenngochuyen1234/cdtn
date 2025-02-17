@@ -83,7 +83,15 @@ const RegisterAccountShopPage = () => {
             });
             if (result?.data?.success) {
                 localStorage.setItem('EMAIL_BIZ', data.email);
-                dispatch(setNewShop({ ...data, ...store }));
+                dispatch(
+                    setNewShop({
+                        ...data,
+                        ...store,
+                        city: selectedProvince,
+                        ward: selectedWard,
+                        district: selectedDistrict,
+                    })
+                );
                 setSnackbar({ open: true, message: 'Đăng ký thành công!', severity: 'success' });
                 navigate('/biz/create-tag');
             } else {

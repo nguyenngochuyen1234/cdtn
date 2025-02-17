@@ -11,56 +11,100 @@ import {
     CircularProgress,
     Typography,
     Snackbar,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from '@mui/material';
 import axios from 'axios';
 import cmsApi from '@/api/cmsApi';
-
-interface Shop {
-    id: string;
-    idShop: string;
-    name: string;
-    description: string;
-    city: string;
-    ward: string;
-    district: string;
-    countReview: number;
-    price: number;
-}
+import { StoreCreation } from '@/models';
+import { Image } from 'antd';
+import { PROVINCE_API } from '@/common';
 
 const ModerationPage: React.FC = () => {
-    const [shops, setShops] = useState<Shop[]>([]);
+    const [shops, setShops] = useState<StoreCreation[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [actionLoading, setActionLoading] = useState<{ [key: string]: boolean }>({});
     const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+    const [selectedShop, setSelectedShop] = useState<StoreCreation | null>(null);
+    const [provinces, setProvinces] = useState<{ [key: string]: string }>({});
+    const [districts, setDistricts] = useState<{ [key: string]: string }>({});
+    const [wards, setWards] = useState<{ [key: string]: string }>({});
 
-    // Lấy danh sách cửa hàng chưa kích hoạt
+    const fetchInactiveShops = async () => {
+        setLoading(true);
+        try {
+            const response = await cmsApi.getAllListShopDeactive({
+                page: 1,
+                size: 5,
+                deActive: true,
+            });
+            setShops(response.data.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách cửa hàng:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchInactiveShops = async () => {
-            try {
-                const response = await cmsApi.getAllListShopDeactive({
-                    page: 1,
-                    size: 5,
-                    deActive: true,
-                });
-                setShops(response.data.data);
-            } catch (error) {
-                console.error('Lỗi khi lấy danh sách cửa hàng:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchInactiveShops();
     }, []);
 
-    // Xử lý kích hoạt cửa hàng
-    const handleActivateShop = async (idShop: string) => {
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                const provincesRes = await axios.get(`${PROVINCE_API}p/`);
+                const districtsRes = await axios.get(`${PROVINCE_API}d/`);
+                const wardsRes = await axios.get(`${PROVINCE_API}w/`);
+
+                setProvinces(
+                    provincesRes.data.reduce(
+                        (acc: any, item: any) => ({ ...acc, [item.code]: item.name }),
+                        {}
+                    )
+                );
+                setDistricts(
+                    districtsRes.data.reduce(
+                        (acc: any, item: any) => ({ ...acc, [item.code]: item.name }),
+                        {}
+                    )
+                );
+                setWards(
+                    wardsRes.data.reduce(
+                        (acc: any, item: any) => ({ ...acc, [item.code]: item.name }),
+                        {}
+                    )
+                );
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách địa phương:', error);
+            }
+        };
+        fetchLocations();
+    }, []);
+
+    const handleShopAction = async (id: string, action: 'activate' | 'block') => {
+        setActionLoading((prev) => ({ ...prev, [id]: true }));
         try {
-            await axios.post(`/api/shops/activate/${idShop}`); // API kích hoạt
-            setShops((prevShops) => prevShops.filter((shop) => shop.idShop !== idShop));
-            setSnackbarMessage('Kích hoạt cửa hàng thành công!');
+            const res =
+                action === 'activate'
+                    ? await cmsApi.activeShop(id)
+                    : await cmsApi.blockShopById(id);
+            setSnackbarMessage(res.data.message);
+            setSnackbarSeverity(res.data.success ? 'success' : 'error');
+            if (res.data.success) fetchInactiveShops();
         } catch (error) {
-            console.error('Lỗi khi kích hoạt cửa hàng:', error);
-            setSnackbarMessage('Lỗi khi kích hoạt cửa hàng.');
+            console.error(
+                `Lỗi khi ${action === 'activate' ? 'kích hoạt' : 'khóa'} cửa hàng:`,
+                error
+            );
+            setSnackbarMessage(`Lỗi khi ${action === 'activate' ? 'kích hoạt' : 'khóa'} cửa hàng.`);
+            setSnackbarSeverity('error');
+        } finally {
+            setActionLoading((prev) => ({ ...prev, [id]: false }));
         }
     };
 
@@ -72,40 +116,73 @@ const ModerationPage: React.FC = () => {
 
             {loading ? (
                 <CircularProgress />
-            ) : shops?.length === 0 ? (
+            ) : shops.length === 0 ? (
                 <Typography variant="h6">Không có cửa hàng nào cần kích hoạt.</Typography>
             ) : (
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
                             <TableRow>
+                                <TableCell>Ảnh đại diện</TableCell>
                                 <TableCell>Tên cửa hàng</TableCell>
                                 <TableCell>Mô tả</TableCell>
                                 <TableCell>Thành phố</TableCell>
-                                <TableCell>Quận</TableCell>
-                                <TableCell>Phường</TableCell>
-                                <TableCell>Đánh giá</TableCell>
+                                <TableCell>Trạng thái</TableCell>
                                 <TableCell>Thao tác</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {shops?.map((shop) => (
-                                <TableRow key={shop.id}>
+                            {shops.map((shop) => (
+                                <TableRow
+                                    key={shop.id}
+                                    onClick={() => setSelectedShop(shop)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <TableCell>
+                                        <Image
+                                            preview={{ mask: false }}
+                                            width={100}
+                                            src={shop.avatar as string}
+                                        />
+                                    </TableCell>
                                     <TableCell>{shop.name}</TableCell>
                                     <TableCell>{shop.description}</TableCell>
-                                    <TableCell>{shop.city}</TableCell>
-                                    <TableCell>{shop.district}</TableCell>
-                                    <TableCell>{shop.ward}</TableCell>
-                                    <TableCell>{shop.countReview}</TableCell>
-                                    {/* <TableCell>{shop.price.toLocaleString()} VND</TableCell> */}
+                                    <TableCell>{provinces[shop.city || 0] || shop.city}</TableCell>
+                                    <TableCell>{shop.statusShopEnums}</TableCell>
                                     <TableCell>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={() => handleActivateShop(shop.idShop)}
-                                        >
-                                            Kích hoạt
-                                        </Button>
+                                        {shop.statusShopEnums === 'ACTIVE' ? (
+                                            <Button
+                                                variant="contained"
+                                                color="error"
+                                                disabled={actionLoading[shop.id || '']}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleShopAction(shop.id || '', 'block');
+                                                }}
+                                            >
+                                                {actionLoading[shop.id || ''] ? (
+                                                    <CircularProgress size={20} />
+                                                ) : (
+                                                    'Khóa'
+                                                )}
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="contained"
+                                                color="success"
+                                                disabled={actionLoading[shop.id || '']}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleShopAction(shop.id || '', 'activate');
+                                                }}
+                                            >
+                                                {actionLoading[shop.id || ''] ? (
+                                                    <CircularProgress size={20} />
+                                                ) : (
+                                                    'Kích hoạt'
+                                                )}
+                                            </Button>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -114,7 +191,6 @@ const ModerationPage: React.FC = () => {
                 </TableContainer>
             )}
 
-            {/* Hiển thị thông báo Snackbar */}
             <Snackbar
                 open={!!snackbarMessage}
                 autoHideDuration={3000}

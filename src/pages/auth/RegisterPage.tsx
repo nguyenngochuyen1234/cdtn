@@ -59,17 +59,21 @@ const RegisterPage: React.FC = () => {
         try {
             const { username, email, password, phone } = formData;
             const result = await authApi.register({ username, email, password, phone });
-            console.log(result.data);
+            if (result?.data.success) {
+                // Hiển thị thông báo thành công
+                setSnackbarMessage(result.data.message);
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
 
-            // Hiển thị thông báo thành công
-            setSnackbarMessage('Đăng ký thành công');
-            setSnackbarSeverity('success');
-            setSnackbarOpen(true);
-
-            // Sau 1.5 giây chuyển hướng đến trang đăng nhập
-            setTimeout(() => {
-                navigate('/auth/login');
-            }, 1500);
+                // Sau 1.5 giây chuyển hướng đến trang đăng nhập
+                setTimeout(() => {
+                    navigate('/auth/login');
+                }, 1500);
+            } else {
+                setSnackbarMessage(result.data.message);
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+            }
         } catch (err) {
             setSnackbarMessage('Đăng ký thất bại');
             setSnackbarSeverity('error');
@@ -82,9 +86,6 @@ const RegisterPage: React.FC = () => {
             <Typography variant="h5" fontWeight="bold" gutterBottom>
                 Đăng ký
             </Typography>
-            {/* <Typography variant="body2" color="textSecondary" gutterBottom>
-                Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-            </Typography> */}
 
             <TextField
                 label="Họ và tên"
@@ -167,6 +168,15 @@ const RegisterPage: React.FC = () => {
                     </Button>
                 </Grid>
             </Grid>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarOpen(false)}
+            >
+                <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
