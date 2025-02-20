@@ -1,30 +1,32 @@
-import React, { useState } from 'react';
+import authApi from '@/api/authApi';
+import { setUser } from '@/redux/userSlice';
+import GoogleIcon from '@mui/icons-material/Google';
 import {
+    Alert,
     Box,
     Button,
     Checkbox,
+    CircularProgress,
     Divider,
+    FormControlLabel,
     Grid,
+    Link,
+    Snackbar,
     TextField,
     Typography,
-    Link,
-    FormControlLabel,
-    Snackbar,
-    Alert,
 } from '@mui/material';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import GoogleIcon from '@mui/icons-material/Google';
-import CarouselComponent from '@/components/CarouselComponent';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import authApi from '@/api/authApi';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    // State cho Snackbar
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
@@ -37,6 +39,7 @@ const LoginPage: React.FC = () => {
     };
 
     const handleLogin = async () => {
+        setIsLoading(true);
         try {
             const result = await authApi.login({ username, password });
             setSnackbarMessage(result.data.message);
@@ -44,13 +47,21 @@ const LoginPage: React.FC = () => {
             setSnackbarOpen(true);
 
             if (result.data.success) {
+                dispatch(setUser(result.data.data));
+
                 localStorage.setItem('access_token', result.data.data.accessToken);
-                setTimeout(() => navigate('/'), 1500);
+                if (result.data.data.userInfoResponse.role[0] === 'OWNER') {
+                    navigate('/owner');
+                } else if (result.data.data.userInfoResponse.role[0] === 'ADMIN') {
+                    navigate('/admin');
+                }
             }
         } catch (err) {
             setSnackbarMessage('Đăng nhập thất bại');
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -59,21 +70,16 @@ const LoginPage: React.FC = () => {
             <Typography variant="h5" fontWeight="bold" gutterBottom>
                 Đăng nhập
             </Typography>
-            {/* <Typography variant="body2" color="textSecondary" gutterBottom>
-                Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-            </Typography> */}
 
-            {/* Email input */}
             <TextField
                 label="Tên đăng nhập"
                 variant="outlined"
                 fullWidth
                 margin="normal"
-                value={username} // Set the value to the state
-                onChange={(e) => setUsername(e.target.value)} // Update state on change
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
             />
 
-            {/* Password input */}
             <TextField
                 label="Password"
                 type="password"
@@ -102,10 +108,11 @@ const LoginPage: React.FC = () => {
                 variant="contained"
                 color="primary"
                 fullWidth
-                sx={{ mb: 2 }}
+                sx={{ mb: 2, mt: 2 }}
                 onClick={handleLogin}
+                disabled={isLoading}
             >
-                Đăng nhập
+                {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Đăng nhập'}
             </Button>
 
             <Typography variant="body2" align="center">
@@ -119,12 +126,9 @@ const LoginPage: React.FC = () => {
                     Google
                 </Button>
             </Grid>
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={3000}
-                onClose={() => setSnackbarOpen(false)}
-            >
-                <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
+
+            <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleSnackbarClose}>
+                <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
                     {snackbarMessage}
                 </Alert>
             </Snackbar>

@@ -33,6 +33,11 @@ import { setUser } from './redux/userSlice';
 import ActiveCodeUser from './pages/auth/ActiveUser';
 import BusinessSearch from './pages/reviewShop/BusinessSearch';
 import ReviewBusiness from './pages/reviewShop/ReviewBusiness';
+import OwnerPage from './pages/owner/index';
+import { BusinessInfo } from './pages/owner/BusinessInfo';
+import ServicesPage from './pages/owner/ServicesPage';
+import ReviewsPage from './pages/owner/ReviewsPage';
+import OwnerProfile from './pages/owner/ProfilePage';
 export default function App() {
     const dispatch = useDispatch();
     const fetchUser = async () => {
@@ -67,6 +72,13 @@ export default function App() {
                         path="verify-account"
                         element={<ActiveCodeUser></ActiveCodeUser>}
                     ></Route>
+                </Route>
+                <Route path="/owner" element={<OwnerPage />}>
+                    <Route path="profile" element={<OwnerProfile />} />
+                    <Route path="business-info" element={<BusinessInfo />} />
+                    <Route path="services" element={<ServicesPage />} />
+                    <Route path="statistics" element={<StatisticsPage />} />
+                    <Route path="reviews" element={<ReviewsPage />} />
                 </Route>
                 <Route path="/biz" element={<CreateShop />}>
                     <Route path="register-shop" element={<RegisterAccountShopPage />} />

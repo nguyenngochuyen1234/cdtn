@@ -9,68 +9,63 @@ import {
     ListItemIcon,
     ListItemText,
     Paper,
-    Typography
-} from '@mui/material'
-import {
-    AccountCircle,
-    Article,
-    ChevronRight,
-    HelpOutline,
-    Logout,
-} from '@mui/icons-material'
-import { MenuItem, User } from '@/models'
+    Typography,
+} from '@mui/material';
+import { AccountCircle, Article, ChevronRight, HelpOutline, Logout } from '@mui/icons-material';
+import { MenuItem, User } from '@/models';
+import { useDispatch } from 'react-redux';
+import { setUser } from '@/redux/userSlice';
 
 interface ProfileMenuProps {
-    user: User
-    onMenuItemClick: (item: MenuItem) => void
+    user: User;
+    onMenuItemClick: (item: MenuItem) => void;
 }
 
 export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps) {
+    const dispatch = useDispatch();
+
+    const handleMenuItemClick = (item: MenuItem) => {
+        if (item.id === 'logout') {
+            localStorage.clear();
+            sessionStorage.clear();
+            dispatch(setUser(null));
+        }
+        onMenuItemClick(item);
+    };
+
     const menuItems = [
         {
             id: 'account',
             label: 'Tài khoản',
-            icon: <AccountCircle sx={{
-                color: "#000"
-            }} />,
-            link: "/profile"
+            icon: <AccountCircle sx={{ color: '#000' }} />,
+            link: '/profile',
         },
         {
             id: 'posts',
             label: 'Bài viết của bạn',
-            icon: <Article sx={{
-                color: "#000"
-            }} />,
-            link: "/"
+            icon: <Article sx={{ color: '#000' }} />,
+            link: '/',
         },
-
         {
             id: 'support',
             label: 'Hỗ trợ',
-            icon: <HelpOutline sx={{
-                color: "#000"
-            }} />,
-            link: "/"
+            icon: <HelpOutline sx={{ color: '#000' }} />,
+            link: '/',
         },
         {
             id: 'logout',
             label: 'Đăng xuất',
-            icon: <Logout sx={{
-                color: "#000"
-            }} />,
-            link: "/"
-        }
-    ]
+            icon: <Logout sx={{ color: '#000' }} />,
+            link: '/',
+        },
+    ];
 
     return (
         <Paper sx={{ width: '100%', maxWidth: 360 }}>
             <List disablePadding>
                 <ListItem>
                     <ListItemAvatar>
-                        <Avatar
-                            src={user.avatar}
-                            sx={{ width: 40, height: 40 }}
-                        />
+                        <Avatar src={user.avatar} sx={{ width: 40, height: 40 }} />
                     </ListItemAvatar>
                     <ListItemText
                         primary={
@@ -79,7 +74,10 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
                             </Typography>
                         }
                         secondary={
-                            <Box component="span" sx={{ color: user.statusUser ? 'success.main' : 'text.secondary' }}>
+                            <Box
+                                component="span"
+                                sx={{ color: user.statusUser ? 'success.main' : 'text.secondary' }}
+                            >
                                 {user.statusUser ? 'Online' : 'Offline'}
                             </Box>
                         }
@@ -90,28 +88,19 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
 
                 {menuItems.map((item) => (
                     <ListItemButton
-                        sx={{
-                            color: "#000"
-                        }}
+                        sx={{ color: '#000' }}
                         key={item.id}
-                        onClick={() => onMenuItemClick(item)}
+                        onClick={() => handleMenuItemClick(item)}
                     >
-                        <ListItemIcon >
-                            {item.icon}
-                        </ListItemIcon>
-                        <ListItemText primaryTypographyProps={{
-                            sx: {
-                                color: '#000',
-                            },
-                        }} primary={item.label} />
-                        <ChevronRight sx={{
-                            color: "#000"
-                        }} />
+                        <ListItemIcon>{item.icon}</ListItemIcon>
+                        <ListItemText
+                            primaryTypographyProps={{ sx: { color: '#000' } }}
+                            primary={item.label}
+                        />
+                        <ChevronRight sx={{ color: '#000' }} />
                     </ListItemButton>
                 ))}
             </List>
         </Paper>
-    )
+    );
 }
-
-
