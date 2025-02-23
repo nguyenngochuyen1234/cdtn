@@ -87,7 +87,7 @@ const AdminPage = () => {
                     ))}
                 </List>
             </Drawer>
-            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', p: 3, height: '100vh' }}>
+            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', p: 3, minHeight: '100vh' }}>
                 <AppBar position="fixed" sx={{ width: `calc(100% - 240px)`, ml: '240px' }}>
                     <Header />
                 </AppBar>

@@ -34,10 +34,10 @@ import ActiveCodeUser from './pages/auth/ActiveUser';
 import BusinessSearch from './pages/reviewShop/BusinessSearch';
 import ReviewBusiness from './pages/reviewShop/ReviewBusiness';
 import OwnerPage from './pages/owner/index';
-import { BusinessInfo } from './pages/owner/BusinessInfo';
 import ServicesPage from './pages/owner/ServicesPage';
 import ReviewsPage from './pages/owner/ReviewsPage';
 import OwnerProfile from './pages/owner/ProfilePage';
+import BusinessInfo from './pages/owner/BusinessInfo';
 export default function App() {
     const dispatch = useDispatch();
     const fetchUser = async () => {

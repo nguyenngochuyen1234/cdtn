@@ -26,7 +26,6 @@ const ServiceTable: React.FC = () => {
     const fetchDataUser = async () => {
         try {
             const res = await userApi.getUser();
-            console.log(res.data.data.email);
             if (res.data.success) {
                 setEmail(res.data.data.email);
             }

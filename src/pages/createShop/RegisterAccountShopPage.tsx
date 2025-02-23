@@ -40,7 +40,6 @@ const RegisterAccountShopPage = () => {
     const [selectedProvince, setSelectedProvince] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
     const [selectedWard, setSelectedWard] = useState('');
-    const password = watch('password', '');
     useEffect(() => {
         const fetchProvinces = async () => {
             try {
@@ -144,7 +143,7 @@ const RegisterAccountShopPage = () => {
                         <Grid container spacing={2}>
                             {[
                                 // { name: 'username', label: 'Username' },
-                                { name: 'email', label: 'Email *'},
+                                { name: 'email', label: 'Email *' },
                                 { name: 'password', label: 'Mật khẩu *', type: 'password' },
                                 {
                                     name: 'confirmPassword',
