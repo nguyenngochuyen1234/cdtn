@@ -1,3 +1,6 @@
+
+import React, { useState, useEffect } from 'react';
+
 import authApi from '@/api/authApi';
 import { setUser } from '@/redux/userSlice';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -15,6 +18,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
+
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -25,11 +29,22 @@ const LoginPage: React.FC = () => {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+
+    const [rememberMe, setRememberMe] = useState(false);
+
     const [isLoading, setIsLoading] = useState(false);
 
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+
+    useEffect(() => {
+        // Kiểm tra nếu user đã đăng nhập
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            navigate('/');
+        }
+    }, [navigate]);
 
     const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
@@ -65,6 +80,21 @@ const LoginPage: React.FC = () => {
         }
     };
 
+    const handleContinueWithGoogle = () => {
+        // Google OAuth configuration
+        const callbackUrl = 'http://localhost:5173/authenticate';
+        const authUrl = 'https://accounts.google.com/o/oauth2/auth';
+        const googleClientId = '50673866762-neghnt6bhpf0chqd41r5u5sekfkic27a.apps.googleusercontent.com';
+        
+        // Build the OAuth URL with required parameters
+        const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
+            callbackUrl
+        )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
+        
+        // Redirect to Google authentication page
+        window.location.href = targetUrl;
+    };
+
     return (
         <Box sx={{ width: '80%', maxWidth: 400 }}>
             <Typography variant="h5" fontWeight="bold" gutterBottom>
@@ -98,7 +128,15 @@ const LoginPage: React.FC = () => {
                     mt: 1,
                 }}
             >
-                <FormControlLabel control={<Checkbox />} label="Nhớ tài khoản" />
+                <FormControlLabel 
+                    control={
+                        <Checkbox 
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                        />
+                    } 
+                    label="Nhớ tài khoản" 
+                />
                 <Link href="/auth/forgot-password" underline="hover">
                     Quên mật khẩu?
                 </Link>
@@ -121,14 +159,28 @@ const LoginPage: React.FC = () => {
 
             <Divider sx={{ my: 3 }}>Hoặc đăng nhập bằng</Divider>
 
-            <Grid container spacing={2}>
-                <Button variant="outlined" color="error" fullWidth startIcon={<GoogleIcon />}>
-                    Google
-                </Button>
-            </Grid>
 
-            <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleSnackbarClose}>
-                <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+            <Button 
+                variant="outlined" 
+                color="error" 
+                fullWidth 
+                startIcon={<GoogleIcon />}
+                onClick={handleContinueWithGoogle}
+            >
+                Google
+            </Button>
+
+            <Snackbar 
+                open={snackbarOpen} 
+                autoHideDuration={6000} 
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert 
+                    onClose={handleSnackbarClose} 
+                    severity={snackbarSeverity} 
+                    sx={{ width: '100%' }}
+                >
                     {snackbarMessage}
                 </Alert>
             </Snackbar>
