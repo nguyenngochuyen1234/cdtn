@@ -30,6 +30,7 @@ const RegisterAccountShopPage = () => {
         control,
         handleSubmit,
         formState: { errors },
+        watch,
     } = useForm<RegisterUser>();
 
     const [provinces, setProvinces] = useState([]);
@@ -39,7 +40,6 @@ const RegisterAccountShopPage = () => {
     const [selectedProvince, setSelectedProvince] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
     const [selectedWard, setSelectedWard] = useState('');
-
     useEffect(() => {
         const fetchProvinces = async () => {
             try {
@@ -83,7 +83,15 @@ const RegisterAccountShopPage = () => {
             });
             if (result?.data?.success) {
                 localStorage.setItem('EMAIL_BIZ', data.email);
-                dispatch(setNewShop({ ...data, ...store }));
+                dispatch(
+                    setNewShop({
+                        ...data,
+                        ...store,
+                        city: selectedProvince,
+                        ward: selectedWard,
+                        district: selectedDistrict,
+                    })
+                );
                 setSnackbar({ open: true, message: 'Đăng ký thành công!', severity: 'success' });
                 navigate('/biz/create-tag');
             } else {
@@ -134,16 +142,29 @@ const RegisterAccountShopPage = () => {
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <Grid container spacing={2}>
                             {[
-                                { name: 'username', label: 'Username' },
-                                { name: 'password', label: 'Password', type: 'password' },
-                                { name: 'email', label: 'Email' },
-                                { name: 'phone', label: 'Phone' },
+                                // { name: 'username', label: 'Username' },
+                                { name: 'email', label: 'Email *' },
+                                { name: 'password', label: 'Mật khẩu *', type: 'password' },
+                                {
+                                    name: 'confirmPassword',
+                                    label: 'Nhập lại mật khẩu *',
+                                    type: 'password',
+                                },
+                                { name: 'phone', label: 'Số điện thoại *' },
                             ].map(({ name, label, type = 'text' }) => (
                                 <Grid item xs={12} sm={6} key={name}>
                                     <Controller
                                         name={name as keyof RegisterUser}
                                         control={control}
-                                        rules={{ required: `${label} is required` }}
+                                        rules={{
+                                            required: `${label} là trường bắt buộc`,
+                                            validate:
+                                                name === 'confirmPassword'
+                                                    ? (value) =>
+                                                          value === watch('password') ||
+                                                          'Mật khẩu không khớp'
+                                                    : undefined,
+                                        }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
@@ -189,7 +210,7 @@ const RegisterAccountShopPage = () => {
                                     sx={{ color: 'white', position: 'absolute' }}
                                 />
                             ) : (
-                                'Đăng Ký'
+                                'Tiếp theo'
                             )}
                         </Button>
                     </form>

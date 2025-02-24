@@ -1,39 +1,102 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Box,
     Typography,
     TextField,
-    Paper,
     Container,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    IconButton,
     Grid,
     useTheme,
     useMediaQuery,
-    ListItemButton,
+    IconButton,
+    Autocomplete,
+    Card,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import TakeoutDiningIcon from '@mui/icons-material/TakeoutDining';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import PlumbingIcon from '@mui/icons-material/Plumbing';
-import BuildIcon from '@mui/icons-material/Build';
 import MapComponent from '../createShop/MapComponent';
-
+import cmsApi from '@/api/cmsApi';
+import axios from 'axios';
+import debounce from 'lodash.debounce';
+import shopApi from '@/api/shopApi';
+import { Badge } from '@/components/ui/badge';
+import { Shop } from '@/models';
+import { Image } from 'antd';
+import { Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 function BusinessSearch() {
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
-    const [location, setLocation] = useState('San Francisco, CA');
-    const [hasResults] = useState(false);
-
+    const [location, setLocation] = useState('');
+    const [tags, setTags] = useState<string[]>([]);
+    const [filteredTags, setFilteredTags] = useState<string[]>([]);
+    const [suggestedLocations, setSuggestedLocations] = useState<string[]>([]);
+    const [shops, setShops] = useState<Shop[] | null>(null);
     const theme = useTheme();
     const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
+    const fetchCategory = async () => {
+        try {
+            const response = await cmsApi.getAllCategories();
+            if (response.data.data) {
+                const allTags = response.data.data.flatMap((category: any) => category.tags);
+                setTags(allTags);
+            }
+        } catch (err) {
+            console.error('Error fetching categories', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategory();
+    }, []);
+
+    const fetchDataShop = async (keyword: string) => {
+        try {
+            const response = await shopApi.searchShop({ keyword: keyword, page: 0, size: 12 });
+            setShops(response?.data.data);
+            console.log(response?.data);
+        } catch {}
+    };
+    useEffect(() => {
+        if (searchTerm) {
+            const results = tags.filter((tag) =>
+                tag.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredTags(results);
+        } else {
+            setFilteredTags([]);
+        }
+    }, [searchTerm, tags]);
+
+    const fetchAddresses = debounce(async (query: string) => {
+        try {
+            const response = await axios.get(`https://api-adress-vietnam.com/search`, {
+                params: { query },
+            });
+            setSuggestedLocations(response.data.results.map((item: any) => item.address));
+        } catch (error) {
+            console.error('Error fetching addresses', error);
+        }
+    }, 500);
+
+    useEffect(() => {
+        if (location) {
+            fetchAddresses(location);
+        }
+    }, [location]);
+    const renderStars = (rating: number) => {
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            stars.push(
+                <Star
+                    key={i}
+                    className={`h-4 w-4 ${i <= rating ? 'fill-primary text-primary' : 'fill-muted text-muted'}`}
+                />
+            );
+        }
+        return stars;
+    };
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
             <Box sx={{ mb: 4 }}>
@@ -46,84 +109,95 @@ function BusinessSearch() {
             </Box>
 
             <Grid container spacing={3}>
-                {/* Main Content */}
                 <Grid item xs={12} lg={6}>
-                    {/* Search Bar */}
-                    <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-                        <TextField
-                            fullWidth
-                            placeholder="Try lunch, yoga studio, plumber"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            size="small"
+                    <Box sx={{ display: 'flex', gap: 1, mb: 3, alignItems: 'center' }}>
+                        <Autocomplete
+                            freeSolo
+                            options={filteredTags}
+                            onChange={(event, newValue) => {
+                                setSearchTerm(newValue || '');
+                                if (newValue) {
+                                    fetchDataShop(newValue); // Call fetchDataShop when a category is selected
+                                }
+                            }}
+                            sx={{ flex: 2 }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    fullWidth
+                                    placeholder="Try lunch, yoga studio, plumber"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    size="medium"
+                                />
+                            )}
                         />
-                        <TextField
-                            fullWidth
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            size="small"
+
+                        <Autocomplete
+                            freeSolo
+                            options={suggestedLocations}
+                            sx={{ flex: 2 }} // Điều chỉnh độ rộng
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    fullWidth
+                                    placeholder="Enter location"
+                                    value={location}
+                                    onChange={(e) => setLocation(e.target.value)}
+                                    size="medium" // Tăng kích thước input
+                                />
+                            )}
                         />
                         <IconButton
                             sx={{
                                 bgcolor: 'error.main',
-                                color: 'white',
+                                color: '#fff',
                                 '&:hover': {
                                     bgcolor: 'error.dark',
                                 },
+                                height: 40,
+                                width: 40,
                             }}
                         >
                             <SearchIcon />
                         </IconButton>
                     </Box>
-
-                    {/* No Results State */}
-                    {!hasResults && (
-                        <Box sx={{ textAlign: 'center', py: 6 }}>
-                            <Box
-                                sx={{
-                                    display: 'inline-flex',
-                                    bgcolor: 'error.light',
-                                    p: 2,
-                                    borderRadius: '50%',
-                                    mb: 2,
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        width: 48,
-                                        height: 48,
-                                        bgcolor: 'error.main',
-                                        borderRadius: '50%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        transform: 'rotate(12deg)',
-                                    }}
-                                >
-                                    <Typography variant="h5" sx={{ color: 'white' }}>
-                                        ✊
-                                    </Typography>
-                                </Box>
-                            </Box>
-                            <Typography variant="h6" gutterBottom>
-                                No suggestions yet
-                            </Typography>
-                            <Typography color="text.secondary">
-                                We&apos;re out of suggestions for you right now. Keep on using Yelp
-                                and we&apos;ll have some more for you soon.
-                            </Typography>
-                        </Box>
-                    )}
+                    {(shops || [])?.map((shop, index) => (
+                        <Card
+                            key={shop.id}
+                            className="p-4"
+                            onClick={() => navigate(`biz/${shop.id}`)}
+                        >
+                            <div className="flex gap-4 overflow-hidden">
+                                <div className="relative w-48 h-48 flex-shrink-0">
+                                    <Image src={shop.avatar as string} />
+                                </div>
+                                <div className="flex-1">
+                                    <h2 className="text-xl mb-0 font-semibold">
+                                        {index + 1}. {shop.name}
+                                    </h2>
+                                    <div className="flex items-center gap-1 my-2">
+                                        {renderStars(shop.point || 0)}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 my-3">
+                                        {shop.categoryResponse.tags.map((tag) => (
+                                            <Badge variant="secondary" key={tag}>
+                                                {tag}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
                 </Grid>
 
-                {/* Illustration */}
-                {isDesktop && (
-                    <Grid item lg={3}>
-                        <MapComponent />
-                    </Grid>
-                )}
+                <Grid item xs={12} lg={6} height={'100vh'}>
+                    <MapComponent />
+                </Grid>
             </Grid>
         </Container>
     );
 }
+
 export default BusinessSearch;

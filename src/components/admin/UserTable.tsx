@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
     Table,
     TableBody,
@@ -17,9 +17,9 @@ import {
     MenuItem,
     Select,
     FormControl,
-} from '@mui/material'
-import { MoreVert, FilterList } from '@mui/icons-material'
-import { TableFilters, User } from '@/models'
+} from '@mui/material';
+import { MoreVert, FilterList } from '@mui/icons-material';
+import { TableFilters, User } from '@/models';
 
 const mockUsers: User[] = Array.from({ length: 10 }, (_, i) => ({
     id: `user-${i}`,
@@ -44,38 +44,38 @@ const mockUsers: User[] = Array.from({ length: 10 }, (_, i) => ({
 }));
 
 export function UserTable() {
-    const [selected, setSelected] = React.useState<string[]>([])
-    const [filters, setFilters] = React.useState<TableFilters>({ search: '' })
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-    const [users] = React.useState<User[]>(mockUsers)
+    const [selected, setSelected] = React.useState<string[]>([]);
+    const [filters, setFilters] = React.useState<TableFilters>({ search: '' });
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [users] = React.useState<User[]>(mockUsers);
 
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            setSelected(users.map(user => user.id))
+            setSelected(users.map((user) => user.id));
         } else {
-            setSelected([])
+            setSelected([]);
         }
-    }
+    };
 
     const handleSelect = (id: string) => {
-        const selectedIndex = selected.indexOf(id)
-        let newSelected: string[] = []
+        const selectedIndex = selected.indexOf(id);
+        let newSelected: string[] = [];
 
         if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, id)
+            newSelected = newSelected.concat(selected, id);
         } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1))
+            newSelected = newSelected.concat(selected.slice(1));
         } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1))
+            newSelected = newSelected.concat(selected.slice(0, -1));
         } else if (selectedIndex > 0) {
             newSelected = newSelected.concat(
                 selected.slice(0, selectedIndex),
                 selected.slice(selectedIndex + 1)
-            )
+            );
         }
 
-        setSelected(newSelected)
-    }
+        setSelected(newSelected);
+    };
 
     return (
         <div className="p-6">
@@ -87,37 +87,21 @@ export function UserTable() {
                         <span className="text-sm">Lọc theo</span>
                     </div>
                     <FormControl size="small" className="min-w-[200px]">
-                        <Select
-                            value=""
-                            displayEmpty
-                            className="bg-white"
-                        >
+                        <Select value="" displayEmpty className="bg-white">
                             <MenuItem value="">Ngày tham gia</MenuItem>
                         </Select>
                     </FormControl>
                     <FormControl size="small" className="min-w-[200px]">
-                        <Select
-                            value=""
-                            displayEmpty
-                            className="bg-white"
-                        >
+                        <Select value="" displayEmpty className="bg-white">
                             <MenuItem value="">Địa chỉ</MenuItem>
                         </Select>
                     </FormControl>
                     <FormControl size="small" className="min-w-[200px]">
-                        <Select
-                            value=""
-                            displayEmpty
-                            className="bg-white"
-                        >
+                        <Select value="" displayEmpty className="bg-white">
                             <MenuItem value="">Số bài đăng</MenuItem>
                         </Select>
                     </FormControl>
-                    <Button
-                        color="error"
-                        className="ml-auto"
-                        disabled={selected.length === 0}
-                    >
+                    <Button color="error" className="ml-auto" disabled={selected.length === 0}>
                         Xóa bỏ lọc
                     </Button>
                 </div>
@@ -129,10 +113,7 @@ export function UserTable() {
                         value={filters.search}
                         onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                     />
-                    <Button
-                        variant="contained"
-                        className="bg-blue-500 hover:bg-blue-600"
-                    >
+                    <Button variant="contained" className="bg-blue-500 hover:bg-blue-600">
                         Thêm mới người dùng
                     </Button>
                 </div>
@@ -144,7 +125,9 @@ export function UserTable() {
                         <TableRow>
                             <TableCell padding="checkbox">
                                 <Checkbox
-                                    indeterminate={selected.length > 0 && selected.length < users.length}
+                                    indeterminate={
+                                        selected.length > 0 && selected.length < users.length
+                                    }
                                     checked={selected.length === users.length}
                                     onChange={handleSelectAll}
                                 />
@@ -160,11 +143,7 @@ export function UserTable() {
                     </TableHead>
                     <TableBody>
                         {users.map((user) => (
-                            <TableRow
-                                key={user.id}
-                                selected={selected.includes(user.id)}
-                                hover
-                            >
+                            <TableRow key={user.id} selected={selected.includes(user.id)} hover>
                                 <TableCell padding="checkbox">
                                     <Checkbox
                                         checked={selected.includes(user.id)}
@@ -207,21 +186,14 @@ export function UserTable() {
                     <Button size="small" disabled>
                         &lt;
                     </Button>
-                    <Button size="small">
-                        &gt;
-                    </Button>
+                    <Button size="small">&gt;</Button>
                 </div>
             </div>
 
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-            >
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
                 <MenuItem onClick={() => setAnchorEl(null)}>Chỉnh sửa</MenuItem>
                 <MenuItem onClick={() => setAnchorEl(null)}>Xóa</MenuItem>
             </Menu>
         </div>
-    )
+    );
 }
-

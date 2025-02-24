@@ -1,11 +1,12 @@
 import shopApi from '@/api/shopApi';
 import { StoreCreation } from '@/models';
-import { RootState } from '@/redux/stores';
+import { AppDispatch, RootState } from '@/redux/stores';
 import {
     Alert,
     Box,
     Button,
     Checkbox,
+    CircularProgress,
     FormControl,
     FormControlLabel,
     Grid,
@@ -16,7 +17,7 @@ import {
     Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import MapComponent from './MapComponent';
 
 interface OpenTimeRequest {
@@ -27,8 +28,9 @@ interface OpenTimeRequest {
 }
 
 const App: React.FC = () => {
-    const user = useSelector((state: RootState) => state.user.user);
-
+    const dispatch: AppDispatch = useDispatch();
+    const store = useSelector((state: RootState) => state.newShop.newShop);
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState<StoreCreation>({
         name: '',
         avatar: '',
@@ -46,7 +48,7 @@ const App: React.FC = () => {
         categoryEnum: 'RESTAURANT',
         idCategory: '',
         phone: '',
-        owner: false,
+        // owner: false,
     });
 
     const [imagePreviews, setImagePreviews] = useState<{
@@ -60,7 +62,7 @@ const App: React.FC = () => {
     });
 
     const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
     const bizEmail = localStorage.getItem('EMAIL_BIZ');
@@ -91,7 +93,6 @@ const App: React.FC = () => {
     };
 
     const handleFileChange = () => (event: React.ChangeEvent<HTMLInputElement>) => {
-        console.log('hi');
         const files = event.target.files ? Array.from(event.target.files) : [];
 
         if (files.length > 0) {
@@ -102,7 +103,7 @@ const App: React.FC = () => {
 
             setImagePreviews((prev) => ({
                 ...prev,
-                mediaUrls: files.map((file) => URL.createObjectURL(file)), // Create object URLs for previews
+                mediaUrls: files.map((file) => URL.createObjectURL(file)),
             }));
         }
     };
@@ -117,12 +118,10 @@ const App: React.FC = () => {
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     const validateForm = () => {
-        console.log(formData);
         const newErrors: { [key: string]: string } = {};
 
-        if (!formData.name) newErrors.name = 'Name is required';
+        if (!formData.name) newErrors.name = 'Tên cửa hàng là trường bắt buộc';
 
-        console.log(newErrors);
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -153,11 +152,13 @@ const App: React.FC = () => {
     const handleSubmit = async () => {
         try {
             if (validateForm()) {
-                await shopApi.uploadMultipeImage(
+                await shopApi.uploadMultipleImage(
                     formData.mediaUrls as File[],
                     formData.email as string
                 );
-                setSnackbarMessage('Form submitted successfully!');
+                setSnackbarMessage(
+                    'Gửi yêu cầu đăng ký cửa hàng thành công vui lòng đợi admin xét duyệt!'
+                );
                 setSnackbarSeverity('success');
                 setSnackbarOpen(true);
             } else {
@@ -166,12 +167,48 @@ const App: React.FC = () => {
                 setSnackbarMessage('Please fix the errors in the form.');
                 setSnackbarSeverity('error');
                 setSnackbarOpen(true);
+                return;
             }
-        } catch (err) {}
-    };
 
-    const handleSnackbarClose = () => {
-        setSnackbarOpen(false);
+            setLoading(true);
+            const meadiaUrls = await shopApi.uploadMultipleImage(
+                formData.mediaUrls as File[],
+                formData.email as string
+            );
+            const response = await shopApi.createShop({
+                name: formData.name,
+                avatar: store?.avatar,
+                imageBusiness: store?.imageBusiness,
+                email: store?.email,
+                mediaUrls: meadiaUrls.data.data,
+                description: formData.description,
+                urlWebsite: formData.urlWebsite,
+                openTimeRequests: formData.openTimeRequests,
+                city: store?.city,
+                ward: store?.ward,
+                district: store?.district,
+                longitude: 0,
+                latitude: 0,
+                categoryEnum: 'RESTAURANT',
+                idCategory: store?.idCategory,
+                phone: store?.phone,
+                owner: formData.owner,
+            });
+            if (response.data.success) {
+                setSnackbarMessage(response.data.message);
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+            } else {
+                setSnackbarMessage(response.data.message);
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+            }
+        } catch (error) {
+            setSnackbarMessage('Submission failed. Please try again.');
+            setSnackbarSeverity('error');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -183,11 +220,12 @@ const App: React.FC = () => {
                         Tạo cửa hàng
                     </Typography>
                     <TextField
-                        label="Name"
+                        label="Tên cửa hàng"
                         fullWidth
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
                         margin="normal"
+                        required
                     />
 
                     <TextField
@@ -198,7 +236,7 @@ const App: React.FC = () => {
                         margin="normal"
                     />
                     <TextField
-                        label="Description"
+                        label="Mô tả"
                         fullWidth
                         multiline
                         rows={4}
@@ -207,7 +245,7 @@ const App: React.FC = () => {
                         margin="normal"
                     />
 
-                    <FormControlLabel
+                    {/* <FormControlLabel
                         control={
                             <Checkbox
                                 checked={formData.owner}
@@ -215,9 +253,9 @@ const App: React.FC = () => {
                             />
                         }
                         label="Owner"
-                    />
+                    /> */}
                     <Grid item xs={24} sm={12}>
-                        <Typography variant="h6">Open Time Requests</Typography>
+                        <Typography variant="h6">Thời gian hoạt động của cửa hàng</Typography>
                         {(formData?.openTimeRequests || []).map((request, index) => (
                             <Box key={index} className="mb-4">
                                 <Grid container spacing={2} alignItems="center">
@@ -251,7 +289,7 @@ const App: React.FC = () => {
                                     </Grid>
                                     <Grid item xs={3}>
                                         <TextField
-                                            label="Open Time"
+                                            label="Thời gian mở cửa"
                                             fullWidth
                                             value={request.openTime}
                                             onChange={(e) =>
@@ -265,7 +303,7 @@ const App: React.FC = () => {
                                     </Grid>
                                     <Grid item xs={3}>
                                         <TextField
-                                            label="Close Time"
+                                            label="Thời gian đóng cửa"
                                             fullWidth
                                             value={request.closeTime}
                                             onChange={(e) =>
@@ -283,7 +321,7 @@ const App: React.FC = () => {
                                             color="error"
                                             onClick={() => handleRemoveOpenTime(index)}
                                         >
-                                            Remove
+                                            Xóa
                                         </Button>
                                     </Grid>
                                 </Grid>
@@ -296,7 +334,7 @@ const App: React.FC = () => {
                     <Grid item xs={24} sm={12}>
                         <Box mt={4}>
                             <Typography variant="h6" className="mb-2">
-                                Media URLs
+                                Tải nhiều ảnh
                             </Typography>
                             <input
                                 type="file"
@@ -327,8 +365,9 @@ const App: React.FC = () => {
                         color="primary"
                         sx={{ marginTop: 3 }}
                         onClick={handleSubmit}
+                        disabled={loading}
                     >
-                        Submit
+                        {loading ? <CircularProgress size={24} /> : 'Submit'}
                     </Button>
                 </Grid>
 
@@ -337,6 +376,15 @@ const App: React.FC = () => {
                     <MapComponent />
                 </Grid>
             </Grid>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarOpen(false)}
+            >
+                <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

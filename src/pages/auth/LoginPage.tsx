@@ -1,29 +1,39 @@
+
 import React, { useState, useEffect } from 'react';
+
+import authApi from '@/api/authApi';
+import { setUser } from '@/redux/userSlice';
+import GoogleIcon from '@mui/icons-material/Google';
 import {
+    Alert,
     Box,
     Button,
     Checkbox,
+    CircularProgress,
     Divider,
+    FormControlLabel,
     Grid,
+    Link,
+    Snackbar,
     TextField,
     Typography,
-    Link,
-    FormControlLabel,
-    Snackbar,
-    Alert,
 } from '@mui/material';
-import GoogleIcon from '@mui/icons-material/Google';
+
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import authApi from '@/api/authApi';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+
     const [rememberMe, setRememberMe] = useState(false);
 
-    // State cho Snackbar
+    const [isLoading, setIsLoading] = useState(false);
+
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
@@ -44,27 +54,29 @@ const LoginPage: React.FC = () => {
     };
 
     const handleLogin = async () => {
+        setIsLoading(true);
         try {
             const result = await authApi.login({ username, password });
-            console.log(result.data);
-            if (result.data.success) {
-                localStorage.setItem('access_token', result.data.data.accessToken);
-                setSnackbarMessage('Đăng nhập thành công');
-                setSnackbarSeverity('success');
-                setSnackbarOpen(true);
+            setSnackbarMessage(result.data.message);
+            setSnackbarSeverity(result.data.success ? 'success' : 'error');
+            setSnackbarOpen(true);
 
-                setTimeout(() => {
-                    navigate('/');
-                }, 1500);
-            } else {
-                setSnackbarMessage(result.data.message);
-                setSnackbarSeverity('error');
-                setSnackbarOpen(true);
+            if (result.data.success) {
+                dispatch(setUser(result.data.data));
+
+                localStorage.setItem('access_token', result.data.data.accessToken);
+                if (result.data.data.userInfoResponse.role[0] === 'OWNER') {
+                    navigate('/owner');
+                } else if (result.data.data.userInfoResponse.role[0] === 'ADMIN') {
+                    navigate('/admin');
+                }
             }
         } catch (err) {
             setSnackbarMessage('Đăng nhập thất bại');
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -134,10 +146,11 @@ const LoginPage: React.FC = () => {
                 variant="contained"
                 color="primary"
                 fullWidth
-                sx={{ mb: 2 }}
+                sx={{ mb: 2, mt: 2 }}
                 onClick={handleLogin}
+                disabled={isLoading}
             >
-                Đăng nhập
+                {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Đăng nhập'}
             </Button>
 
             <Typography variant="body2" align="center">
@@ -145,6 +158,7 @@ const LoginPage: React.FC = () => {
             </Typography>
 
             <Divider sx={{ my: 3 }}>Hoặc đăng nhập bằng</Divider>
+
 
             <Button 
                 variant="outlined" 

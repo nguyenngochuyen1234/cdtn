@@ -33,6 +33,12 @@ import { setUser } from './redux/userSlice';
 import ActiveCodeUser from './pages/auth/ActiveUser';
 import BusinessSearch from './pages/reviewShop/BusinessSearch';
 import Authenticate from './pages/auth/Authenticate';
+import ReviewBusiness from './pages/reviewShop/ReviewBusiness';
+import OwnerPage from './pages/owner/index';
+import ServicesPage from './pages/owner/ServicesPage';
+import ReviewsPage from './pages/owner/ReviewsPage';
+import OwnerProfile from './pages/owner/ProfilePage';
+import BusinessInfo from './pages/owner/BusinessInfo';
 export default function App() {
     const dispatch = useDispatch();
     const fetchUser = async () => {
@@ -69,6 +75,13 @@ export default function App() {
                         element={<ActiveCodeUser></ActiveCodeUser>}
                     ></Route>
                 </Route>
+                <Route path="/owner" element={<OwnerPage />}>
+                    <Route path="profile" element={<OwnerProfile />} />
+                    <Route path="business-info" element={<BusinessInfo />} />
+                    <Route path="services" element={<ServicesPage />} />
+                    <Route path="statistics" element={<StatisticsPage />} />
+                    <Route path="reviews" element={<ReviewsPage />} />
+                </Route>
                 <Route path="/biz" element={<CreateShop />}>
                     <Route path="register-shop" element={<RegisterAccountShopPage />} />
                     <Route path="create-tag" element={<CreateTagPage />} />
@@ -77,6 +90,7 @@ export default function App() {
                 </Route>
                 <Route path="finish-create-shop" element={<FinishCreateShop />} />
                 <Route path="writeareview" element={<BusinessSearch />} />
+                <Route path="writeareview/biz/:id" element={<ReviewBusiness />} />
                 <Route path="/admin" element={<AdminPage />}>
                     <Route index element={<OverviewPage />} />
                     <Route path="posts" element={<PostsPage />} />
