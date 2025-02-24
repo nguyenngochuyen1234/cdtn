@@ -32,6 +32,7 @@ import { useDispatch } from 'react-redux';
 import { setUser } from './redux/userSlice';
 import ActiveCodeUser from './pages/auth/ActiveUser';
 import BusinessSearch from './pages/reviewShop/BusinessSearch';
+import Authenticate from './pages/auth/Authenticate';
 export default function App() {
     const dispatch = useDispatch();
     const fetchUser = async () => {
@@ -55,6 +56,7 @@ export default function App() {
                     <Route path="detailPost" element={<DetailPost />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="other-user/:idUser" element={<OtherUserPage />} />
+                    <Route path='authenticate' element ={<Authenticate></Authenticate>}></Route>
                 </Route>
                 <Route path="/auth" element={<AuthPage />}>
                     <Route path="login" element={<LoginPage />} />
