@@ -1,12 +1,25 @@
+import { User } from '@/models';
 import axiosClient from './axiosClient';
+import axios from 'axios';
+const token = localStorage.getItem('access_token');
 const userApi = {
-    uploadImage() {
-        const url = '/users/upload-image';
-        return axiosClient.put(url);
+    uploadImage(avatar: File) {
+        console.log(avatar);
+        const formData = new FormData();
+        formData.append('file', avatar);
+        const url = 'http://localhost:8080/users/upload-image';
+
+        return axios.put(url, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Accept: 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+        });
     },
-    updateProfile(data) {
+    updateProfile(data: User) {
         const url = '/users/change-profile';
-        return axiosClient.put(url);
+        return axiosClient.put(url, data);
     },
     changePassword() {
         const url = '/users/change-password';

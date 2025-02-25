@@ -11,9 +11,11 @@ interface AddressSelectorProps {
     onProvinceChange: (provinceCode: string) => void;
     onDistrictChange: (districtCode: string) => void;
     onWardChange: (wardCode: string) => void;
+    disable: boolean;
 }
 
 const AddressSelector: React.FC<AddressSelectorProps> = ({
+    disable,
     provinces,
     districts,
     wards,
@@ -41,7 +43,11 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
             <Grid item xs={4}>
                 <FormControl fullWidth>
                     <InputLabel>Tỉnh/Thành phố</InputLabel>
-                    <Select value={selectedProvince} onChange={handleProvinceChange}>
+                    <Select
+                        disabled={disable}
+                        value={selectedProvince}
+                        onChange={handleProvinceChange}
+                    >
                         {provinces.map((province) => (
                             <MenuItem key={province.code} value={province.code}>
                                 {province.name}
@@ -53,7 +59,11 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
             <Grid item xs={4}>
                 <FormControl fullWidth disabled={!selectedProvince}>
                     <InputLabel>Quận/Huyện</InputLabel>
-                    <Select value={selectedDistrict} onChange={handleDistrictChange}>
+                    <Select
+                        disabled={disable}
+                        value={selectedDistrict}
+                        onChange={handleDistrictChange}
+                    >
                         {districts.map((district) => (
                             <MenuItem key={district.code} value={district.code}>
                                 {district.name}
@@ -65,7 +75,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
             <Grid item xs={4}>
                 <FormControl fullWidth disabled={!selectedDistrict}>
                     <InputLabel>Xã/Phường</InputLabel>
-                    <Select value={selectedWard} onChange={handleWardChange}>
+                    <Select disabled={disable} value={selectedWard} onChange={handleWardChange}>
                         {wards.map((ward) => (
                             <MenuItem key={ward.code} value={ward.code}>
                                 {ward.name}

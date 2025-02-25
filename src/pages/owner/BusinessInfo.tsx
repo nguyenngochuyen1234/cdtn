@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     TextField,
     Button,
@@ -7,31 +7,44 @@ import {
     Typography,
     FormControlLabel,
     Checkbox,
+    Select,
+    MenuItem,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from 'dayjs';
-
-interface OpenTime {
-    id: string;
-    dayOfWeekEnum: string;
-    openTime: string;
-    closeTime: string;
-    dayOff: boolean;
-}
+import ownerApi from '@/api/ownApi';
+import { OpenTime } from '@/models';
+import { daysOfWeek } from '@/common';
 
 const BusinessInfo: React.FC = () => {
     const [restaurant, setRestaurant] = useState({
-        name: 'Nhà hàng của Bảo',
-        email: 'truongducbao2904@gmail.com',
-        description: 'Nhà hàng món ăn hàng đầu về chất lượng',
-        urlWebsite: 'https://quannhautudo.com/bai-viet/quan-nhau-chill-ha-noi-163.htm',
+        name: '',
+        email: '',
+        description: '',
+        urlWebsite: '',
         avatar: '',
         mediaUrls: [],
     });
 
     const [openTimes, setOpenTimes] = useState<OpenTime[]>([]);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const res = await ownerApi.getShop();
+            if (res.data.success) {
+                setRestaurant(res.data.data);
+                setOpenTimes(res.data.data.listOpenTimes || []);
+            }
+        } catch (error) {
+            console.error('Error fetching shop data:', error);
+        }
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setRestaurant({ ...restaurant, [e.target.name]: e.target.value });
@@ -42,7 +55,7 @@ const BusinessInfo: React.FC = () => {
         field: 'avatar' | 'mediaUrls'
     ) => {
         if (e.target.files) {
-            const files = Array.from(e.target.files).map((file) => URL.createObjectURL(file));
+            const files = Array.from(e.target.files);
             setRestaurant({ ...restaurant, [field]: field === 'avatar' ? files[0] : files });
         }
     };
@@ -51,6 +64,24 @@ const BusinessInfo: React.FC = () => {
         setOpenTimes(
             openTimes.map((time) => (time.id === id ? { ...time, [field]: value } : time))
         );
+    };
+
+    const updateRestaurant = async () => {
+        try {
+            const resOpenTime = ownerApi.updateOpenTime(openTimes);
+            const res = await ownerApi.updateShop({
+                ...restaurant,
+            });
+            if (res.data.success) {
+                alert('Cập nhật thành công!');
+                fetchData();
+            } else {
+                alert('Cập nhật thất bại!');
+            }
+        } catch (error) {
+            console.error('Error updating restaurant:', error);
+            alert('Có lỗi xảy ra khi cập nhật!');
+        }
     };
 
     return (
@@ -103,13 +134,17 @@ const BusinessInfo: React.FC = () => {
                         accept="image/*"
                         onChange={(e) => handleFileUpload(e, 'avatar')}
                     />
-                    {restaurant.avatar && (
+                    {/* {restaurant.avatar && (
                         <img
-                            src={restaurant.avatar}
+                            src={
+                                restaurant.avatar instanceof File
+                                    ? URL.createObjectURL(restaurant.avatar)
+                                    : restaurant.avatar
+                            }
                             alt="Avatar"
                             style={{ width: 100, height: 100, objectFit: 'cover', marginTop: 10 }}
                         />
-                    )}
+                    )} */}
 
                     <Typography variant="subtitle1" mt={2}>
                         Ảnh từ thiết bị
@@ -128,22 +163,22 @@ const BusinessInfo: React.FC = () => {
                             marginTop: '10px',
                         }}
                     >
-                        {restaurant.mediaUrls.map((url, index) => (
+                        {/* {restaurant.mediaUrls.map((url, index) => (
                             <img
                                 key={index}
-                                src={url}
+                                src={URL.createObjectURL(url) || ''}
                                 alt={`Media ${index}`}
                                 style={{ width: 100, height: 100, objectFit: 'cover' }}
                             />
-                        ))}
+                        ))} */}
                     </div>
-
                     <Typography variant="h6" mt={2}>
                         Giờ mở cửa
                     </Typography>
                     <Button
                         variant="contained"
                         color="primary"
+                        sx={{ marginBottom: 2 }}
                         onClick={() =>
                             setOpenTimes([
                                 ...openTimes,
@@ -165,19 +200,28 @@ const BusinessInfo: React.FC = () => {
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                marginBottom: 12,
-                                marginTop: 12,
                                 gap: 12,
+                                marginBottom: 12,
                             }}
                         >
-                            <TextField
-                                label="Thứ"
+                            <Select
                                 value={time.dayOfWeekEnum}
                                 onChange={(e) =>
                                     handleOpenTimeChange(time.id, 'dayOfWeekEnum', e.target.value)
                                 }
-                                sx={{ width: 100 }}
-                            />
+                                displayEmpty
+                                sx={{ width: 120 }}
+                            >
+                                <MenuItem value="" disabled>
+                                    Chọn ngày
+                                </MenuItem>
+                                {daysOfWeek.map((day) => (
+                                    <MenuItem key={day.value} value={day.value}>
+                                        {day.label}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+
                             <TimePicker
                                 label="Mở cửa"
                                 value={time.openTime ? dayjs(time.openTime) : null}
@@ -217,8 +261,13 @@ const BusinessInfo: React.FC = () => {
                             />
                         </div>
                     ))}
-
-                    <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                        onClick={updateRestaurant}
+                    >
                         Lưu thông tin
                     </Button>
                 </CardContent>

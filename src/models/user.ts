@@ -1,14 +1,14 @@
 export interface User {
     username?: string;
-    avatar?: string;
-    email?: string;
+    avatar: string;
+    email: string;
     role?: ('OWNER' | 'ADMIN' | 'USER')[];
-    phone?: string;
+    phone: string;
     dateOfBirth?: string;
     statusUser?: 'ACTIVE' | 'INACTIVE' | 'BANNED';
-    city?: string;
-    district?: string;
-    ward?: string;
+    city: string;
+    district: string;
+    ward: string;
     ratingUser?: number;
     quantityImage?: number;
     helpful?: number;

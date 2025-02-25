@@ -23,6 +23,13 @@ export interface Shop {
     price: number;
     statusShop: 'ACTIVE' | 'INACTIVE' | 'BANNED';
 }
+export interface OpenTime {
+    id: string;
+    dayOfWeekEnum: string;
+    openTime: string;
+    closeTime: string;
+    dayOff: boolean;
+}
 export interface ParamFilterShop {
     keyword?: string;
     categoryId?: string[];

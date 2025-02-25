@@ -30,14 +30,12 @@ const shopApi = {
         formData.append('email', email);
         console.log(file);
         console.log('Dữ liệu trong FormData trước khi gửi:');
-        for (let pair of formData.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
-        }
 
-        const url = '/shops/upload-image-shop';
-        return axiosClient.put(url, formData, {
+        const url = 'http://localhost:8080/shops/upload-image-shop';
+        return axios.put(url, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
+                Accept: 'application/json',
             },
         });
     },

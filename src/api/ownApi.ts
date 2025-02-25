@@ -1,7 +1,7 @@
-import { Comment, Favorite, Service, Shop, User } from '@/models';
+import { Comment, Favorite, OpenTime, Service, Shop, StoreCreation, User } from '@/models';
 import axiosClient from './axiosClient';
 const ownerApi = {
-    updateShop(data: Shop) {
+    updateShop(data: StoreCreation) {
         const url = `/own/shop/update-shop`;
         return axiosClient.put(url, data);
     },
@@ -9,8 +9,8 @@ const ownerApi = {
         const url = `/own/shop/update-service/${id}`;
         return axiosClient.put(url, data);
     },
-    updateOpenTime(id: string, data) {
-        const url = `/own/shop/update-open-time/${id}`;
+    updateOpenTime(data: OpenTime[]) {
+        const url = `/own/shop/update-open-time`;
         return axiosClient.put(url, data);
     },
     createService(idReview: string, data: Comment) {

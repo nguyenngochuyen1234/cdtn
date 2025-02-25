@@ -185,6 +185,7 @@ const RegisterAccountShopPage = () => {
                             ))}
                             <Grid item xs={24} sm={12}>
                                 <AddressSelector
+                                    disable={true}
                                     provinces={provinces}
                                     districts={districts}
                                     wards={wards}
