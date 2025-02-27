@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { useState } from 'react';
 import {
     Box,
+    Button,
     Drawer,
     List,
     ListItem,
     ListItemButton,
     ListItemIcon,
     ListItemText,
+    Typography,
     useTheme,
-} from '@mui/material'
+} from '@mui/material';
 import {
     Dashboard,
     Article,
@@ -18,15 +20,13 @@ import {
     People,
     Settings,
     Logout,
-} from '@mui/icons-material'
-import { Logo } from './logo'
-import { SearchBar } from './searchBar'
-import { MenuAdminItem } from '@/models'
-import { colors } from '@/themes/colors'
-import { useNavigate } from "react-router-dom"
+} from '@mui/icons-material';
+import { SearchBar } from './searchBar';
+import { MenuAdminItem } from '@/models';
+import { colors } from '@/themes/colors';
+import { useNavigate } from 'react-router-dom';
 
-
-const DRAWER_WIDTH = 280
+const DRAWER_WIDTH = 280;
 
 const MENU_ITEMS: MenuAdminItem[] = [
     { key: 'overview', label: 'Tổng quan', icon: <Dashboard />, path: '/' },
@@ -35,17 +35,16 @@ const MENU_ITEMS: MenuAdminItem[] = [
     { key: 'moderation', label: 'Kiểm duyệt', icon: <AdminPanelSettings />, path: '/moderation' },
     { key: 'categories', label: 'Danh mục', icon: <Category />, path: '/categories' },
     { key: 'users', label: 'Người dùng', icon: <People />, path: '/users' },
-]
+];
 
 const BOTTOM_MENU_ITEMS: MenuAdminItem[] = [
     { key: 'logout', label: 'Đăng xuất', icon: <Logout />, path: '/logout' },
-]
+];
 
 export function SidebarMenu() {
-    const theme = useTheme()
-    const [selectedKey, setSelectedKey] = useState('overview')
-    const navigate = useNavigate()
-
+    const theme = useTheme();
+    const [selectedKey, setSelectedKey] = useState('overview');
+    const navigate = useNavigate();
 
     return (
         <Drawer
@@ -60,7 +59,11 @@ export function SidebarMenu() {
                 },
             }}
         >
-            <Logo />
+            <Button onClick={() => navigate('/')}>
+                <Typography variant="h4" fontWeight="bold">
+                    Logo
+                </Typography>
+            </Button>
 
             <Box sx={{ overflow: 'auto', flex: 1 }}>
                 <List>
@@ -70,7 +73,7 @@ export function SidebarMenu() {
                                 selected={selectedKey === item.key}
                                 onClick={() => {
                                     setSelectedKey(item.key);
-                                    navigate(`/admin${item.path}`)
+                                    navigate(`/admin${item.path}`);
                                 }}
                                 sx={{
                                     mx: 1,
@@ -96,20 +99,24 @@ export function SidebarMenu() {
                                 <ListItemIcon
                                     sx={{
                                         minWidth: 40,
-                                        color: selectedKey === item.key ? 'white' : 'secondary.dark',
+                                        color:
+                                            selectedKey === item.key ? 'white' : 'secondary.dark',
                                     }}
                                 >
                                     {item.icon}
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={item.label}
-                                    primaryTypographyProps={{ style: { color: selectedKey === item.key ? '#fff' : "#202224", } }}
+                                    primaryTypographyProps={{
+                                        style: {
+                                            color: selectedKey === item.key ? '#fff' : '#202224',
+                                        },
+                                    }}
                                 />
                             </ListItemButton>
                         </ListItem>
                     ))}
                 </List>
-
             </Box>
             <Box sx={{ mt: 'auto' }}>
                 <List>
@@ -139,10 +146,14 @@ export function SidebarMenu() {
                                     },
                                 }}
                             >
-                                <ListItemIcon sx={{ minWidth: 40 }} >{item.icon}</ListItemIcon>
+                                <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
                                 <ListItemText
                                     primary={item.label}
-                                    primaryTypographyProps={{ style: { color: selectedKey === item.key ? '#fff' : "#202224", } }}
+                                    primaryTypographyProps={{
+                                        style: {
+                                            color: selectedKey === item.key ? '#fff' : '#202224',
+                                        },
+                                    }}
                                 />
                             </ListItemButton>
                         </ListItem>
@@ -150,6 +161,5 @@ export function SidebarMenu() {
                 </List>
             </Box>
         </Drawer>
-    )
+    );
 }
-

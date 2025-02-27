@@ -42,7 +42,10 @@ export const HeaderComponent = () => {
                 boxShadow: '-1px -1px 7px rgba(0, 0, 0, 0.1)',
             }}
         >
-            <Typography variant="h6">Logo</Typography>
+            <Button onClick={() => navigate('/')}>
+                <Typography variant="h6">Logo</Typography>
+            </Button>
+
             <Stack direction="row" alignItems="center" spacing={2}>
                 <Button
                     variant="contained"
@@ -89,6 +92,7 @@ export const HeaderComponent = () => {
                         <Button
                             startIcon={<NotificationsIcon sx={{ color: colors.textColor }} />}
                             sx={{ textTransform: 'none' }}
+                            onClick={() => navigate('/auth/register')}
                         >
                             <Typography
                                 variant="subtitle2"

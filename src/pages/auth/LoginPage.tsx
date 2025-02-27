@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 import authApi from '@/api/authApi';
@@ -19,7 +18,6 @@ import {
     Typography,
 } from '@mui/material';
 
-import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -84,13 +82,14 @@ const LoginPage: React.FC = () => {
         // Google OAuth configuration
         const callbackUrl = 'http://localhost:5173/authenticate';
         const authUrl = 'https://accounts.google.com/o/oauth2/auth';
-        const googleClientId = '50673866762-neghnt6bhpf0chqd41r5u5sekfkic27a.apps.googleusercontent.com';
-        
+        const googleClientId =
+            '50673866762-neghnt6bhpf0chqd41r5u5sekfkic27a.apps.googleusercontent.com';
+
         // Build the OAuth URL with required parameters
         const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
             callbackUrl
         )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
-        
+
         // Redirect to Google authentication page
         window.location.href = targetUrl;
     };
@@ -128,14 +127,14 @@ const LoginPage: React.FC = () => {
                     mt: 1,
                 }}
             >
-                <FormControlLabel 
+                <FormControlLabel
                     control={
-                        <Checkbox 
+                        <Checkbox
                             checked={rememberMe}
                             onChange={(e) => setRememberMe(e.target.checked)}
                         />
-                    } 
-                    label="Nhớ tài khoản" 
+                    }
+                    label="Nhớ tài khoản"
                 />
                 <Link href="/auth/forgot-password" underline="hover">
                     Quên mật khẩu?
@@ -159,26 +158,25 @@ const LoginPage: React.FC = () => {
 
             <Divider sx={{ my: 3 }}>Hoặc đăng nhập bằng</Divider>
 
-
-            <Button 
-                variant="outlined" 
-                color="error" 
-                fullWidth 
+            <Button
+                variant="outlined"
+                color="error"
+                fullWidth
                 startIcon={<GoogleIcon />}
                 onClick={handleContinueWithGoogle}
             >
                 Google
             </Button>
 
-            <Snackbar 
-                open={snackbarOpen} 
-                autoHideDuration={6000} 
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
                 onClose={handleSnackbarClose}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
-                <Alert 
-                    onClose={handleSnackbarClose} 
-                    severity={snackbarSeverity} 
+                <Alert
+                    onClose={handleSnackbarClose}
+                    severity={snackbarSeverity}
                     sx={{ width: '100%' }}
                 >
                     {snackbarMessage}
