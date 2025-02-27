@@ -19,7 +19,6 @@ import {
     Typography,
 } from '@mui/material';
 
-import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 

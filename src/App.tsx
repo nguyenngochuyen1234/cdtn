@@ -39,6 +39,7 @@ import ServicesPage from './pages/owner/ServicesPage';
 import ReviewsPage from './pages/owner/ReviewsPage';
 import OwnerProfile from './pages/owner/ProfilePage';
 import BusinessInfo from './pages/owner/BusinessInfo';
+// import BusinessInfo from './pages/owner/BusinessInfo';
 export default function App() {
     const dispatch = useDispatch();
     const fetchUser = async () => {
