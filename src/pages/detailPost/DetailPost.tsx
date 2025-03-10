@@ -22,9 +22,9 @@ const fakeReviews = [
             date: '2024-02-28',
             text: 'Phong cảnh rất đẹp!',
             images: [
-                'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
-                'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
-                'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
+                'https://cdn.tgdd.vn/Files/2021/06/24/1363040/cac-mon-ngon-ha-noi-phai-thu-cac-quan-an-ha-noi-phai-ghe-202209271046019037.jpg',
+                'https://cdn.tgdd.vn/Files/2021/06/24/1363040/cac-mon-ngon-ha-noi-phai-thu-cac-quan-an-ha-noi-phai-ghe-202209271046019037.jpg',
+                'https://cdn.tgdd.vn/Files/2021/06/24/1363040/cac-mon-ngon-ha-noi-phai-thu-cac-quan-an-ha-noi-phai-ghe-202209271046019037.jpg',
             ],
             metrics: {
                 helpful: 10,
@@ -44,9 +44,9 @@ const fakeReviews = [
             date: '2024-02-27',
             text: 'Phong cảnh rất đẹp!',
             images: [
-                'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
-                'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
-                'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
+                'https://cdn.tgdd.vn/Files/2021/06/24/1363040/cac-mon-ngon-ha-noi-phai-thu-cac-quan-an-ha-noi-phai-ghe-202209271046019037.jpg',
+                'https://cdn.tgdd.vn/Files/2021/06/24/1363040/cac-mon-ngon-ha-noi-phai-thu-cac-quan-an-ha-noi-phai-ghe-202209271046019037.jpg',
+                'https://cdn.tgdd.vn/Files/2021/06/24/1363040/cac-mon-ngon-ha-noi-phai-thu-cac-quan-an-ha-noi-phai-ghe-202209271046019037.jpg',
             ],
             metrics: {
                 helpful: 5,
@@ -75,11 +75,9 @@ function DetailPost() {
         </Typography>,
     ];
     const images = [
-        'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
-        'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
-        'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
-        'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
-        'https://i2.ex-cdn.com/crystalbay.com/files/content/2024/08/13/du-lich-phong-nha-ke-bang-123-2134.jpg',
+        'https://cdn.tgdd.vn/Files/2021/06/24/1363040/cac-mon-ngon-ha-noi-phai-thu-cac-quan-an-ha-noi-phai-ghe-202209271046565284.jpg',
+        'https://cdn.tgdd.vn/Files/2021/06/24/1363040/cac-mon-ngon-ha-noi-phai-thu-cac-quan-an-ha-noi-phai-ghe-202209271046019037.jpg',
+        'https://cdn3.ivivu.com/2019/07/top-30-quan-an-ngon-ha-noi-ban-nhat-dinh-phai-thu-ivivu-5-compressed.jpg',
     ];
 
     return (

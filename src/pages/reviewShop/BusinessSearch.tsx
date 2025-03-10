@@ -24,6 +24,7 @@ import { Shop } from '@/models';
 import { Image } from 'antd';
 import { Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import usersCategory from '@/api/usersCategory';
 function BusinessSearch() {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +38,7 @@ function BusinessSearch() {
 
     const fetchCategory = async () => {
         try {
-            const response = await cmsApi.getAllCategories();
+            const response = await usersCategory.getAllCategories();
             if (response.data.data) {
                 const allTags = response.data.data.flatMap((category: any) => category.tags);
                 setTags(allTags);
@@ -117,7 +118,7 @@ function BusinessSearch() {
                             onChange={(event, newValue) => {
                                 setSearchTerm(newValue || '');
                                 if (newValue) {
-                                    fetchDataShop(newValue); // Call fetchDataShop when a category is selected
+                                    fetchDataShop(newValue);
                                 }
                             }}
                             sx={{ flex: 2 }}

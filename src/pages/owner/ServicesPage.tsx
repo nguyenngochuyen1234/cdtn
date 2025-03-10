@@ -4,6 +4,7 @@ import { EditOutlined, DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant
 import type { ColumnsType } from 'antd/es/table';
 import userApi from '@/api/userApi';
 import shopApi from '@/api/shopApi';
+import ownerApi from '@/api/ownApi';
 
 interface Service {
     id?: string;
@@ -20,19 +21,30 @@ interface Service {
 const ServiceTable: React.FC = () => {
     const [services, setServices] = useState<Service[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+
     const [editingService, setEditingService] = useState<Service | null>(null);
     const [form] = Form.useForm();
     const [email, setEmail] = useState('');
-    const fetchDataUser = async () => {
+    const fetchData = async () => {
         try {
             const res = await userApi.getUser();
+            const dataService = await ownerApi.getAllService({
+                limit: 12,
+                page: 0,
+            });
             if (res.data.success) {
                 setEmail(res.data.data.email);
+            }
+            console.log(dataService.data.data);
+            if (dataService.data.success) {
+                setServices(dataService.data.data);
             }
         } catch (err) {}
     };
     useEffect(() => {
-        fetchDataUser();
+        fetchData();
     }, []);
     const handleAdd = () => {
         setEditingService(null);
@@ -46,64 +58,84 @@ const ServiceTable: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = (id: string) => {
-        setServices(services.filter((service) => service.id !== id));
-        message.success('Xóa dịch vụ thành công');
+    const handleDelete = async (id: string) => {
+        try {
+            setServices(services.filter((service) => service.id !== id));
+            await ownerApi.deleteService(id);
+            message.success('Xóa dịch vụ thành công');
+        } catch {}
     };
 
     const handleSave = async () => {
-        console.log(email);
         try {
-            // form.validateFields().then(async (values) => {
-            //     const { mediaUrl, ...rest } = values;
-            //     // Lấy danh sách File từ `fileList`
-            //     const fileList = mediaUrl?.fileList || [];
-            //     const files: File[] = fileList
-            //         .map(
-            //             (file: any) => file.originFileObj // Lấy file gốc từ Ant Design
-            //         )
-            //         .filter(Boolean); // Lọc các giá trị undefined (nếu có)
-            //     const newService = {
-            //         ...rest,
-            //         mediaUrl: files, // Lưu dưới dạng File[]
-            //     };
-            //     // const meadiaUrls = await shopApi.uploadMultipleImage(
-            //     //     files as File[],
-            //     //     email as string
-            //     // );
-            //     console.log({ files, email });
-            //     if (editingService) {
-            //         setServices((prev) =>
-            //             prev.map((service) =>
-            //                 service.id === editingService.id
-            //                     ? { ...newService, id: service.id }
-            //                     : service
-            //             )
-            //         );
-            //         message.success('Cập nhật dịch vụ thành công');
-            //     } else {
-            //         setServices([
-            //             ...services,
-            //             { ...newService, id: Math.random().toString(36).substr(2, 9) },
-            //         ]);
-            //         message.success('Thêm dịch vụ thành công');
-            //     }
-            //     setIsModalOpen(false);
-            // });
-        } catch (err) {}
+            form.validateFields().then(async (values) => {
+                const { mediaUrl, thumbnail, ...rest } = values;
+
+                const mediaFiles = mediaUrl?.fileList || [];
+                const thumbFile = thumbnail?.fileList?.[0]?.originFileObj;
+
+                const mediaUrls = await shopApi.uploadMultipleImage(
+                    mediaFiles.map((file: { originFileObj: any }) => file.originFileObj),
+                    email
+                );
+
+                let thumbnailUrl = editingService?.thumbnail;
+                if (thumbFile) {
+                    const response = await shopApi.uploadImageShop(thumbFile, email);
+                    thumbnailUrl = typeof response === 'string' ? response : response.data?.data;
+                }
+
+                const newService = {
+                    ...rest,
+                    mediaUrl: mediaUrls.data.data,
+                    thumbnail: thumbnailUrl || '',
+                };
+                if (editingService) {
+                    setServices((prev) =>
+                        prev.map((service) =>
+                            service.id === editingService.id
+                                ? { ...newService, id: service.id }
+                                : service
+                        )
+                    );
+                    message.success('Cập nhật dịch vụ thành công');
+                } else {
+                    const res = await ownerApi.createService(newService);
+                    if (res.data.success) {
+                        setServices([...services, { ...res.data.data }]);
+                        message.success('Thêm dịch vụ thành công');
+                    }
+                }
+                setIsModalOpen(false);
+            });
+        } catch (err) {
+            console.error('Lỗi khi lưu dịch vụ:', err);
+        }
     };
 
     const columns: ColumnsType<Service> = [
         { title: 'Tên dịch vụ', dataIndex: 'name', key: 'name' },
         { title: 'Mô tả', dataIndex: 'description', key: 'description' },
         {
+            title: 'Ảnh đại diện',
+            dataIndex: 'thumbnail',
+            key: 'thumbnail',
+            render: (thumbnail) => (
+                <img
+                    src={thumbnail}
+                    alt="Thumbnail"
+                    style={{ width: 50, height: 50, borderRadius: 8 }}
+                />
+            ),
+        },
+        {
             title: 'Hình ảnh',
             dataIndex: 'mediaUrl',
             key: 'mediaUrl',
-            // render: (mediaUrl: string[]) =>
-            //     (mediaUrl || []).map((url, index) => (
-            //         <img key={index} src={url} alt="media" style={{ width: 50, marginRight: 5 }} />
-            //     )),
+            render: (mediaUrl: string[]) =>
+                (mediaUrl || []).map((url, index) => (
+                    <img key={index} src={url} alt="media" style={{ width: 50, marginRight: 5 }} />
+                )),
         },
         {
             title: 'Giá',
@@ -166,12 +198,23 @@ const ServiceTable: React.FC = () => {
                         <Input />
                     </Form.Item>
                     <Form.Item
+                        name="thumbnail"
+                        label="Ảnh đại diện"
+                        rules={[{ required: true, message: 'Vui lòng chọn ảnh đại diện!' }]}
+                    >
+                        <Upload beforeUpload={() => false} listType="picture">
+                            <Button icon={<UploadOutlined />}>Chọn ảnh đại diện</Button>
+                        </Upload>
+                    </Form.Item>
+
+                    <Form.Item
                         name="description"
                         label="Mô tả"
                         rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
                     >
                         <Input.TextArea />
                     </Form.Item>
+
                     <Form.Item
                         name="mediaUrl"
                         label="Hình ảnh"

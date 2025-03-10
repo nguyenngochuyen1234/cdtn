@@ -13,13 +13,17 @@ const ownerApi = {
         const url = `/own/shop/update-open-time`;
         return axiosClient.put(url, data);
     },
-    createService(idReview: string, data: Comment) {
+    createService(data: Comment) {
         const url = `/own/shop/create-service`;
         return axiosClient.post(url, data);
     },
     getShopById_1(idComment: string, data: Comment) {
         const url = `/own/shop/${id}`;
         return axiosClient.get(url, data);
+    },
+    getAllService(data: { limit: number; page: number }) {
+        const url = `/own/shop/get-list-service`;
+        return axiosClient.post(url, data);
     },
     getShop() {
         const url = `/own/shop/get-shop`;
@@ -33,9 +37,9 @@ const ownerApi = {
         const url = `/own/shop/get-open-time`;
         return axiosClient.get(url);
     },
-    deleteService(idReview: string, data: Comment) {
-        const url = `/own/shop/delete-service/${id}`;
-        return axiosClient.delete(url, data);
+    deleteService(idReview: string) {
+        const url = `/own/shop/delete-service/${idReview}`;
+        return axiosClient.delete(url);
     },
 };
 export default ownerApi;

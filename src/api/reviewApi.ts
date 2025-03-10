@@ -15,7 +15,7 @@ const reviewApi = {
     },
     getAllReviewByIdUser(idUser: string) {
         const url = `/reviews/getall/users/${idUser}`;
-        return axiosClient.post(url);
+        return axiosClient.get(url);
     },
     AddReview(data: {
         reviewTitle: string;
@@ -30,7 +30,7 @@ const reviewApi = {
     },
     getAllReviewByIdShop(idShop: string) {
         const url = `/reviews/getall/shop/${idShop}`;
-        return axiosClient.put(url);
+        return axiosClient.get(url);
     },
     getAllReviewByIdService(idService: string) {
         const url = `/reviews/getall/service/${idService}`;

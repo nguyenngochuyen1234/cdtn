@@ -1,16 +1,16 @@
 import { Box, Typography, Rating, LinearProgress, Avatar, Stack, Grid } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
+    RestaurantMenu,
+    LocalDining,
+    Fastfood,
+    WineBar,
+    Coffee,
+    EmojiFoodBeverage,
+    DeliveryDining,
+    OutdoorGrill,
     Person,
     Star,
-    SportsGymnastics,
-    CleaningServices,
-    Restaurant,
-    Support,
-    NetworkCheck,
-    LocalBar,
-    Wifi,
-    Inventory,
 } from '@mui/icons-material';
 import StarRating from './StarRating';
 import { useState } from 'react';
@@ -23,14 +23,14 @@ const BorderLinearProgress = styled(LinearProgress)({
     },
 });
 const services = [
-    { icon: <Person fontSize="small" />, text: 'Bể bơi miễn phí' },
-    { icon: <CleaningServices fontSize="small" />, text: 'Làm đẹp và chăm sóc' },
-    { icon: <Restaurant fontSize="small" />, text: 'Có nhà hàng' },
-    { icon: <Support fontSize="small" />, text: 'Khách sạn 24/24' },
-    { icon: <SportsGymnastics fontSize="small" />, text: 'Dịch vụ gym, thể thao' },
-    { icon: <LocalBar fontSize="small" />, text: 'Quán bar dịch vụ bay lắc' },
-    { icon: <Wifi fontSize="small" />, text: 'Miễn phí wifi' },
-    { icon: <Inventory fontSize="small" />, text: 'Có phế dịch vụ' },
+    { icon: <RestaurantMenu fontSize="small" />, text: 'Thực đơn đa dạng' },
+    { icon: <LocalDining fontSize="small" />, text: 'Món ăn chất lượng' },
+    { icon: <Fastfood fontSize="small" />, text: 'Phục vụ nhanh chóng' },
+    { icon: <WineBar fontSize="small" />, text: 'Rượu và đồ uống cao cấp' },
+    { icon: <Coffee fontSize="small" />, text: 'Cà phê đặc sản' },
+    { icon: <EmojiFoodBeverage fontSize="small" />, text: 'Tráng miệng hấp dẫn' },
+    { icon: <DeliveryDining fontSize="small" />, text: 'Giao hàng tận nơi' },
+    { icon: <OutdoorGrill fontSize="small" />, text: 'BBQ & Nướng ngoài trời' },
 ];
 export default function RateArticle() {
     const [rating, setRating] = useState<number>(0);
@@ -46,7 +46,7 @@ export default function RateArticle() {
                         <Person />
                     </Avatar>
                     <Typography>Đánh giá của bạn cho bài viết này</Typography>
-                    <StarRating rating={rating} setRating={setRating} />
+                    <StarRating size="big" rating={rating} setRating={setRating} />
                     <Typography>Tốt</Typography>
                 </Stack>
             </Box>

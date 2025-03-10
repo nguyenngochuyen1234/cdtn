@@ -7,6 +7,10 @@ import {
     Button,
     Card,
     Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     Divider,
     FormControl,
     IconButton,
@@ -29,6 +33,11 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/stores';
 import { User, UserProfile } from '@/models';
 import userApi from '@/api/userApi';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import MyReviews from '@/components/user/MyReviews';
+
 interface SocialLink {
     platform: string;
     url: string;
@@ -37,6 +46,7 @@ interface SocialLink {
 export default function ProfilePage() {
     const [selectedTab, setSelectedTab] = useState(0);
     const user = useSelector((state: RootState) => state.user.user);
+    const [openModal, setOpenModal] = useState(false);
     const [profile, setProfile] = useState<UserProfile | null>(user);
     useEffect(() => {
         if (user) {
@@ -55,13 +65,26 @@ export default function ProfilePage() {
             }));
         }
     };
-    const [provinces, setProvinces] = useState([]);
-    const [districts, setDistricts] = useState([]);
-    const [wards, setWards] = useState([]);
 
-    const [selectedProvince, setSelectedProvince] = useState('');
-    const [selectedDistrict, setSelectedDistrict] = useState('');
-    const [selectedWard, setSelectedWard] = useState('');
+    useEffect(() => {
+        const fetchProvinces = async () => {
+            try {
+                const response = await provincesApi.getProvince();
+                setProvinces(response.data);
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách tỉnh:', error);
+            }
+        };
+        fetchProvinces();
+    }, []);
+
+    const [provinces, setProvinces] = useState<Array<{ code: string; name: string }>>([]);
+    const [districts, setDistricts] = useState<Array<{ code: string; name: string }>>([]);
+    const [wards, setWards] = useState<Array<{ code: string; name: string }>>([]);
+
+    const [selectedProvince, setSelectedProvince] = useState(profile?.city || '');
+    const [selectedDistrict, setSelectedDistrict] = useState(profile?.district || '');
+    const [selectedWard, setSelectedWard] = useState(profile?.ward || '');
 
     useEffect(() => {
         const fetchProvinces = async () => {
@@ -94,7 +117,10 @@ export default function ProfilePage() {
         }
     };
 
-    const handleProvinceChange = (event: SelectChangeEvent<string>) => {
+    const handleOpenModal = () => setOpenModal(true);
+    const handleCloseModal = () => setOpenModal(false);
+
+    const handleProvinceChange = (event: any) => {
         const provinceCode = event.target.value;
         setSelectedProvince(provinceCode);
         setSelectedDistrict('');
@@ -102,15 +128,39 @@ export default function ProfilePage() {
         fetchDistricts(provinceCode);
     };
 
-    const handleDistrictChange = (event: SelectChangeEvent<string>) => {
+    const handleDistrictChange = (event: any) => {
         const districtCode = event.target.value;
         setSelectedDistrict(districtCode);
         setSelectedWard('');
         fetchWards(districtCode);
     };
 
-    const handleWardChange = (event: SelectChangeEvent<string>) => {
-        setSelectedWard(event.target.value);
+    const handleWardChange = (event: any) => setSelectedWard(event.target.value);
+
+    const handleSaveAddress = async () => {
+        // setProfile((prev) => ({
+        //     ...prev,
+        //     city: selectedProvince,
+        //     district: selectedDistrict,
+        //     ward: selectedWard,
+        // }));
+        // handleCloseModal();
+        try {
+            const updatedProfile = {
+                city: selectedProvince,
+                district: selectedDistrict,
+                ward: selectedWard,
+            };
+
+            await userApi.updateProfile(updatedProfile); // Gọi API cập nhật
+
+            setProfile(updatedProfile); // Cập nhật state
+            alert('Cập nhật địa chỉ thành công!');
+            handleCloseModal();
+        } catch (error) {
+            console.error('Lỗi cập nhật địa chỉ:', error);
+            alert('Cập nhật địa chỉ thất bại!');
+        }
     };
     const updateUserProfile = async (field: keyof UserProfile, value: string) => {
         try {
@@ -168,7 +218,7 @@ export default function ProfilePage() {
                         borderRadius: '16px',
                     }}
                 />
-
+                ==
                 <Avatar
                     sx={{
                         width: 120,
@@ -195,266 +245,278 @@ export default function ProfilePage() {
                 >
                     <Tab label="Tài khoản của tôi" />
                     <Tab label="Các bài đăng của tôi" />
-                    <Tab label="Các hoạt động của tôi" />
                 </Tabs>
             </Box>
-            <Card sx={{ p: 4 }}>
-                <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                    <Box sx={{ flex: '7 1 0', minWidth: 300 }}>
-                        <Typography variant="h6" gutterBottom sx={{ marginBottom: 4 }}>
-                            Thông tin về bản thân
-                        </Typography>
-                        <Stack spacing={2}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <TextField
-                                    sx={inputStyle}
-                                    fullWidth
-                                    label="Họ"
-                                    value={profile?.firstName}
-                                    variant="outlined"
-                                    InputLabelProps={{
-                                        shrink: !!profile?.firstName,
-                                    }}
-                                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                                />
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<EditIcon />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                    onClick={(e) =>
-                                        updateUserProfile('firstName', profile?.firstName || '')
-                                    }
-                                >
-                                    Thay đổi
-                                </Button>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <TextField
-                                    sx={inputStyle}
-                                    fullWidth
-                                    label="Tên"
-                                    value={profile?.lastName}
-                                    variant="outlined"
-                                    InputLabelProps={{
-                                        shrink: !!profile?.lastName,
-                                    }}
-                                    onChange={(e) => handleInputChange('lastName', e.target.value)}
-                                />
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<EditIcon />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                    onClick={(e) =>
-                                        updateUserProfile('lastName', profile?.lastName || '')
-                                    }
-                                >
-                                    Thay đổi
-                                </Button>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <TextField
-                                    sx={inputStyle}
-                                    fullWidth
-                                    label="Ngày sinh"
-                                    value={profile?.dateOfBirth}
-                                    variant="outlined"
-                                    InputLabelProps={{
-                                        shrink: !!profile?.dateOfBirth,
-                                    }}
-                                    onChange={(e) =>
-                                        handleInputChange('dateOfBirth', e.target.value)
-                                    }
-                                />
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<EditIcon />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                    onClick={(e) =>
-                                        updateUserProfile('dateOfBirth', profile?.dateOfBirth || '')
-                                    }
-                                >
-                                    Thay đổi
-                                </Button>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <TextField
-                                    sx={inputStyle}
-                                    fullWidth
-                                    label="Số điện thoại"
-                                    value={profile?.phone}
-                                    multiline
-                                    rows={3}
-                                    variant="outlined"
-                                    InputLabelProps={{
-                                        shrink: !!profile?.phone,
-                                    }}
-                                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                                />
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<EditIcon />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                    onClick={(e) =>
-                                        updateUserProfile('phone', profile?.phone || '')
-                                    }
-                                >
-                                    Thay đổi
-                                </Button>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Tỉnh/Thành phố</InputLabel>
-                                    <Select
-                                        value={selectedProvince}
-                                        onChange={handleProvinceChange}
+            {selectedTab === 0 && (
+                <Card sx={{ p: 4 }}>
+                    <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                        <Box sx={{ flex: '7 1 0', minWidth: 300 }}>
+                            <Typography variant="h6" gutterBottom sx={{ marginBottom: 4 }}>
+                                Thông tin về bản thân
+                            </Typography>
+                            <Stack spacing={2}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <TextField
+                                        sx={inputStyle}
+                                        fullWidth
+                                        label="Họ"
+                                        value={profile?.firstName}
+                                        variant="outlined"
+                                        InputLabelProps={{
+                                            shrink: !!profile?.firstName,
+                                        }}
+                                        onChange={(e) =>
+                                            handleInputChange('firstName', e.target.value)
+                                        }
+                                    />
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<EditIcon />}
+                                        sx={{
+                                            textTransform: 'none',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                        onClick={(e) =>
+                                            updateUserProfile('firstName', profile?.firstName || '')
+                                        }
                                     >
-                                        {provinces.map((province: any) => (
-                                            <MenuItem key={province.code} value={province.code}>
-                                                {province.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<EditIcon />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                    onClick={(e) =>
-                                        updateUserProfile('city', selectedProvince || '')
-                                    }
-                                >
-                                    Thay đổi
-                                </Button>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <FormControl fullWidth disabled={!selectedProvince}>
-                                    <InputLabel>Quận/Huyện</InputLabel>
-                                    <Select
-                                        value={selectedDistrict}
-                                        onChange={handleDistrictChange}
+                                        Thay đổi
+                                    </Button>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <TextField
+                                        sx={inputStyle}
+                                        fullWidth
+                                        label="Tên"
+                                        value={profile?.lastName}
+                                        variant="outlined"
+                                        InputLabelProps={{
+                                            shrink: !!profile?.lastName,
+                                        }}
+                                        onChange={(e) =>
+                                            handleInputChange('lastName', e.target.value)
+                                        }
+                                    />
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<EditIcon />}
+                                        sx={{
+                                            textTransform: 'none',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                        onClick={(e) =>
+                                            updateUserProfile('lastName', profile?.lastName || '')
+                                        }
                                     >
-                                        {districts.map((district: any) => (
-                                            <MenuItem key={district.code} value={district.code}>
-                                                {district.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<EditIcon />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                    onClick={(e) =>
-                                        updateUserProfile('district', selectedDistrict || '')
-                                    }
-                                >
-                                    Thay đổi
-                                </Button>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <FormControl fullWidth disabled={!selectedDistrict}>
-                                    <InputLabel>Xã/Phường</InputLabel>
-                                    <Select value={selectedWard} onChange={handleWardChange}>
-                                        {wards.map((ward: any) => (
-                                            <MenuItem key={ward.code} value={ward.code}>
-                                                {ward.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<EditIcon />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                    onClick={(e) => updateUserProfile('ward', selectedWard || '')}
-                                >
-                                    Thay đổi
-                                </Button>
-                            </Box>
-                        </Stack>
-                    </Box>
+                                        Thay đổi
+                                    </Button>
+                                </Box>
+                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <DatePicker
+                                            label="Ngày sinh"
+                                            value={
+                                                profile?.dateOfBirth
+                                                    ? new Date(profile.dateOfBirth)
+                                                    : null
+                                            }
+                                            onChange={(newValue) => {
+                                                if (newValue) {
+                                                    handleInputChange(
+                                                        'dateOfBirth',
+                                                        newValue.toISOString()
+                                                    );
+                                                }
+                                            }}
+                                            slotProps={{
+                                                textField: { fullWidth: true, sx: inputStyle },
+                                            }}
+                                        />
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<EditIcon />}
+                                            sx={{
+                                                textTransform: 'none',
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                            onClick={() =>
+                                                updateUserProfile(
+                                                    'dateOfBirth',
+                                                    profile?.dateOfBirth || ''
+                                                )
+                                            }
+                                        >
+                                            Thay đổi
+                                        </Button>
+                                    </Box>
+                                </LocalizationProvider>
 
-                    <Box sx={{ flex: '3 1 0', minWidth: 200 }}>
-                        <Typography variant="h6" gutterBottom>
-                            Liên kết mạng xã hội khác
-                        </Typography>
-                        <Stack spacing={2}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <IconButton color="primary">
-                                    <Facebook />
-                                </IconButton>
-                                <TextField
-                                    sx={inputStyle}
-                                    fullWidth
-                                    placeholder="https://www.facebook.com/"
-                                    variant="outlined"
-                                />
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <IconButton color="primary">
-                                    <Instagram />
-                                </IconButton>
-                                <TextField
-                                    sx={inputStyle}
-                                    fullWidth
-                                    placeholder="https://www.instagram.com/"
-                                    variant="outlined"
-                                />
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <IconButton color="primary">
-                                    <Twitter />
-                                </IconButton>
-                                <TextField
-                                    sx={inputStyle}
-                                    fullWidth
-                                    placeholder="https://twitter.com/"
-                                    variant="outlined"
-                                />
-                            </Box>
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: 'row-reverse',
-                                    gap: 1,
-                                }}
-                            >
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<EditIcon />}
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <TextField
+                                        sx={inputStyle}
+                                        fullWidth
+                                        label="Số điện thoại"
+                                        value={profile?.phone}
+                                        multiline
+                                        variant="outlined"
+                                        InputLabelProps={{
+                                            shrink: !!profile?.phone,
+                                        }}
+                                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                                    />
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<EditIcon />}
+                                        sx={{
+                                            textTransform: 'none',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                        onClick={(e) =>
+                                            updateUserProfile('phone', profile?.phone || '')
+                                        }
+                                    >
+                                        Thay đổi
+                                    </Button>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <TextField
+                                        fullWidth
+                                        label="Địa chỉ"
+                                        value={`${wards.find((w) => w.code === selectedWard)?.name.trim() || ''}, 
+            ${districts.find((d) => d.code === selectedDistrict)?.name || ''}, 
+            ${provinces.find((p) => p.code === selectedProvince)?.name || ''}`}
+                                        variant="outlined"
+                                        disabled
+                                    />
+
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<EditIcon />}
+                                        sx={{
+                                            textTransform: 'none',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                        onClick={handleOpenModal}
+                                    >
+                                        Thay đổi
+                                    </Button>
+                                </Box>
+                            </Stack>
+                        </Box>
+
+                        <Box sx={{ flex: '3 1 0', minWidth: 200 }}>
+                            <Typography variant="h6" gutterBottom>
+                                Liên kết mạng xã hội khác
+                            </Typography>
+                            <Stack spacing={2}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <IconButton color="primary">
+                                        <Facebook />
+                                    </IconButton>
+                                    <TextField
+                                        sx={inputStyle}
+                                        fullWidth
+                                        placeholder="https://www.facebook.com/"
+                                        variant="outlined"
+                                    />
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <IconButton color="primary">
+                                        <Instagram />
+                                    </IconButton>
+                                    <TextField
+                                        sx={inputStyle}
+                                        fullWidth
+                                        placeholder="https://www.instagram.com/"
+                                        variant="outlined"
+                                    />
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <IconButton color="primary">
+                                        <Twitter />
+                                    </IconButton>
+                                    <TextField
+                                        sx={inputStyle}
+                                        fullWidth
+                                        placeholder="https://twitter.com/"
+                                        variant="outlined"
+                                    />
+                                </Box>
+                                <Box
                                     sx={{
-                                        textTransform: 'none',
-                                        whiteSpace: 'nowrap',
+                                        display: 'flex',
+                                        flexDirection: 'row-reverse',
+                                        gap: 1,
                                     }}
                                 >
-                                    Thay đổi
-                                </Button>
-                            </Box>
-                        </Stack>
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<EditIcon />}
+                                        sx={{
+                                            textTransform: 'none',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        Thay đổi
+                                    </Button>
+                                </Box>
+                            </Stack>
+                        </Box>
                     </Box>
-                </Box>
-            </Card>
+                </Card>
+            )}
+            {selectedTab === 1 && <MyReviews />}
+            <Dialog open={openModal} onClose={handleCloseModal}>
+                <DialogTitle>Chọn địa chỉ</DialogTitle>
+                <DialogContent>
+                    <Stack
+                        sx={{
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: 4,
+                            marginTop: 4,
+                        }}
+                    >
+                        <FormControl fullWidth>
+                            <InputLabel>Tỉnh/Thành phố</InputLabel>
+                            <Select value={selectedProvince} onChange={handleProvinceChange}>
+                                {provinces.map((province) => (
+                                    <MenuItem key={province.code} value={province.code}>
+                                        {province.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth disabled={!selectedProvince}>
+                            <InputLabel>Quận/Huyện</InputLabel>
+                            <Select value={selectedDistrict} onChange={handleDistrictChange}>
+                                {districts.map((district) => (
+                                    <MenuItem key={district.code} value={district.code}>
+                                        {district.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth disabled={!selectedDistrict}>
+                            <InputLabel>Xã/Phường</InputLabel>
+                            <Select value={selectedWard} onChange={handleWardChange}>
+                                {wards.map((ward) => (
+                                    <MenuItem key={ward.code} value={ward.code}>
+                                        {ward.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseModal}>Hủy</Button>
+                    <Button onClick={handleSaveAddress} variant="contained">
+                        Lưu
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

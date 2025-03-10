@@ -19,8 +19,8 @@ import FilterPanel from '@/components/FilterPanel';
 export default function SearchPage() {
     const postData = [
         {
-            image: 'https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2023/5/7/1189286/Anh-Hoang-Thanh-Than-11.jpg',
-            name: 'Địa điểm du lịch nổi tiếng',
+            image: 'https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2023/2/17/1148679/Nguoc-Dong-Ve-Thoi-O.jpg',
+            name: 'Quán ăn Hai Bà Trưng',
             address: 'Hà Nội, Việt Nam',
             rating: 4.5,
             reviewCount: 120,
@@ -29,8 +29,8 @@ export default function SearchPage() {
             postTime: '2024-11-07',
         },
         {
-            image: 'https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2023/5/7/1189286/Anh-Hoang-Thanh-Than-11.jpg',
-            name: 'Ẩm thực đường phố',
+            image: 'https://easysalon.vn/wp-content/uploads/2020/10/cat-toc-nam-gia-re-o-ha-noi-3.jpg',
+            name: 'Quán cắt tóc',
             address: 'Đà Nẵng, Việt Nam',
             rating: 4.7,
             reviewCount: 90,
@@ -39,7 +39,7 @@ export default function SearchPage() {
             postTime: '2024-11-06',
         },
         {
-            image: 'https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2023/5/7/1189286/Anh-Hoang-Thanh-Than-11.jpg',
+            image: 'https://torog-cdn.kootoro.com/cms/upload/image/1674010181995-kinh%20doanh%20c%E1%BB%ADa%20h%C3%A0ng%20gi%E1%BA%B7t%20l%C3%A0.jpg',
             name: 'Tiệm giặt là ABC',
             address: 'Hồ Chí Minh, Việt Nam',
             rating: 4.2,
@@ -65,53 +65,6 @@ export default function SearchPage() {
                     </Grid>
                     <Grid item xs={8} md={5}>
                         <Stack p={2} height="100%" gap={3}>
-                            <Box
-                                display="flex"
-                                alignItems="center"
-                                p={2}
-                                sx={{ backgroundColor: '#fff' }}
-                            >
-                                <Box
-                                    display="flex"
-                                    flexDirection="column"
-                                    alignItems="center"
-                                    mr={2}
-                                >
-                                    <Typography variant="h6">Địa điểm du lịch</Typography>
-                                    <Typography variant="body2">(10 kết quả)</Typography>
-                                </Box>
-                                <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-
-                                <Box
-                                    display="flex"
-                                    flexDirection="column"
-                                    alignItems="center"
-                                    mr={2}
-                                >
-                                    <Typography variant="h6">Ẩm thực</Typography>
-                                    <Typography variant="body2">(10 kết quả)</Typography>
-                                </Box>
-                                <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-
-                                <Box
-                                    display="flex"
-                                    flexDirection="column"
-                                    alignItems="center"
-                                    mr={2}
-                                >
-                                    <Typography variant="h6">Tiệm giặt</Typography>
-                                    <Typography variant="body2">(10 kết quả)</Typography>
-                                </Box>
-                                <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-
-                                <Typography variant="h6" style={{ cursor: 'pointer' }}>
-                                    Xem thêm
-                                </Typography>
-                            </Box>
-                            <Typography variant="h6" style={{ cursor: 'pointer' }}>
-                                kết quả hiện thị 10 of{' '}
-                                <span className="text-[red]">20 kết quả đã tìm kiếm</span>
-                            </Typography>
                             <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
                                 {postData.map((post, index) => (
                                     <SearchCardComponent

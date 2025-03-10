@@ -12,15 +12,16 @@ const labels: { [index: number]: string } = {
 // Định nghĩa props
 interface StarRatingProps {
     rating: number;
+    size: 'big' | 'small';
     setRating: (rating: number) => void;
 }
 
-const StarRating: React.FC<StarRatingProps> = ({ rating, setRating }) => {
+const StarRating: React.FC<StarRatingProps> = ({ rating, setRating, size }) => {
     const [hover, setHover] = useState<number>(0);
 
     return (
         <div style={{ display: 'flex', alignItems: 'center', width: '400px' }}>
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', gap: size === 'big' ? 12 : 4 }}>
                 {[1, 2, 3, 4, 5].map((star) => (
                     <span
                         key={star}
@@ -30,10 +31,10 @@ const StarRating: React.FC<StarRatingProps> = ({ rating, setRating }) => {
                         style={{
                             cursor: 'pointer',
                             color: (hover || rating) >= star ? colors.starColor : '#ccc',
-                            fontSize: '2rem',
+                            fontSize: size === 'big' ? '2rem' : '1.2rem',
                             transition: 'color 0.2s',
                             backgroundColor: '#f1f1f1',
-                            padding: '12px 8px',
+                            padding: size === 'big' ? '12px 8px' : '6px 4px',
                             borderRadius: 8,
                         }}
                     >

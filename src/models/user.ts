@@ -1,9 +1,10 @@
 export interface User {
     username?: string;
-    avatar: string;
-    email: string;
+    id?: string;
+    avatar?: string;
+    email?: string;
     role?: ('OWNER' | 'ADMIN' | 'USER')[];
-    phone: string;
+    phone?: string;
     dateOfBirth?: string;
     statusUser?: 'ACTIVE' | 'INACTIVE' | 'BANNED';
     city: string;

@@ -1,8 +1,7 @@
-
-import EmailIcon from "@mui/icons-material/Email";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import { useState } from 'react'
+import EmailIcon from '@mui/icons-material/Email';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import { useState } from 'react';
 import {
     Avatar,
     Box,
@@ -17,7 +16,7 @@ import {
     ToggleButtonGroup,
     Typography,
     useTheme,
-} from '@mui/material'
+} from '@mui/material';
 import {
     ChatBubbleOutline,
     Favorite,
@@ -25,28 +24,28 @@ import {
     Language,
     LocationOn,
     Mail,
-} from '@mui/icons-material'
-import OtherUserCard from "@/components/user/OtherUserCard";
-import { colors } from "@/themes/colors";
-import DestinationCard from "@/components/user/DestinationCard";
+} from '@mui/icons-material';
+import OtherUserCard from '@/components/user/OtherUserCard';
+import { colors } from '@/themes/colors';
+import DestinationCard from '@/components/user/DestinationCard';
 
 interface Post {
-    id: number
-    image: string
-    likes: number
-    comments: number
-    liked: boolean
+    id: number;
+    image: string;
+    likes: number;
+    comments: number;
+    liked: boolean;
 }
 
 interface Profile {
-    name: string
-    bio: string
-    followers: number
-    following: number
-    posts: Post[]
-    website: string
-    email: string
-    location: string
+    name: string;
+    bio: string;
+    followers: number;
+    following: number;
+    posts: Post[];
+    website: string;
+    email: string;
+    location: string;
 }
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
     borderRadius: '24px',
@@ -59,8 +58,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
         '&.Mui-selected': {
             backgroundColor: colors.textColor,
             color: theme.palette.primary.contrastText,
-            '&:hover': {
-            },
+            '&:hover': {},
         },
         '&:not(.Mui-selected)': {
             color: colors.textColor,
@@ -88,44 +86,70 @@ interface Tab {
 const tabs: Tab[] = [
     { value: 'details', label: 'Thông tin chi tiết' },
     { value: 'posts', label: 'Các viết của user B' },
-    { value: 'activities', label: 'Các hoạt động của user B' },
 ];
 export default function OtherUserPage() {
-    const theme = useTheme()
+    const theme = useTheme();
     const [selected, setSelected] = useState('details');
 
-    const handleChange = (
-        event: React.MouseEvent<HTMLElement>,
-        newValue: string | null
-    ) => {
+    const handleChange = (event: React.MouseEvent<HTMLElement>, newValue: string | null) => {
         if (newValue !== null) {
             setSelected(newValue);
         }
     };
     const [profile, setProfile] = useState<Profile>({
         name: 'User B',
-        bio: 'Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem ipsum.',
+        bio: "Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem ipsum.",
         followers: 1234,
         following: 567,
         website: 'example.com',
         email: 'contact@mail.com',
         location: 'Ha Long Bay',
         posts: [
-            { id: 1, image: 'https://wallpapers.com/images/hd/hanoi-retains-its-traditional-traits-meba8ch7tnlz4k4i.jpg', likes: 45, comments: 12, liked: false },
-            { id: 2, image: 'https://wallpapers.com/images/hd/hanoi-retains-its-traditional-traits-meba8ch7tnlz4k4i.jpg', likes: 45, comments: 12, liked: false },
-            { id: 3, image: 'https://wallpapers.com/images/hd/hanoi-retains-its-traditional-traits-meba8ch7tnlz4k4i.jpg', likes: 45, comments: 12, liked: false },
-            { id: 4, image: 'https://wallpapers.com/images/hd/hanoi-retains-its-traditional-traits-meba8ch7tnlz4k4i.jpg', likes: 45, comments: 12, liked: false },
+            {
+                id: 1,
+                image: 'https://wallpapers.com/images/hd/hanoi-retains-its-traditional-traits-meba8ch7tnlz4k4i.jpg',
+                likes: 45,
+                comments: 12,
+                liked: false,
+            },
+            {
+                id: 2,
+                image: 'https://wallpapers.com/images/hd/hanoi-retains-its-traditional-traits-meba8ch7tnlz4k4i.jpg',
+                likes: 45,
+                comments: 12,
+                liked: false,
+            },
+            {
+                id: 3,
+                image: 'https://wallpapers.com/images/hd/hanoi-retains-its-traditional-traits-meba8ch7tnlz4k4i.jpg',
+                likes: 45,
+                comments: 12,
+                liked: false,
+            },
+            {
+                id: 4,
+                image: 'https://wallpapers.com/images/hd/hanoi-retains-its-traditional-traits-meba8ch7tnlz4k4i.jpg',
+                likes: 45,
+                comments: 12,
+                liked: false,
+            },
         ],
-    })
+    });
 
     const toggleLike = (postId: number) => {
-        setProfile(prev => ({
+        setProfile((prev) => ({
             ...prev,
-            posts: prev.posts.map(post =>
-                post.id === postId ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 } : post
+            posts: prev.posts.map((post) =>
+                post.id === postId
+                    ? {
+                          ...post,
+                          liked: !post.liked,
+                          likes: post.liked ? post.likes - 1 : post.likes + 1,
+                      }
+                    : post
             ),
-        }))
-    }
+        }));
+    };
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -142,8 +166,22 @@ export default function OtherUserPage() {
                     }}
                 />
 
-                <Box sx={{ position: 'absolute', top: 150, left: 32, display: 'flex', alignItems: 'flex-end', gap: 2 }}>
-                    <OtherUserCard avatarUrl={""} username={"User B"} stats={"100"} joinDate={"12/12/2023"} />
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 150,
+                        left: 32,
+                        display: 'flex',
+                        alignItems: 'flex-end',
+                        gap: 2,
+                    }}
+                >
+                    <OtherUserCard
+                        avatarUrl={''}
+                        username={'User B'}
+                        stats={'100'}
+                        joinDate={'12/12/2023'}
+                    />
                 </Box>
             </Box>
 
@@ -168,8 +206,8 @@ export default function OtherUserPage() {
                     </StyledToggleButtonGroup>
                 </Grid>
                 <Grid item xs={12} md={8} spacing={4}>
-                    <Box sx={{ px: 4, borderRadius: "8px" }}>
-                        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+                    <Box sx={{ px: 4, borderRadius: '8px' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
                             Thông tin về bản thân
                         </Typography>
                         <Typography variant="body1" sx={{ mb: 4 }}>
@@ -211,10 +249,8 @@ export default function OtherUserPage() {
                             ))}
                         </Grid>
                     </Stack>
-
                 </Grid>
             </Grid>
         </Container>
-    )
+    );
 }
-

@@ -12,11 +12,11 @@ import {
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from 'dayjs';
 import ownerApi from '@/api/ownApi';
 import { OpenTime } from '@/models';
 import { daysOfWeek } from '@/common';
+import OpeningHours from '@/utils/OpeningHours';
 
 const BusinessInfo: React.FC = () => {
     const [restaurant, setRestaurant] = useState({
@@ -175,92 +175,11 @@ const BusinessInfo: React.FC = () => {
                     <Typography variant="h6" mt={2}>
                         Giờ mở cửa
                     </Typography>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{ marginBottom: 2 }}
-                        onClick={() =>
-                            setOpenTimes([
-                                ...openTimes,
-                                {
-                                    id: Date.now().toString(),
-                                    dayOfWeekEnum: '',
-                                    openTime: '',
-                                    closeTime: '',
-                                    dayOff: false,
-                                },
-                            ])
-                        }
-                    >
-                        Thêm giờ mở cửa
-                    </Button>
-                    {openTimes.map((time) => (
-                        <div
-                            key={time.id}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 12,
-                                marginBottom: 12,
-                            }}
-                        >
-                            <Select
-                                value={time.dayOfWeekEnum}
-                                onChange={(e) =>
-                                    handleOpenTimeChange(time.id, 'dayOfWeekEnum', e.target.value)
-                                }
-                                displayEmpty
-                                sx={{ width: 120 }}
-                            >
-                                <MenuItem value="" disabled>
-                                    Chọn ngày
-                                </MenuItem>
-                                {daysOfWeek.map((day) => (
-                                    <MenuItem key={day.value} value={day.value}>
-                                        {day.label}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-
-                            <TimePicker
-                                label="Mở cửa"
-                                value={time.openTime ? dayjs(time.openTime) : null}
-                                onChange={(newValue) =>
-                                    handleOpenTimeChange(
-                                        time.id,
-                                        'openTime',
-                                        newValue ? newValue.format('YYYY-MM-DDTHH:mm') : ''
-                                    )
-                                }
-                            />
-                            <TimePicker
-                                label="Đóng cửa"
-                                value={time.closeTime ? dayjs(time.closeTime) : null}
-                                onChange={(newValue) =>
-                                    handleOpenTimeChange(
-                                        time.id,
-                                        'closeTime',
-                                        newValue ? newValue.format('YYYY-MM-DDTHH:mm') : ''
-                                    )
-                                }
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={time.dayOff}
-                                        onChange={(e) =>
-                                            handleOpenTimeChange(
-                                                time.id,
-                                                'dayOff',
-                                                e.target.checked
-                                            )
-                                        }
-                                    />
-                                }
-                                label="Nghỉ"
-                            />
-                        </div>
-                    ))}
+                    <OpeningHours
+                        openTimes={openTimes}
+                        setOpenTimes={setOpenTimes}
+                        handleOpenTimeChange={handleOpenTimeChange}
+                    />
                     <Button
                         variant="contained"
                         color="primary"
