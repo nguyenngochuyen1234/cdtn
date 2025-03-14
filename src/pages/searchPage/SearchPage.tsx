@@ -15,8 +15,19 @@ import SearchIcon from '@mui/icons-material/Search';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MapIcon from '@mui/icons-material/Map';
 import FilterPanel from '@/components/FilterPanel';
+import shopApi from '@/api/shopApi';
+import { useEffect, useState } from 'react';
+import { Shop } from '@/models';
 
 export default function SearchPage() {
+    const [shops, setShops] = useState<Shop[] | null>(null);
+
+    const fetchDataShop = async () => {
+        try {
+            const response = await shopApi.searchShop({ keyword: '', page: 1, size: 12 });
+            setShops(response?.data.data);
+        } catch {}
+    };
     const postData = [
         {
             image: 'https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2023/2/17/1148679/Nguoc-Dong-Ve-Thoi-O.jpg',
@@ -49,6 +60,9 @@ export default function SearchPage() {
             postTime: '2024-11-05',
         },
     ];
+    useEffect(() => {
+        fetchDataShop();
+    }, []);
     const keywords = ['Du lịch', 'Đồ ăn', 'Động Phong Nha', 'Ẩm thực Việt Nam', 'Thái Lan'];
     return (
         <div>
@@ -66,19 +80,19 @@ export default function SearchPage() {
                     <Grid item xs={8} md={5}>
                         <Stack p={2} height="100%" gap={3}>
                             <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                                {postData.map((post, index) => (
+                                {/* {(shops || []).map((post, index) => (
                                     <SearchCardComponent
                                         key={index}
-                                        image={post.image}
+                                        image={post.avatar}
                                         name={post.name}
                                         address={post.address}
-                                        rating={post.rating}
-                                        reviewCount={post.reviewCount}
-                                        favoriteCount={post.favoriteCount}
-                                        viewCount={post.viewCount}
-                                        postTime={post.postTime}
+                                        rating={post.point}
+                                        reviewCount={post.countReview}
+                                        favoriteCount={post}
+                                        viewCount={post.countReview}
+                                        postTime={post}
                                     />
-                                ))}
+                                ))} */}
                             </Box>
                         </Stack>
                     </Grid>
