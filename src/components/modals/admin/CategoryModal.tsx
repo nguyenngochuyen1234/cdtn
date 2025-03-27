@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Dialog,
     DialogActions,
@@ -19,11 +19,17 @@ interface CategoryModalProps {
     open: boolean;
     onClose: () => void;
     onSubmit: (newCategory: Category, tags: string[]) => void;
+    currentCategory: Category | null;
 }
 
 const validTypes = ['OTHER', 'BEAUTY_SPA', 'HOME_SERVICE', 'RESTAURANT', 'BEVERAGE', 'CUTTING'];
 
-const CategoryModal: React.FC<CategoryModalProps> = ({ open, onClose, onSubmit }) => {
+const CategoryModal: React.FC<CategoryModalProps> = ({
+    open,
+    onClose,
+    onSubmit,
+    currentCategory,
+}) => {
     const [newCategory, setNewCategory] = useState<Category>({
         name: '',
         type: '',
@@ -33,7 +39,18 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ open, onClose, onSubmit }
     });
     const [newTag, setNewTag] = useState<string>('');
     const [tags, setTags] = useState<string[]>([]);
-
+    useEffect(() => {
+        if (currentCategory) {
+            setNewCategory({
+                name: currentCategory.name,
+                type: currentCategory.type,
+                description: currentCategory.description,
+                tags: currentCategory.tags,
+                id: currentCategory.id,
+            });
+            setTags(currentCategory.tags || []);
+        }
+    }, [currentCategory]);
     const handleTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
         setNewCategory((prevCategory) => ({

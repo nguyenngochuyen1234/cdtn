@@ -9,6 +9,7 @@ import {
     Divider,
     Snackbar,
     Alert,
+    CircularProgress,
 } from '@mui/material';
 import CarouselComponent from '@/components/CarouselComponent';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +19,7 @@ import authApi from '@/api/authApi';
 
 const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
-
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -27,7 +28,6 @@ const RegisterPage: React.FC = () => {
         phone: '',
     });
 
-    // State cho Snackbar
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
@@ -48,7 +48,7 @@ const RegisterPage: React.FC = () => {
     };
 
     const handleSubmit = async () => {
-        // Kiểm tra xác nhận mật khẩu
+        setLoading(true);
         if (formData.password !== formData.confirmPassword) {
             setSnackbarMessage('Mật khẩu và xác nhận mật khẩu không khớp!');
             setSnackbarSeverity('error');
@@ -60,12 +60,10 @@ const RegisterPage: React.FC = () => {
             const { username, email, password, phone } = formData;
             const result = await authApi.register({ username, email, password, phone });
             if (result?.data.success) {
-                // Hiển thị thông báo thành công
                 setSnackbarMessage(result.data.message);
                 setSnackbarSeverity('success');
                 setSnackbarOpen(true);
 
-                // Sau 1.5 giây chuyển hướng đến trang đăng nhập
                 setTimeout(() => {
                     navigate('/auth/login');
                 }, 1500);
@@ -78,6 +76,8 @@ const RegisterPage: React.FC = () => {
             setSnackbarMessage('Đăng ký thất bại');
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -142,8 +142,9 @@ const RegisterPage: React.FC = () => {
                 fullWidth
                 sx={{ mb: 2 }}
                 onClick={handleSubmit}
+                disabled={loading}
             >
-                Đăng ký
+                {loading ? <CircularProgress size={24} /> : 'Đăng ký'}
             </Button>
 
             <Typography variant="body2" align="center">

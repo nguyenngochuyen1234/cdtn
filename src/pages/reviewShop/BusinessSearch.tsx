@@ -1,30 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import {
-    Box,
-    Typography,
-    TextField,
-    Container,
-    Grid,
-    useTheme,
-    useMediaQuery,
-    IconButton,
-    Autocomplete,
-    Card,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import MapComponent from '../createShop/MapComponent';
-import cmsApi from '@/api/cmsApi';
-import axios from 'axios';
-import debounce from 'lodash.debounce';
 import shopApi from '@/api/shopApi';
+import usersCategory from '@/api/usersCategory';
 import { Badge } from '@/components/ui/badge';
 import { Shop } from '@/models';
+import SearchIcon from '@mui/icons-material/Search';
+import {
+    Autocomplete,
+    Box,
+    Card,
+    Container,
+    Grid,
+    IconButton,
+    TextField,
+    Typography,
+    useMediaQuery,
+    useTheme,
+} from '@mui/material';
 import { Image } from 'antd';
 import { Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import usersCategory from '@/api/usersCategory';
+import MapComponent from '../createShop/MapComponent';
 function BusinessSearch() {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
@@ -34,7 +31,6 @@ function BusinessSearch() {
     const [suggestedLocations, setSuggestedLocations] = useState<string[]>([]);
     const [shops, setShops] = useState<Shop[] | null>(null);
     const theme = useTheme();
-    const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
     const fetchCategory = async () => {
         try {
@@ -70,22 +66,6 @@ function BusinessSearch() {
         }
     }, [searchTerm, tags]);
 
-    const fetchAddresses = debounce(async (query: string) => {
-        try {
-            const response = await axios.get(`https://api-adress-vietnam.com/search`, {
-                params: { query },
-            });
-            setSuggestedLocations(response.data.results.map((item: any) => item.address));
-        } catch (error) {
-            console.error('Error fetching addresses', error);
-        }
-    }, 500);
-
-    useEffect(() => {
-        if (location) {
-            fetchAddresses(location);
-        }
-    }, [location]);
     const renderStars = (rating: number) => {
         const stars = [];
         for (let i = 1; i <= 5; i++) {
@@ -116,6 +96,7 @@ function BusinessSearch() {
                             freeSolo
                             options={filteredTags}
                             onChange={(event, newValue) => {
+                                console.log(event);
                                 setSearchTerm(newValue || '');
                                 if (newValue) {
                                     fetchDataShop(newValue);
@@ -137,7 +118,7 @@ function BusinessSearch() {
                         <Autocomplete
                             freeSolo
                             options={suggestedLocations}
-                            sx={{ flex: 2 }} // Điều chỉnh độ rộng
+                            sx={{ flex: 2 }}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
@@ -145,7 +126,7 @@ function BusinessSearch() {
                                     placeholder="Enter location"
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
-                                    size="medium" // Tăng kích thước input
+                                    size="medium"
                                 />
                             )}
                         />

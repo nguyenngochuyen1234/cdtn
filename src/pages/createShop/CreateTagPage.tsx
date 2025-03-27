@@ -17,7 +17,6 @@ import { Category } from '@/models';
 import usersCategory from '@/api/usersCategory';
 import { AppDispatch, RootState } from '@/redux/stores';
 import { useDispatch, useSelector } from 'react-redux';
-import { setUser } from '@/redux/userSlice';
 import { setNewShop } from '@/redux/createShop';
 
 function CreateTagPage() {

@@ -89,14 +89,17 @@ const CategoriesPage: React.FC = () => {
         setOpenRows((prev) => ({ ...prev, [id]: !prev[id] }));
     };
 
-    const handleDeleteTag = async (categoryId: string, tag: string) => {
+    const handleDeleteTag = async (categoryId: string, tag: string, tags: string[]) => {
         try {
+            const updateTags = tags?.filter((t) => t !== tag);
+            const responseUpdateTags = await cmsApi.deleteTag(categoryId, updateTags);
+
             setCategories((prevCategories) =>
                 prevCategories.map((category) =>
                     category.id === categoryId
                         ? {
                               ...category,
-                              tags: category.tags?.filter((t) => t !== tag),
+                              tags: updateTags,
                           }
                         : category
                 )
@@ -107,22 +110,27 @@ const CategoriesPage: React.FC = () => {
     };
     const handleSubmit = async (newCategory: Category, tags: string[]) => {
         try {
-            console.log({ newCategory, tags });
+            const newData = {
+                name: newCategory.name,
+                type: newCategory.type,
+                description: newCategory.description,
+                tags: tags,
+            };
             if (!currentCategory) {
-                // Update existing category
-                const newCategoryData = await cmsApi.addCategories({
-                    name: newCategory.name,
-                    type: newCategory.type,
-                    description: newCategory.description,
-                    tags: tags,
-                });
-                setCategories((prev) => [...prev, newCategoryData.data]);
+                const newCategoryData = await cmsApi.addCategories(newData);
+                setCategories((prev) => [...prev, newCategoryData.data.data]);
             } else {
-                // Create new category
-                // const response = await cmsApi.createCategory({ ...newCategory, tags });
-                // setCategories((prevCategories) => [...prevCategories, response.data.data]);
+                const responseUpdateCategory = await cmsApi.updateCategory({
+                    ...newData,
+                    parentId: currentCategory.id,
+                });
+                const responseUpdateTags = await cmsApi.updateTags(currentCategory.id || '', tags);
+                const updateCategories = categories.map((item) =>
+                    item.id === currentCategory.id ? responseUpdateCategory.data.data : item
+                );
+                setCategories(updateCategories);
             }
-            handleModalClose(); // Close the modal after submit
+            handleModalClose();
         } catch (err) {
             console.error('Error saving category', err);
         }
@@ -131,7 +139,7 @@ const CategoriesPage: React.FC = () => {
     return (
         <div className="container mx-auto mt-10">
             <h1 className="text-3xl font-bold text-center mb-5">Danh sách danh mục</h1>
-            <Button variant="contained" color="primary" onClick={() => handleModalOpen()}>
+            <Button variant="contained" color="primary" onClick={() => handleModalOpen(null)}>
                 Thêm mới danh mục
             </Button>
             <TableContainer component={Paper} className="mt-5">
@@ -203,7 +211,8 @@ const CategoriesPage: React.FC = () => {
                                                                         onClick={() =>
                                                                             handleDeleteTag(
                                                                                 category.id || '',
-                                                                                tag
+                                                                                tag,
+                                                                                category?.tags || []
                                                                             )
                                                                         }
                                                                     >
@@ -223,7 +232,12 @@ const CategoriesPage: React.FC = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <CategoryModal open={openModal} onClose={handleModalClose} onSubmit={handleSubmit} />
+            <CategoryModal
+                open={openModal}
+                currentCategory={currentCategory}
+                onClose={handleModalClose}
+                onSubmit={handleSubmit}
+            />
         </div>
     );
 };

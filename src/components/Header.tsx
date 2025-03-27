@@ -58,17 +58,20 @@ export const HeaderComponent = () => {
                     </Typography>
                 </Button>
                 <div className="w-[1px] h-4 bg-black "></div>
-                <Button sx={{ textTransform: 'none' }} onClick={() => navigate('/writeareview')}>
-                    <Typography
-                        variant="subtitle2"
-                        sx={{ fontWeight: 600, color: colors.textColor }}
-                    >
-                        Viết bài đánh giá
-                    </Typography>
-                </Button>
-                <div className="w-[1px] h-4 bg-black "></div>
                 {user ? (
                     <>
+                        <Button
+                            sx={{ textTransform: 'none' }}
+                            onClick={() => navigate('/writeareview')}
+                        >
+                            <Typography
+                                variant="subtitle2"
+                                sx={{ fontWeight: 600, color: colors.textColor }}
+                            >
+                                Viết bài đánh giá
+                            </Typography>
+                        </Button>
+                        <div className="w-[1px] h-4 bg-black "></div>
                         <Button
                             startIcon={<Avatar sx={{ bgcolor: deepOrange[500] }}>N</Avatar>}
                             sx={{ textTransform: 'none', position: 'relative' }}

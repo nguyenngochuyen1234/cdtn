@@ -1,26 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import cmsApi from '@/api/cmsApi';
+import { PROVINCE_API } from '@/common';
+import { StoreCreation } from '@/models';
 import {
     Button,
+    CircularProgress,
+    Paper,
+    Snackbar,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    Paper,
-    CircularProgress,
     Typography,
-    Snackbar,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
 } from '@mui/material';
-import axios from 'axios';
-import cmsApi from '@/api/cmsApi';
-import { StoreCreation } from '@/models';
 import { Image } from 'antd';
-import { PROVINCE_API } from '@/common';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 const ModerationPage: React.FC = () => {
     const [shops, setShops] = useState<StoreCreation[]>([]);
@@ -53,38 +49,22 @@ const ModerationPage: React.FC = () => {
     useEffect(() => {
         fetchInactiveShops();
     }, []);
+    const [locationCache, setLocationCache] = useState<{ [key: string]: string }>({});
 
-    useEffect(() => {
-        const fetchLocations = async () => {
-            try {
-                const provincesRes = await axios.get(`${PROVINCE_API}p/`);
-                const districtsRes = await axios.get(`${PROVINCE_API}d/`);
-                const wardsRes = await axios.get(`${PROVINCE_API}w/`);
+    const fetchLocationName = async (type: 'p' | 'd' | 'w', code: string) => {
+        if (!code) return '';
+        if (locationCache[code]) return locationCache[code]; // Lấy từ cache nếu có
 
-                setProvinces(
-                    provincesRes.data.reduce(
-                        (acc: any, item: any) => ({ ...acc, [item.code]: item.name }),
-                        {}
-                    )
-                );
-                setDistricts(
-                    districtsRes.data.reduce(
-                        (acc: any, item: any) => ({ ...acc, [item.code]: item.name }),
-                        {}
-                    )
-                );
-                setWards(
-                    wardsRes.data.reduce(
-                        (acc: any, item: any) => ({ ...acc, [item.code]: item.name }),
-                        {}
-                    )
-                );
-            } catch (error) {
-                console.error('Lỗi khi lấy danh sách địa phương:', error);
-            }
-        };
-        fetchLocations();
-    }, []);
+        try {
+            const response = await axios.get(`${PROVINCE_API}${type}/${code}`);
+            const name = response.data.name;
+            setLocationCache((prev) => ({ ...prev, [code]: name })); // Lưu vào cache
+            return name;
+        } catch (error) {
+            console.error(`Lỗi khi lấy thông tin ${type}:`, error);
+            return code; // Nếu lỗi, trả về mã số thay vì tên
+        }
+    };
 
     const handleShopAction = async (id: string, action: 'activate' | 'block') => {
         setActionLoading((prev) => ({ ...prev, [id]: true }));
@@ -107,6 +87,23 @@ const ModerationPage: React.FC = () => {
             setActionLoading((prev) => ({ ...prev, [id]: false }));
         }
     };
+    const [shopsWithLocation, setShopsWithLocation] = useState<StoreCreation[]>([]);
+
+    useEffect(() => {
+        const fetchLocationsForShops = async () => {
+            const updatedShops = await Promise.all(
+                shops.map(async (shop) => ({
+                    ...shop,
+                    cityName: await fetchLocationName('p', shop.city ?? ''),
+                    districtName: await fetchLocationName('d', shop.district ?? ''),
+                    wardName: await fetchLocationName('w', shop.ward ?? ''),
+                }))
+            );
+            setShopsWithLocation(updatedShops);
+        };
+
+        if (shops.length > 0) fetchLocationsForShops();
+    }, [shops]);
 
     return (
         <div style={{ padding: '20px' }}>
@@ -132,7 +129,7 @@ const ModerationPage: React.FC = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {shops.map((shop) => (
+                            {shopsWithLocation.map((shop) => (
                                 <TableRow
                                     key={shop.id}
                                     onClick={() => setSelectedShop(shop)}
@@ -147,7 +144,8 @@ const ModerationPage: React.FC = () => {
                                     </TableCell>
                                     <TableCell>{shop.name}</TableCell>
                                     <TableCell>{shop.description}</TableCell>
-                                    <TableCell>{provinces[shop.city || 0] || shop.city}</TableCell>
+                                    <TableCell>{shop.cityName || shop.city}</TableCell>
+
                                     <TableCell>{shop.statusShopEnums}</TableCell>
                                     <TableCell>
                                         {shop.statusShopEnums === 'ACTIVE' ? (

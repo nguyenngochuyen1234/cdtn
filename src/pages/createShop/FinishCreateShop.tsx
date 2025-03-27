@@ -23,6 +23,7 @@ const App: React.FC = () => {
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
     const store = useSelector((state: RootState) => state.newShop.newShop);
+    console.log(store?.imageBusiness);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState<StoreCreation>({
         name: '',
@@ -58,7 +59,6 @@ const App: React.FC = () => {
     const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
     const [openTimes, setOpenTimes] = useState<OpenTime[]>([]);
-
     const bizEmail = localStorage.getItem('EMAIL_BIZ');
     const bizIdCategory = localStorage.getItem('IDCATEGORY_BIZ');
     useEffect(() => {
@@ -143,11 +143,6 @@ const App: React.FC = () => {
                     formData.mediaUrls as File[],
                     formData.email as string
                 );
-                setSnackbarMessage(
-                    'Gửi yêu cầu đăng ký cửa hàng thành công vui lòng đợi admin xét duyệt!'
-                );
-                setSnackbarSeverity('success');
-                setSnackbarOpen(true);
             } else {
                 console.log('Validation failed. Fix errors and try again.');
 
@@ -169,7 +164,7 @@ const App: React.FC = () => {
                 mediaUrls: meadiaUrls.data.data,
                 description: formData.description,
                 urlWebsite: formData.urlWebsite,
-                openTimeRequests: formData.openTimeRequests,
+                openTimeRequests: openTimes,
                 city: store?.city,
                 ward: store?.ward,
                 district: store?.district,

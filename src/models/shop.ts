@@ -42,10 +42,11 @@ export interface ParamFilterShop {
     distance?: 0;
     sortField?: string;
     sortOrderEnums?: 'ASC';
-    page: 0;
-    size: 12;
+    page: number;
+    size: number;
 }
 export interface StoreCreation {
+    // cityName: string | undefined;
     statusShopEnums?: 'ACTIVE' | 'DEACTIVE' | 'BANNED';
     id?: string;
     name?: string;

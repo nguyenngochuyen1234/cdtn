@@ -68,7 +68,7 @@ const BusinessInfo: React.FC = () => {
 
     const updateRestaurant = async () => {
         try {
-            const resOpenTime = ownerApi.updateOpenTime(openTimes);
+            const resOpenTime = await ownerApi.updateOpenTime(openTimes);
             const res = await ownerApi.updateShop({
                 ...restaurant,
             });
@@ -134,7 +134,7 @@ const BusinessInfo: React.FC = () => {
                         accept="image/*"
                         onChange={(e) => handleFileUpload(e, 'avatar')}
                     />
-                    {/* {restaurant.avatar && (
+                    {restaurant.avatar && (
                         <img
                             src={
                                 restaurant.avatar instanceof File
@@ -144,7 +144,7 @@ const BusinessInfo: React.FC = () => {
                             alt="Avatar"
                             style={{ width: 100, height: 100, objectFit: 'cover', marginTop: 10 }}
                         />
-                    )} */}
+                    )}
 
                     <Typography variant="subtitle1" mt={2}>
                         Ảnh từ thiết bị
@@ -163,14 +163,18 @@ const BusinessInfo: React.FC = () => {
                             marginTop: '10px',
                         }}
                     >
-                        {/* {restaurant.mediaUrls.map((url, index) => (
+                        {restaurant.mediaUrls.map((url, index) => (
                             <img
                                 key={index}
-                                src={URL.createObjectURL(url) || ''}
+                                src={
+                                    url instanceof File
+                                        ? URL.createObjectURL(url)
+                                        : restaurant.avatar
+                                }
                                 alt={`Media ${index}`}
                                 style={{ width: 100, height: 100, objectFit: 'cover' }}
                             />
-                        ))} */}
+                        ))}
                     </div>
                     <Typography variant="h6" mt={2}>
                         Giờ mở cửa

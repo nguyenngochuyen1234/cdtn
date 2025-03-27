@@ -1,22 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import {
-    Box,
-    Button,
-    Grid,
-    TextField,
-    Typography,
-} from '@mui/material';
+import { Box, Button, Grid, TextField, Typography } from '@mui/material';
 import { Carousel } from 'antd';
 
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from 'react-router-dom';
 
 const VerificationCodePage: React.FC = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const [timer, setTimer] = useState(30);
     const [code, setCode] = useState('');
 
-    // Cập nhật đồng hồ đếm ngược
     useEffect(() => {
         if (timer > 0) {
             const countdown = setInterval(() => {
@@ -35,8 +28,8 @@ const VerificationCodePage: React.FC = () => {
     };
 
     const handleVerification = () => {
-        console.log("Mã xác thực:", code);
-        navigate("/auth/reset-password")
+        console.log('Mã xác thực:', code);
+        navigate('/auth/reset-password');
     };
 
     return (
@@ -64,7 +57,6 @@ const VerificationCodePage: React.FC = () => {
                 sx={{ mt: 2 }}
                 onClick={handleVerification}
                 disabled={timer === 0}
-
             >
                 Xác thực tài khoản
             </Button>

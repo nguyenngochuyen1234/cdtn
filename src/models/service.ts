@@ -23,6 +23,7 @@ export interface Category {
     description: string;
     tags?: string[];
     id?: string;
+    parentId?: string;
 }
 
 export interface Tag {

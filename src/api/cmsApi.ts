@@ -19,9 +19,28 @@ const cmsApi = {
         const url = '/cms/categories';
         return axiosClient.get(url);
     },
+    updateCategory(data: Category) {
+        const url = `/cms/categories/${data.parentId}`;
+        return axiosClient.put(url, data);
+    },
+    updateTags(idCategory: string, tags: string[]) {
+        const url = `/cms/categories/add-tags`;
+        return axiosClient.put(url, {
+            idCategory: idCategory,
+            tags: tags,
+            delete: true,
+        });
+    },
     deleteCategory(id: string) {
         const url = `/cms/categories/${id}`;
         return axiosClient.delete(url);
+    },
+    deleteTag(id: string, tags: string[]) {
+        const url = `/cms/categories/delete-tags`;
+        return axiosClient.post(url, {
+            idCategory: id,
+            tags: tags,
+        });
     },
     getAllListShopDeactive(data: { page: number; size: number; deActive: boolean }) {
         const url = '/cms/shops/list-shop-deactive';

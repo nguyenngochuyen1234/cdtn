@@ -21,7 +21,7 @@ import cmsApi from '@/api/cmsApi';
 export default function UsersPage() {
     const [users, setUsers] = React.useState([]);
     const [selected, setSelected] = React.useState([]);
-    const [filters, setFilters] = React.useState({ keyword: '', page: 1, limit: 10, sort: '' });
+    const [filters, setFilters] = React.useState({ keyword: '', page: 2, limit: 10, sort: '' });
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [loading, setLoading] = React.useState(false);
     const [selectedUserId, setSelectedUserId] = React.useState(null);

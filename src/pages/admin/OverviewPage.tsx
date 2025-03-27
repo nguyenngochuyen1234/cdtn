@@ -13,7 +13,6 @@ import {
     Legend,
 } from 'chart.js';
 
-// Đăng ký các phần tử của Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface DataResponse {

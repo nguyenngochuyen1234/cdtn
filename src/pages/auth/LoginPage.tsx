@@ -67,6 +67,8 @@ const LoginPage: React.FC = () => {
                     navigate('/owner');
                 } else if (result.data.data.userInfoResponse.role[0] === 'ADMIN') {
                     navigate('/admin');
+                } else {
+                    navigate('/');
                 }
             }
         } catch (err) {

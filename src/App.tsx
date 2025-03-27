@@ -13,8 +13,8 @@ import DetailPost from './pages/detailPost/DetailPost';
 import ProfilePage from './pages/auth/ProfilePage';
 import OtherUserPage from './pages/auth/OtherUserPage';
 import AdminPage from './pages/admin';
-import PostsPage from './pages/admin/PostsPage';
 import StatisticsPage from './pages/admin/StatisticsPage';
+import StatisticsPageOwner from './pages/owner/StatisticsPage';
 import ModerationPage from './pages/admin/ModerationPage';
 import CategoriesPage from './pages/admin/CategoriesPage';
 import UsersPage from './pages/admin/UsersPage';
@@ -80,7 +80,7 @@ export default function App() {
                     <Route path="profile" element={<OwnerProfile />} />
                     <Route path="business-info" element={<BusinessInfo />} />
                     <Route path="services" element={<ServicesPage />} />
-                    <Route path="statistics" element={<StatisticsPage />} />
+                    <Route path="statistics" element={<StatisticsPageOwner />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                 </Route>
                 <Route path="/biz" element={<CreateShop />}>
@@ -94,7 +94,6 @@ export default function App() {
                 <Route path="writeareview/biz/:id" element={<ReviewBusiness />} />
                 <Route path="/admin" element={<AdminPage />}>
                     <Route index element={<OverviewPage />} />
-                    <Route path="posts" element={<PostsPage />} />
                     <Route path="statistics" element={<StatisticsPage />} />
                     <Route path="moderation" element={<ModerationPage />} />
                     <Route path="categories" element={<CategoriesPage />} />
