@@ -1,19 +1,6 @@
-import { Box, Typography, Rating, LinearProgress, Avatar, Stack, Grid } from '@mui/material';
+import { Star } from '@mui/icons-material';
+import { Box, Grid, LinearProgress, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import {
-    RestaurantMenu,
-    LocalDining,
-    Fastfood,
-    WineBar,
-    Coffee,
-    EmojiFoodBeverage,
-    DeliveryDining,
-    OutdoorGrill,
-    Person,
-    Star,
-} from '@mui/icons-material';
-import StarRating from './StarRating';
-import { useState } from 'react';
 
 const BorderLinearProgress = styled(LinearProgress)({
     height: 8,
@@ -22,90 +9,54 @@ const BorderLinearProgress = styled(LinearProgress)({
         backgroundColor: '#ff4444',
     },
 });
-const services = [
-    { icon: <RestaurantMenu fontSize="small" />, text: 'Thực đơn đa dạng' },
-    { icon: <LocalDining fontSize="small" />, text: 'Món ăn chất lượng' },
-    { icon: <Fastfood fontSize="small" />, text: 'Phục vụ nhanh chóng' },
-    { icon: <WineBar fontSize="small" />, text: 'Rượu và đồ uống cao cấp' },
-    { icon: <Coffee fontSize="small" />, text: 'Cà phê đặc sản' },
-    { icon: <EmojiFoodBeverage fontSize="small" />, text: 'Tráng miệng hấp dẫn' },
-    { icon: <DeliveryDining fontSize="small" />, text: 'Giao hàng tận nơi' },
-    { icon: <OutdoorGrill fontSize="small" />, text: 'BBQ & Nướng ngoài trời' },
-];
-export default function RateArticle() {
-    const [rating, setRating] = useState<number>(0);
+
+interface RateArticleProps {
+    ratings: number[]; // Mảng [số lượng 5 sao, 4 sao, 3 sao, 2 sao, 1 sao]
+}
+
+export default function RateArticle({ ratings }: RateArticleProps) {
+    const totalRatings = ratings.reduce((acc, value) => acc + value, 0); // Tổng số lượt đánh giá
+
+    // Tính trung bình đánh giá
+    const averageRating = totalRatings
+        ? (
+              ratings.reduce((acc, value, index) => acc + value * (5 - index), 0) / totalRatings
+          ).toFixed(1)
+        : 0;
+
     return (
         <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-                Đánh giá bài viết
-            </Typography>
-
-            <Box sx={{ mb: 4 }}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                    <Avatar sx={{ width: 40, height: 40 }}>
-                        <Person />
-                    </Avatar>
-                    <Typography>Đánh giá của bạn cho bài viết này</Typography>
-                    <StarRating size="big" rating={rating} setRating={setRating} />
-                    <Typography>Tốt</Typography>
-                </Stack>
-            </Box>
-
             <Grid container spacing={4}>
+                {/* Tổng quan đánh giá */}
                 <Grid item xs={12} md={6}>
-                    <Typography variant="subtitle1">Thông tin liên quan</Typography>
-                    <Stack spacing={2} sx={{ paddingTop: 2 }}>
-                        <Grid container spacing={2}>
-                            {services.map((service, index) => (
-                                <Grid item xs={6} key={index}>
-                                    <Stack direction="row" spacing={1} alignItems="center">
-                                        {service.icon}
-                                        <Typography>{service.text}</Typography>
-                                    </Stack>
-                                </Grid>
-                            ))}
-                        </Grid>
-                        <Typography
-                            variant="caption"
-                            color="primary"
-                            sx={{ display: 'block', mt: 2, cursor: 'pointer' }}
-                        >
-                            +2 xem thêm
-                        </Typography>
-                    </Stack>
-                </Grid>
-                <Grid item xs={12} md={6}>
+                    <Typography variant="h6" gutterBottom>
+                        Tổng quan đánh giá
+                    </Typography>
+
                     <Box sx={{ mb: 3 }}>
-                        <Typography variant="subtitle1" gutterBottom>
-                            Trung bình lượt đánh giá
-                        </Typography>
                         <Stack direction="row" spacing={1} alignItems="center">
-                            <Typography variant="h4">4.8</Typography>
+                            <Typography variant="h4">{averageRating}</Typography>
                             <Star sx={{ color: '#ffb400' }} />
                             <Typography variant="caption" color="text.secondary">
-                                (100 lượt đánh giá)
+                                ({totalRatings} lượt đánh giá)
                             </Typography>
                         </Stack>
                     </Box>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
                     <Stack spacing={1.5}>
-                        {[5, 4, 3, 2, 1].map((rating) => (
+                        {[5, 4, 3, 2, 1].map((rating, index) => (
                             <Stack key={rating} direction="row" spacing={2} alignItems="center">
                                 <Typography sx={{ minWidth: 60 }}>{rating} sao</Typography>
                                 <BorderLinearProgress
                                     variant="determinate"
-                                    value={
-                                        rating === 5
-                                            ? 80
-                                            : rating === 4
-                                              ? 60
-                                              : rating === 3
-                                                ? 40
-                                                : rating === 2
-                                                  ? 20
-                                                  : 10
-                                    }
+                                    value={totalRatings ? (ratings[index] / totalRatings) * 100 : 0}
                                     sx={{ flexGrow: 1 }}
                                 />
+                                <Typography variant="caption" color="text.secondary">
+                                    {ratings[index]} Lượt
+                                </Typography>
                             </Stack>
                         ))}
                     </Stack>

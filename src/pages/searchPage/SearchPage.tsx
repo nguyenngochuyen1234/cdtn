@@ -24,7 +24,7 @@ export default function SearchPage() {
 
     const fetchDataShop = async () => {
         try {
-            const response = await shopApi.searchShop({ keyword: '', page: 1, size: 12 });
+            const response = await shopApi.searchShop({ keyword: '', page: 0, size: 12 });
             setShops(response?.data.data);
         } catch {}
     };
@@ -80,19 +80,9 @@ export default function SearchPage() {
                     <Grid item xs={8} md={5}>
                         <Stack p={2} height="100%" gap={3}>
                             <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                                {/* {(shops || []).map((post, index) => (
-                                    <SearchCardComponent
-                                        key={index}
-                                        image={post.avatar}
-                                        name={post.name}
-                                        address={post.address}
-                                        rating={post.point}
-                                        reviewCount={post.countReview}
-                                        favoriteCount={post}
-                                        viewCount={post.countReview}
-                                        postTime={post}
-                                    />
-                                ))} */}
+                                {(shops || []).map((shop, index) => (
+                                    <SearchCardComponent key={index} shop={shop} />
+                                ))}
                             </Box>
                         </Stack>
                     </Grid>

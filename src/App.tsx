@@ -60,7 +60,7 @@ export default function App() {
                 <Route path="/" element={<Main />}>
                     <Route index element={<HomePage />} />
                     <Route path="search" element={<SearchPage />} />
-                    <Route path="detailPost" element={<DetailPost />} />
+                    <Route path="detailPost/:id" element={<DetailPost />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="other-user/:idUser" element={<OtherUserPage />} />
                     <Route path="authenticate" element={<Authenticate></Authenticate>}></Route>

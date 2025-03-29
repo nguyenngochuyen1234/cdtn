@@ -1,82 +1,180 @@
-import React from 'react';
-import { Box, Card, CardContent, CardMedia, Typography, IconButton, Button, Stack } from '@mui/material';
+'use client';
+
+import type React from 'react';
+import { useState } from 'react';
+import {
+    Box,
+    Card,
+    CardMedia,
+    Typography,
+    Button,
+    IconButton,
+    Chip,
+    Rating,
+    useTheme,
+    useMediaQuery,
+} from '@mui/material';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import StarIcon from '@mui/icons-material/Star';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { Shop } from '@/models';
+
 import { useNavigate } from 'react-router-dom';
 
-interface SearchCardComponentProps {
-    image: string;
-    name: string;
-    address: string;
-    rating: number;
-    reviewCount: number;
-    favoriteCount: number;
-    viewCount: number;
-    postTime: string;
+interface BusinessListingCardProps {
+    shop: Shop;
 }
 
-const SearchCardComponent: React.FC<SearchCardComponentProps> = ({
-    image,
-    name,
-    address,
-    rating,
-    reviewCount,
-    favoriteCount,
-    viewCount,
-    postTime
-}) => {
-    const navigate = useNavigate()
-    return (
-        <Card sx={{ width: "100%", p: 2, display: "flex", flexDirection: "row" }}>
-            <CardMedia component="img" sx={{ borderRadius: 4, height: 220, width: 240 }} image={image} alt={name} />
+const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ shop }) => {
+    const navigate = useNavigate();
 
-            <CardContent>
-                <Typography variant="h6">{name}</Typography>
-                <Box display="flex" alignItems="center" mb={1}>
-                    <LocationOnIcon fontSize="small" color="action" />
-                    <Typography variant="body2" color="textSecondary" ml={0.5}>
-                        {address}
+    const [isFavorite, setIsFavorite] = useState(false);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const handleFavoriteClick = () => {
+        setIsFavorite(!isFavorite);
+    };
+
+    return (
+        <Card
+            sx={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                width: '100%',
+                maxWidth: 900,
+                overflow: 'hidden',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                borderRadius: 2,
+            }}
+        >
+            {/* Left side - Image */}
+            <CardMedia
+                component="img"
+                sx={{
+                    width: isMobile ? '100%' : 230,
+                    height: isMobile ? 200 : 230,
+                    objectFit: 'cover',
+                }}
+                image={shop.avatar}
+                alt={shop.name}
+            />
+
+            {/* Right side - Content */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    width: '100%',
+                    p: 2,
+                }}
+            >
+                {/* Business name and reviews */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
+                        {shop.name}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mr: 0.5 }}>
+                            {shop.countReview || 0}+ lượt đánh giá
+                        </Typography>
+                    </Box>
+                </Box>
+
+                {/* Address */}
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1.5 }}>
+                    <LocationOnIcon
+                        sx={{ color: 'text.secondary', fontSize: 18, mt: 0.3, mr: 0.5 }}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                        {shop.city}
                     </Typography>
                 </Box>
 
-                <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-                    <Box display="flex" alignItems="center">
-                        <StarIcon fontSize="small" color="warning" />
-                        <Typography variant="body2" ml={0.5}>
-                            {rating} ({reviewCount} đánh giá)
-                        </Typography>
-                    </Box>
-                    <Box display="flex" alignItems="center">
-                        <FavoriteIcon fontSize="small" color="error" />
-                        <Typography variant="body2" ml={0.5}>{favoriteCount}</Typography>
-                    </Box>
-                    <Box display="flex" alignItems="center">
-                        <VisibilityIcon fontSize="small" color="action" />
-                        <Typography variant="body2" ml={0.5}>{viewCount}</Typography>
-                    </Box>
-                </Stack>
+                {/* Rating */}
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                    <Rating
+                        value={shop.point}
+                        readOnly
+                        size="small"
+                        emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
+                        sx={{ color: '#FF5722' }}
+                    />
+                    <Typography variant="body2" sx={{ ml: 0.5, color: '#FF5722' }}>
+                        {shop.point || 0} sao
+                    </Typography>
+                </Box>
 
-                <Typography variant="caption" color="textSecondary">
-                    Đăng vào: {postTime}
-                </Typography>
+                {/* Likes */}
+                <Box sx={{ display: 'flex', mb: 1.5 }}>
+                    <Chip
+                        label={`0 Lượt yêu thích`}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                            borderRadius: 1,
+                            height: 28,
+                            color: 'text.primary',
+                            borderColor: '#e0e0e0',
+                        }}
+                    />
+                </Box>
 
-                <Stack direction="row" spacing={1} mt={2}>
-                    <IconButton aria-label="share" color="primary">
-                        <ShareIcon />
+                {/* Views */}
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <VisibilityIcon sx={{ color: 'text.secondary', fontSize: 18, mr: 0.5 }} />
+                    <Typography variant="body2" color="text.secondary">
+                        0 lượt xem
+                    </Typography>
+                </Box>
+
+                {/* Action buttons */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        mt: 'auto',
+                        gap: 1,
+                    }}
+                >
+                    <IconButton
+                        onClick={handleFavoriteClick}
+                        sx={{
+                            border: '1px solid #e0e0e0',
+                            borderRadius: 1,
+                            p: 1,
+                            width: 40,
+                            height: 40,
+                        }}
+                    >
+                        {isFavorite ? (
+                            <FavoriteIcon sx={{ color: 'red', fontSize: 20 }} />
+                        ) : (
+                            <FavoriteBorderIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                        )}
                     </IconButton>
-                    <IconButton aria-label="like" color="error">
-                        <FavoriteIcon />
-                    </IconButton>
-                    <Button variant="contained" color="primary" size="small" onClick={() => navigate("/detailPost")}>
-                        Xem chi tiết bài viết
+
+                    <Button
+                        variant="contained"
+                        color="error"
+                        fullWidth
+                        onClick={() => navigate(`/detailPost/${shop.id}`)}
+                        sx={{
+                            borderRadius: 1,
+                            textTransform: 'none',
+                            boxShadow: 'none',
+                            '&:hover': {
+                                boxShadow: 'none',
+                                backgroundColor: '#d32f2f',
+                            },
+                        }}
+                    >
+                        Xem chi tiết
                     </Button>
-                </Stack>
-            </CardContent>
+                </Box>
+            </Box>
         </Card>
     );
 };
-
-export default SearchCardComponent;
+export default BusinessListingCard;

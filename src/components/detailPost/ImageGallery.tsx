@@ -24,7 +24,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                         alt={`Image ${index + 1}`}
                         sx={{
                             width: 400,
-                            height: "auto",
+                            height: 'auto',
                             borderRadius: 1,
                             boxShadow: 2,
                         }}
