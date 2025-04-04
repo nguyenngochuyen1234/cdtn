@@ -1,10 +1,15 @@
-import { Breadcrumbs, Divider, Link, Stack, Typography } from '@mui/material';
-import React from 'react';
+import { Breadcrumbs, Divider, Grid, Link, Paper, Stack, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import HeaderDetailPost from '@/components/detailPost/HeaderDetailPost';
 import ImageGallery from '@/components/detailPost/ImageGallery';
 import RateArticle from '@/components/detailPost/RateArticle';
 import ReviewCardPost from '@/components/detailPost/ReviewCardPost';
+import BusinessHoursSection from '@/components/detailPost/BusinessHoursSection';
+import SuggestShops from '@/components/detailPost/SuggestShops';
+import { Shop } from '@/models';
+import shopApi from '@/api/shopApi';
+import { useParams } from 'react-router-dom';
 
 function handleClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     event.preventDefault();
@@ -57,6 +62,21 @@ const fakeReviews = [
     },
 ];
 function DetailPost() {
+    const [detailShop, setDetailShop] = useState<Shop | null>();
+    const { id } = useParams();
+    const fetchDataShop = async () => {
+        try {
+            if (id) {
+                const response = await shopApi.getShopById(id);
+                if (response?.data.data) {
+                    setDetailShop(response?.data.data);
+                }
+            }
+        } catch {}
+    };
+    useEffect(() => {
+        fetchDataShop();
+    }, []);
     const breadcrumbs = [
         <Link underline="hover" key="1" color="inherit" href="/" onClick={handleClick}>
             Trang chủ
@@ -74,49 +94,48 @@ function DetailPost() {
             Bài viết 1
         </Typography>,
     ];
-    const images = [
-        'https://cdn.tgdd.vn/Files/2021/06/24/1363040/cac-mon-ngon-ha-noi-phai-thu-cac-quan-an-ha-noi-phai-ghe-202209271046565284.jpg',
-        'https://cdn.tgdd.vn/Files/2021/06/24/1363040/cac-mon-ngon-ha-noi-phai-thu-cac-quan-an-ha-noi-phai-ghe-202209271046019037.jpg',
-        'https://cdn3.ivivu.com/2019/07/top-30-quan-an-ngon-ha-noi-ban-nhat-dinh-phai-thu-ivivu-5-compressed.jpg',
-    ];
 
     return (
         <div className="px-[50px] py-[30px] bg-[#FAFBFC]">
             <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
                 {breadcrumbs}
             </Breadcrumbs>
-            <HeaderDetailPost />
-            <ImageGallery images={images} />
-            <Stack sx={{ gap: 2, paddingTop: 5, paddingBottom: 5 }}>
-                <Typography variant="h5" fontWeight="bol    d">
-                    Nội dung bài viết
-                </Typography>
-                <Typography variant="body2" fontWeight="Nội dung bài viết">
-                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
-                    Ipsum has been the industry's standard dummy text ever since the 1500s, when an
-                    unknown printer took a galley of type and scrambled it to make a type specimen
-                    book. It has survived not only five centuries, but also the leap into electronic
-                    typesetting, remaining essentially unchanged. It was popularised in the 1960s
-                    with the release of Letraset sheets containing Lorem Ipsum passages, and more
-                    recently with desktop publishing software like Aldus PageMaker including
-                    versions of Lorem Ipsum. t is a long established fact that a reader will be
-                    distracted by the readable content of a page when looking at its layout. The
-                    point of using Lorem Ipsum is that it has a more-or-less normal distribution of
-                    letters, as opposed to using 'Content here, content here', making it look like
-                    readable English. Many desktop publishing packages and web page editors now use
-                    Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will
-                    uncover many web sites still in their infancy. Various versions have evolved
-                    over the years, sometimes by accident, sometimes on purpose (injected humour and
-                    the like).
-                </Typography>
-            </Stack>
-            <Divider />
-            <RateArticle />
-            <div className="space-y-6">
-                {fakeReviews.map((review, index) => (
-                    <ReviewCardPost key={index} user={review.user} review={review.review} />
-                ))}
-            </div>
+            <Grid container spacing={2}>
+                <Grid item xs={9}>
+                    <HeaderDetailPost />
+                    <ImageGallery images={detailShop?.mediaUrls || []} />
+                </Grid>
+                {detailShop && (
+                    <Grid item xs={3}>
+                        <BusinessHoursSection shop={detailShop} />
+                    </Grid>
+                )}
+            </Grid>
+            <Grid container spacing={2}>
+                <Grid item xs={8}>
+                    <Stack sx={{ gap: 2, paddingTop: 5, paddingBottom: 5 }}>
+                        <Typography variant="h5" fontWeight="bol    d">
+                            Nội dung bài viết
+                        </Typography>
+                        <Typography variant="body2" fontWeight="Nội dung bài viết">
+                            {detailShop?.description}
+                        </Typography>
+                    </Stack>
+                    <Divider />
+                    <RateArticle ratings={[80, 60, 40, 20, 10]} />
+                    <Divider />
+                    <div className="space-y-6 my-6">
+                        {fakeReviews.map((review, index) => (
+                            <ReviewCardPost key={index} user={review.user} review={review.review} />
+                        ))}
+                    </div>
+                </Grid>
+                <Grid item xs={4}>
+                    <SuggestShops type="forme" />
+                    <Divider />
+                    <SuggestShops type="forme1" />
+                </Grid>
+            </Grid>
         </div>
     );
 }

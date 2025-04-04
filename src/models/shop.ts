@@ -10,6 +10,7 @@ export interface Shop {
     urlWebsite: string;
     phoneNumber: string;
     listIdOpenTime: string[];
+    listOpenTimes: OpenTime[];
     longitude: string;
     Latitude: string;
     mediaUrls: string[];
@@ -19,6 +20,7 @@ export interface Shop {
     district: string;
     hasAnOwner: boolean;
     type: string;
+    description: string;
     categoryResponse: { tags: string[] };
     price: number;
     statusShop: 'ACTIVE' | 'INACTIVE' | 'BANNED';

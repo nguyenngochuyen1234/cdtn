@@ -53,6 +53,7 @@ export default function SearchPage() {
 
     const fetchDataShop = async () => {
         try {
+
             const apiParams: ParamFilterShop = {
                 keyword: filterParams.keyword !== undefined ? filterParams.keyword : '', // Truyền '' nếu không có keyword
                 categoryId:
@@ -74,6 +75,7 @@ export default function SearchPage() {
             setShops([]);
             setTotalShops(0);
         }
+
     };
 
     const sortShops = (shops: Shop[], sort: string) => {
