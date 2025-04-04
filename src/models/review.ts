@@ -5,7 +5,7 @@ export interface Review {
     id: string;
     idService: string;
     idUser: string;
-    createAt: Date;
+    createdAt: Date;
     updatedAt: Date;
     reviewTitle: string;
     reviewContent: string;
@@ -13,7 +13,7 @@ export interface Review {
     mediaUrlReview: string[];
     like: number;
     helpful: number;
-    notlike: number;
+    notike: number;
     idShop: string;
     isEdit: boolean;
     userReviewInfo: User;

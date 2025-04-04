@@ -9,9 +9,9 @@ const reviewApi = {
         const url = `/reviews/${idReview}`;
         return axiosClient.delete(url);
     },
-    updateReactionById(idReview: string) {
+    updateReactionById(idReview: string, body: any) {
         const url = `/reviews/update-reaction/${idReview}`;
-        return axiosClient.put(url);
+        return axiosClient.put(url, body);
     },
     getAllReviewByIdUser(idUser: string) {
         const url = `/reviews/getall/users/${idUser}`;
@@ -38,7 +38,7 @@ const reviewApi = {
     },
     getAllReviewRecently() {
         const url = '/reviews/getall/recently';
-        return axiosClient.put(url);
+        return axiosClient.get(url);
     },
 };
 export default reviewApi;
