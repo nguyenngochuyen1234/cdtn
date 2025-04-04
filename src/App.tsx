@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
 import Home from './pages/home';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
@@ -25,8 +25,7 @@ import CreateShop from './pages/createShop/CreateShop';
 import CreateTagPage from './pages/createShop/CreateTagPage';
 import UploadImagePage from './pages/createShop/UploadImagePage';
 import FinishCreateShop from './pages/createShop/FinishCreateShop';
-import { useEffect, useState } from 'react';
-import { User } from './models';
+import { useEffect } from 'react';
 import userApi from './api/userApi';
 import { useDispatch } from 'react-redux';
 import { setUser } from './redux/userSlice';
@@ -39,20 +38,41 @@ import ServicesPage from './pages/owner/ServicesPage';
 import ReviewsPage from './pages/owner/ReviewsPage';
 import OwnerProfile from './pages/owner/ProfilePage';
 import BusinessInfo from './pages/owner/BusinessInfo';
-// import BusinessInfo from './pages/owner/BusinessInfo';
+import AboutPage from './pages/about';
+import PoliciesPage from './pages/policy';
+import ReviewList from './components/ReviewList';
+import { ToastContainer } from 'react-toastify';
+import WriteReview from './components/shop/WriteReview';
+
 export default function App() {
     const dispatch = useDispatch();
+
     const fetchUser = async () => {
         try {
             const res = await userApi.getUser();
             if (res.data.success) {
                 dispatch(setUser(res.data.data));
+            } else {
+                dispatch(setUser(null));
+                localStorage.removeItem('access_token');
             }
-        } catch (err) {}
+        } catch (err) {
+            console.error('Error fetching user:', err);
+            dispatch(setUser(null));
+            localStorage.removeItem('access_token');
+        }
     };
+
     useEffect(() => {
-        fetchUser();
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            fetchUser();
+        }
     }, []);
+
+    const NoFooterLayout = () => {
+        return <Outlet />;
+    };
 
     return (
         <BrowserRouter>
@@ -60,10 +80,16 @@ export default function App() {
                 <Route path="/" element={<Main />}>
                     <Route index element={<HomePage />} />
                     <Route path="search" element={<SearchPage />} />
-                    <Route path="detailPost" element={<DetailPost />} />
+                    <Route path="detailPost/:id" element={<DetailPost />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="other-user/:idUser" element={<OtherUserPage />} />
-                    <Route path="authenticate" element={<Authenticate></Authenticate>}></Route>
+                    <Route path="authenticate" element={<NoFooterLayout />}>
+                        <Route index element={<Authenticate />} />
+                    </Route>
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="policy" element={<PoliciesPage />} />
+                    <Route path="/reviews" element={<ReviewList />} />
+                    <Route path="write-review/:shopId" element={<WriteReview />} />
                 </Route>
                 <Route path="/auth" element={<AuthPage />}>
                     <Route path="login" element={<LoginPage />} />
@@ -71,10 +97,7 @@ export default function App() {
                     <Route path="reset-password" element={<ResetPasswordPage />} />
                     <Route path="forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="verfication" element={<VerificationCodePage />} />
-                    <Route
-                        path="verify-account"
-                        element={<ActiveCodeUser></ActiveCodeUser>}
-                    ></Route>
+                    <Route path="verify-account" element={<ActiveCodeUser />} />
                 </Route>
                 <Route path="/owner" element={<OwnerPage />}>
                     <Route path="profile" element={<OwnerProfile />} />
@@ -100,6 +123,7 @@ export default function App() {
                     <Route path="users" element={<UsersPage />} />
                 </Route>
             </Routes>
+            <ToastContainer position="bottom-center" autoClose={3000} pauseOnFocusLoss={false} />
         </BrowserRouter>
     );
 }

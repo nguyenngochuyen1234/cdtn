@@ -40,8 +40,6 @@ export interface ParamFilterShop {
     latitude?: 0;
     longitude?: 0;
     distance?: 0;
-    sortField?: string;
-    sortOrderEnums?: 'ASC';
     page: number;
     size: number;
 }

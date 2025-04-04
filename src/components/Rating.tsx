@@ -8,7 +8,7 @@ interface RatingProps {
 
 export function Rating({ value, onValueChange, readOnly = false }: RatingProps) {
     return (
-        <div className="flex">
+        <div className="flex space-x-1">
             {[1, 2, 3, 4, 5].map((star) => (
                 <button
                     key={star}
@@ -17,9 +17,13 @@ export function Rating({ value, onValueChange, readOnly = false }: RatingProps) 
                     onClick={() => !readOnly && onValueChange?.(star)}
                     disabled={readOnly}
                 >
-                    <Star
-                        className={`w-6 h-6 ${star <= value ? 'fill-yellow-400 text-yellow-400' : 'fill-none text-gray-300'}`}
-                    />
+                    <div
+                        className={`w-4 h-4 flex items-center justify-center rounded-md ${
+                            star <= value ? 'bg-red-500' : 'bg-gray-300'
+                        }`}
+                    >
+                        <Star className="w-3 h-3 text-white fill-white" />
+                    </div>
                 </button>
             ))}
         </div>

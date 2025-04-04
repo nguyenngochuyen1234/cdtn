@@ -75,5 +75,9 @@ const shopApi = {
         const url = `/shops/search`;
         return axiosClient.post(url, data);
     },
+    suggestShop(data: any){
+        const url = `/shops/suggest`;
+        return axiosClient.post(url, data);
+    }
 };
 export default shopApi;

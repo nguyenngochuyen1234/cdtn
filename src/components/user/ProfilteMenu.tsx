@@ -47,12 +47,6 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
             link: '/',
         },
         {
-            id: 'support',
-            label: 'Hỗ trợ',
-            icon: <HelpOutline sx={{ color: '#000' }} />,
-            link: '/',
-        },
-        {
             id: 'logout',
             label: 'Đăng xuất',
             icon: <Logout sx={{ color: '#000' }} />,
@@ -73,14 +67,7 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
                                 {user.username}
                             </Typography>
                         }
-                        secondary={
-                            <Box
-                                component="span"
-                                sx={{ color: user.statusUser ? 'success.main' : 'text.secondary' }}
-                            >
-                                {user.statusUser ? 'Online' : 'Offline'}
-                            </Box>
-                        }
+                        
                     />
                 </ListItem>
 
