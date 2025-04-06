@@ -1,26 +1,32 @@
 import logo from '@/assets/images/logo.svg';
-import { Avatar, Box, Button, Divider, Stack, Typography } from '@mui/material';
+import { Avatar, Box, Button, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { colors } from '@/themes/colors';
 import { deepOrange } from '@mui/material/colors';
-import { useEffect, useState } from 'react';
-import ProfileMenu from './user/ProfilteMenu';
+import { useState } from 'react';
 import { MenuItem, User } from '@/models';
-import userApi from '@/api/userApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/stores';
+import ProfileMenu from './user/ProfilteMenu';
+
 export const HeaderComponent = () => {
     const user = useSelector((state: RootState) => state.user.user);
-    const handleSearch = (value: string) => {
-        console.log('Search:', value);
-    };
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Dưới 600px
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600px - 900px
     const [openMenu, setOpenMenu] = useState(false);
     const navigate = useNavigate();
-    const handelNavigate = (item: MenuItem) => {
-        setOpenMenu(false);
+
+    const handleNavigate = (item: MenuItem) => {
+        setOpenMenu(false); // Đóng menu khi chọn một mục
         navigate(item.link);
+    };
+
+    // Hàm xử lý bật/tắt menu khi bấm vào nút Profile
+    const handleProfileClick = () => {
+        setOpenMenu((prev) => !prev); // Chuyển đổi trạng thái từ true sang false và ngược lại
     };
 
     return (
@@ -37,82 +43,195 @@ export const HeaderComponent = () => {
                 right: 0,
                 width: '100%',
                 zIndex: 10,
-                px: 4,
-                py: 2,
+                px: { xs: 2, sm: 3, md: 4 },
+                py: { xs: 1, md: 2 },
                 boxShadow: '-1px -1px 7px rgba(0, 0, 0, 0.1)',
             }}
         >
-            <Button onClick={() => navigate('/')}>
-                <Typography variant="h6">Logo</Typography>
-            </Button>
+            {/* Logo */}
+            <Link to="/">
+                <img
+                    src="/Bright Web.png"
+                    alt="Logo"
+                    style={{
+                        height: isMobile ? '14px' : '18px',
+                        width: 'auto',
+                    }}
+                />
+            </Link>
 
-            <Stack direction="row" alignItems="center" spacing={2}>
+            {/* Các nút bên phải */}
+            <Stack direction="row" alignItems="center" spacing={isMobile ? 1 : 2}>
+                {/* Nút "Bắt đầu tạo cửa hàng" */}
                 <Button
                     variant="contained"
                     onClick={() => navigate('biz/register-shop')}
-                    startIcon={<NotificationsIcon sx={{ color: '#fff' }} />}
-                    sx={{ textTransform: 'none' }}
+                    startIcon={
+                        <NotificationsIcon
+                            sx={{ color: '#fff', fontSize: isMobile ? '16px' : '20px' }}
+                        />
+                    }
+                    sx={{
+                        textTransform: 'none',
+                        py: isMobile ? 0.5 : 1,
+                        px: isMobile ? 1 : 2,
+                    }}
                 >
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                    <Typography
+                        variant="subtitle2"
+                        sx={{
+                            fontWeight: 600,
+                            fontSize: isMobile ? '0.75rem' : '0.875rem',
+                            display: isMobile ? 'none' : 'block',
+                        }}
+                    >
                         Bắt đầu tạo cửa hàng
                     </Typography>
                 </Button>
-                <div className="w-[1px] h-4 bg-black "></div>
+
+                {!isMobile && <Box sx={{ width: '1px', height: '16px', bgcolor: 'black' }} />}
+
                 {user ? (
                     <>
+                        {/* Nút "Viết bài đánh giá" */}
                         <Button
-                            sx={{ textTransform: 'none' }}
-                            onClick={() => navigate('/writeareview')}
+                            sx={{
+                                textTransform: 'none',
+                                py: isMobile ? 0.5 : 1,
+                                px: isMobile ? 1 : 2,
+                            }}
+                            onClick={() => navigate('/search')}
                         >
                             <Typography
                                 variant="subtitle2"
-                                sx={{ fontWeight: 600, color: colors.textColor }}
+                                sx={{
+                                    fontWeight: 600,
+                                    color: colors.textColor,
+                                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                    display: isMobile ? 'none' : 'block',
+                                }}
                             >
                                 Viết bài đánh giá
                             </Typography>
+                            {isMobile && (
+                                <FavoriteIcon sx={{ color: colors.textColor, fontSize: '16px' }} />
+                            )}
                         </Button>
-                        <div className="w-[1px] h-4 bg-black "></div>
+
+                        {!isMobile && (
+                            <Box sx={{ width: '1px', height: '16px', bgcolor: 'black' }} />
+                        )}
+
+                        {/* Nút Profile */}
                         <Button
-                            startIcon={<Avatar sx={{ bgcolor: deepOrange[500] }}>N</Avatar>}
-                            sx={{ textTransform: 'none', position: 'relative' }}
-                            onClick={() => setOpenMenu(true)}
+                            startIcon={
+                                <Avatar
+                                    sx={{
+                                        bgcolor: deepOrange[500],
+                                        width: isMobile ? 24 : 32,
+                                        height: isMobile ? 24 : 32,
+                                    }}
+                                >
+                                    N
+                                </Avatar>
+                            }
+                            sx={{
+                                textTransform: 'none',
+                                position: 'relative',
+                                py: isMobile ? 0.5 : 1,
+                                px: isMobile ? 1 : 2,
+                            }}
+                            onClick={handleProfileClick} // Sử dụng hàm mới để bật/tắt menu
                         >
                             <Typography
                                 variant="subtitle2"
-                                sx={{ fontWeight: 600, color: colors.textColor }}
+                                sx={{
+                                    fontWeight: 600,
+                                    color: colors.textColor,
+                                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                    display: isMobile ? 'none' : 'block',
+                                }}
                             >
                                 {user.username}
                             </Typography>
                         </Button>
+
+                        {/* Profile Menu */}
                         {openMenu && (
-                            <div className="absolute top-20 right-1 z-10 w-[330px]">
-                                <ProfileMenu user={user} onMenuItemClick={handelNavigate} />
-                            </div>
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: isMobile ? '48px' : '60px',
+                                    right: isMobile ? 8 : 16,
+                                    zIndex: 10,
+                                    width: isMobile ? '200px' : '330px',
+                                }}
+                            >
+                                <ProfileMenu user={user} onMenuItemClick={handleNavigate} />
+                            </Box>
                         )}
                     </>
                 ) : (
                     <>
+                        {/* Nút "Đăng ký" */}
                         <Button
-                            startIcon={<NotificationsIcon sx={{ color: colors.textColor }} />}
-                            sx={{ textTransform: 'none' }}
-                            onClick={() => navigate('/auth/register')}
+                            startIcon={
+                                <NotificationsIcon
+                                    sx={{
+                                        color: colors.textColor,
+                                        fontSize: isMobile ? '16px' : '20px',
+                                    }}
+                                />
+                            }
+                            sx={{
+                                textTransform: 'none',
+                                py: isMobile ? 0.5 : 1,
+                                px: isMobile ? 1 : 2,
+                            }}
+                            onClick={() => navigate('/auth/signup')}
                         >
                             <Typography
                                 variant="subtitle2"
-                                sx={{ fontWeight: 600, color: colors.textColor }}
+                                sx={{
+                                    fontWeight: 600,
+                                    color: colors.textColor,
+                                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                    display: isMobile ? 'none' : 'block',
+                                }}
                             >
                                 Đăng ký
                             </Typography>
                         </Button>
-                        <div className="w-[1px] h-4 bg-black "></div>
+
+                        {!isMobile && (
+                            <Box sx={{ width: '1px', height: '16px', bgcolor: 'black' }} />
+                        )}
+
+                        {/* Nút "Đăng nhập" */}
                         <Button
-                            startIcon={<FavoriteIcon sx={{ color: colors.textColor }} />}
-                            sx={{ textTransform: 'none' }}
+                            startIcon={
+                                <FavoriteIcon
+                                    sx={{
+                                        color: colors.textColor,
+                                        fontSize: isMobile ? '16px' : '20px',
+                                    }}
+                                />
+                            }
+                            sx={{
+                                textTransform: 'none',
+                                py: isMobile ? 0.5 : 1,
+                                px: isMobile ? 1 : 2,
+                            }}
                             onClick={() => navigate('auth/login')}
                         >
                             <Typography
                                 variant="subtitle2"
-                                sx={{ fontWeight: 600, color: colors.textColor }}
+                                sx={{
+                                    fontWeight: 600,
+                                    color: colors.textColor,
+                                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                    display: isMobile ? 'none' : 'block',
+                                }}
                             >
                                 Đăng nhập
                             </Typography>

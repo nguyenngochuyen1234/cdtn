@@ -1,67 +1,113 @@
-import React, { useState } from 'react';
-import { Select, MenuItem, FormControl, InputLabel, Stack } from '@mui/material';
+// 'use client';
 
-const SearchComponent = () => {
-    const [touristPlace, setTouristPlace] = useState('Phong nha kẻ bàng');
-    const [cuisine, setCuisine] = useState('Bún chả');
-    const [hairSalon, setHairSalon] = useState('Quán 30 shain');
-    const [laundryShop, setLaundryShop] = useState('Giặt là có ngay');
+// import { useState } from 'react';
+// import { TextField, Button, Box, Typography, InputAdornment, Stack, Paper } from '@mui/material';
+// import SearchIcon from '@mui/icons-material/Search';
+// import LocationOnIcon from '@mui/icons-material/LocationOn';
+// import { createTheme, ThemeProvider } from '@mui/material/styles';
+// import { Link } from 'react-router-dom';
+// import GoogleLocation from '../location/GoogleLocation';
+// import SearchBarComponent from '../search/SearchBarComponent';
 
-    return (
-        <Stack direction="row" spacing={2} marginY={3}>
-            <FormControl fullWidth>
-                <InputLabel>Địa điểm du lịch</InputLabel>
-                <Select
-                    value={touristPlace}
-                    label="Địa điểm du lịch"
-                    onChange={(e) => setTouristPlace(e.target.value)}
-                >
-                    <MenuItem value="Phong nha kẻ bàng">Phong nha kẻ bàng</MenuItem>
-                    <MenuItem value="Vịnh Hạ Long">Vịnh Hạ Long</MenuItem>
-                    <MenuItem value="Sapa">Sapa</MenuItem>
-                </Select>
-            </FormControl>
+// // Create a custom theme with red primary color for the buttons
+// const theme = createTheme({
+//     palette: {
+//         primary: {
+//             main: '#dc2626',
+//         },
+//     },
+//     components: {
+//         MuiButton: {
+//             styleOverrides: {
+//                 root: {
+//                     textTransform: 'none',
+//                     borderRadius: '4px',
+//                 },
+//             },
+//         },
+//         MuiOutlinedInput: {
+//             styleOverrides: {
+//                 root: {
+//                     borderRadius: '4px',
+//                 },
+//             },
+//         },
+//     },
+// });
 
-            <FormControl fullWidth>
-                <InputLabel>Ẩm thực</InputLabel>
-                <Select
-                    value={cuisine}
-                    label="Ẩm thực"
-                    onChange={(e) => setCuisine(e.target.value)}
-                >
-                    <MenuItem value="Bún chả">Bún chả</MenuItem>
-                    <MenuItem value="Phở">Phở</MenuItem>
-                    <MenuItem value="Bánh mì">Bánh mì</MenuItem>
-                </Select>
-            </FormControl>
+// const SearchComponent = () => {
+//     const [searchQuery, setSearchQuery] = useState('');
 
-            <FormControl fullWidth>
-                <InputLabel>Quán cắt tóc</InputLabel>
-                <Select
-                    value={hairSalon}
-                    label="Quán cắt tóc"
-                    onChange={(e) => setHairSalon(e.target.value)}
-                >
-                    <MenuItem value="Quán 30 shain">Quán 30 shain</MenuItem>
-                    <MenuItem value="Barber House">Barber House</MenuItem>
-                    <MenuItem value="Hair Station">Hair Station</MenuItem>
-                </Select>
-            </FormControl>
+//     return (
+//         // <ThemeProvider theme={theme}>
+//         //     <Paper
+//         //         elevation={2}
+//         //         sx={{
+//         //             width: '100%',
+//         //             minWidth: { xs: '300px', sm: '500px', md: '700px' },
+//         //             border: '1px solid rgb(249, 246, 246)', // Thêm viền màu xám nhạt
+//         //             overflow: 'hidden',
+//         //         }}
+//         //     >
+//         //         <Box sx={{ p: 1 }}>
+//         //             <Typography
+//         //                 variant="h5"
+//         //                 sx={{
+//         //                     fontWeight: 600, // Làm đậm hơn một chút để dễ nhìn
+//         //                     mb: 2,
+//         //                     color: '#333', // Màu tối hơn để nổi bật
+//         //                     textAlign: 'start', // Căn giữa nếu muốn
+//         //                     textTransform: 'capitalize', // Viết hoa chữ cái đầu
+//         //                     letterSpacing: '0.5px', // Giúp chữ trông thanh thoát hơn
+//         //                 }}
+//         //             >
+//         //                 Bạn đang tìm kiếm thứ gì?
+//         //             </Typography>
 
-            <FormControl fullWidth>
-                <InputLabel>Tiệm giặt ủi</InputLabel>
-                <Select
-                    value={laundryShop}
-                    label="Tiệm giặt ủi"
-                    onChange={(e) => setLaundryShop(e.target.value)}
-                >
-                    <MenuItem value="Giặt là có ngay">Giặt là có ngay</MenuItem>
-                    <MenuItem value="Laundry Pro">Laundry Pro</MenuItem>
-                    <MenuItem value="Quick Wash">Quick Wash</MenuItem>
-                </Select>
-            </FormControl>
-        </Stack>
-    );
-};
+//         //             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
+//         //                 <TextField
+//         //                     placeholder="Tìm kiếm cửa hàng..."
+//         //                     variant="outlined"
+//         //                     fullWidth
+//         //                     value={searchQuery}
+//         //                     onChange={(e) => setSearchQuery(e.target.value)}
+//         //                     sx={{ flex: 1 }}
+//         //                 />
+//         //                 <Stack direction="row" spacing={1}>
+//         //                     <GoogleLocation></GoogleLocation>
+//         //                     <Link to="/search">
+//         //                         <Button
+//         //                             variant="contained"
+//         //                             color="primary"
+//         //                             sx={{
+//         //                                 minWidth: '56px',
+//         //                                 height: '56px',
+//         //                                 px: 2,
+//         //                             }}
+//         //                         >
+//         //                             <SearchIcon />
+//         //                         </Button>
+//         //                     </Link>
+//         //                 </Stack>
+//         //             </Stack>
 
-export default SearchComponent;
+//         //             {/* <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+//         //     <Link to={"/search"}>
+//         //     <Button variant="contained" color="primary" sx={{ px: 3, py: 1 }}>
+//         //       Xem thêm cửa hàng
+//         //     </Button>
+//         //     </Link>
+//         //   </Box> */}
+//         //         </Box>
+//         //     </Paper>
+//         // </ThemeProvider>
+//         <div
+//             style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #F4E0E0 100%)' }}
+//             className="h-[172px] w-[100%] flex justify-center items-center"
+//         >
+//             <SearchBarComponent />
+//         </div>
+//     );
+// };
+
+// export default SearchComponent;

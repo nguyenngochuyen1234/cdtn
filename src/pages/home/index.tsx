@@ -1,15 +1,23 @@
+import Footer from '@/components/Footer';
 import { HeaderComponent } from '@/components/Header';
+import { Box } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 
 const Main = () => {
     return (
-        <div>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            {/* Header */}
             <HeaderComponent />
-            <Outlet />
 
-        </div>
+            {/* Nội dung chính của các route con */}
+            <Box sx={{ flex: 1 }}>
+                <Outlet />
+            </Box>
 
-    )
-}
+            {/* Footer */}
+            <Footer />
+        </Box>
+    );
+};
 
-export default Main
+export default Main;

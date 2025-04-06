@@ -1,211 +1,574 @@
 'use client';
 
-import { useState } from 'react';
-import { Checkbox, Slider, Collapse, Button } from 'antd';
-import { StarFilled, StarOutlined } from '@ant-design/icons';
-import type { CheckboxChangeEvent } from 'antd/es/checkbox';
-import { Typography } from '@mui/material';
-
-const { Panel } = Collapse;
+import { useEffect, useState } from 'react';
+import {
+    Box,
+    Typography,
+    Button,
+    Modal,
+    List,
+    ListItem,
+    ListItemText,
+    Divider,
+    Rating,
+    Radio,
+    FormControlLabel,
+    Checkbox,
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import provincesApi from '@/api/provincesApi';
+import usersCategory from '@/api/usersCategory';
 
 interface Category {
     id: string;
     name: string;
-    checked: boolean;
+    checked: boolean; // Still multi-select with checkboxes
 }
 
-interface OpeningHour {
+interface ClosingHour {
     id: string;
-    time: string;
-    selected: boolean;
+    time: string; // Display time (e.g., "9 PM")
+    localTime: string; // ISO time (e.g., "21:00:00")
 }
 
 interface StarRating {
     id: number;
     value: number;
-    checked: boolean;
 }
 
-export default function FilterPanel() {
-    // Categories state
-    const [categories, setCategories] = useState<Category[]>([
-        { id: '1', name: 'Nhà hàng', checked: true },
-        { id: '2', name: 'Cắt tóc', checked: false },
-        { id: '3', name: 'Làm đẹp', checked: true },
-        { id: '4', name: 'Quán nước', checked: false },
+interface Province {
+    code: string;
+    name: string;
+}
+
+interface District {
+    code: string;
+    name: string;
+}
+
+interface FilterPanelProps {
+    onFilterChange: (filters: {
+        keyword: string;
+        categoryId: string[]; // Multi-select
+        city: string; // Single-select
+        district: string; // Single-select
+        openTimeId: string; // Single-select
+        scoreReview: number; // Single-select
+        latitude?: number;
+        longitude?: number;
+    }) => void;
+}
+
+export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [provinces, setProvinces] = useState<Province[]>([]);
+    const [districts, setDistricts] = useState<District[]>([]);
+    const [closingHours, setClosingHours] = useState<ClosingHour[]>([
+        { id: '1', time: '6 PM', localTime: '18:00:00' },
+        { id: '2', time: '7 PM', localTime: '19:00:00' },
+        { id: '3', time: '8 PM', localTime: '20:00:00' },
+        { id: '4', time: '9 PM', localTime: '21:00:00' },
+        { id: '5', time: '10 PM', localTime: '22:00:00' },
     ]);
-
-    // Opening hours state
-    const [openingHours, setOpeningHours] = useState<OpeningHour[]>([
-        { id: '1', time: 'Đến 6 PM', selected: false },
-        { id: '2', time: 'Đến 7 PM', selected: false },
-        { id: '3', time: 'Đến 8 PM', selected: false },
-        { id: '4', time: 'Đến 9 PM', selected: false },
-    ]);
-
-    // Distance state
-    const [distance, setDistance] = useState<number>(7);
-
-    // Star ratings state
     const [ratings, setRatings] = useState<StarRating[]>([
-        { id: 5, value: 5, checked: true },
-        { id: 4, value: 4, checked: true },
-        { id: 3, value: 3, checked: false },
-        { id: 2, value: 2, checked: true },
-        { id: 1, value: 1, checked: false },
+        { id: 5, value: 5 },
+        { id: 4, value: 4 },
+        { id: 3, value: 3 },
+        { id: 2, value: 2 },
+        { id: 1, value: 1 },
     ]);
 
-    // Category change handler
-    const handleCategoryChange = (id: string) => (e: CheckboxChangeEvent) => {
-        setCategories(
-            categories.map((category) =>
-                category.id === id ? { ...category, checked: e.target.checked } : category
+    // Single-selection states
+    const [selectedCity, setSelectedCity] = useState<string>('');
+    const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+    const [selectedClosingHour, setSelectedClosingHour] = useState<string>('');
+    const [selectedRating, setSelectedRating] = useState<number | null>(null);
+    const [location, setLocation] = useState<{ latitude?: number; longitude?: number }>({});
+
+    // Modal and collapse states
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalType, setModalType] = useState<
+        'categories' | 'provinces' | 'districts' | 'closingHours' | null
+    >(null);
+    const [openCategories, setOpenCategories] = useState(true);
+    const [openClosingHours, setOpenClosingHours] = useState(true);
+    const [openRatings, setOpenRatings] = useState(true);
+    const [openProvinces, setOpenProvinces] = useState(true);
+    const [openDistricts, setOpenDistricts] = useState(true);
+
+    // Fetch categories
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await usersCategory.getAllCategories();
+                const categoryData = response.data.data.map((cat: any) => ({
+                    id: cat.id,
+                    name: cat.name,
+                    checked: false,
+                }));
+                setCategories(categoryData);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+        fetchCategories();
+    }, []);
+
+    // Fetch provinces
+    useEffect(() => {
+        const fetchProvinces = async () => {
+            try {
+                const response = await provincesApi.getProvince();
+                const provinceData = response.data.map((province: any) => ({
+                    code: province.code,
+                    name: province.name,
+                }));
+                setProvinces(provinceData);
+            } catch (error) {
+                console.error('Error fetching provinces:', error);
+            }
+        };
+        fetchProvinces();
+    }, []);
+
+    // Fetch districts when a province is selected
+    const fetchDistricts = async (provinceCode: string) => {
+        try {
+            const response = await provincesApi.getDistrict(provinceCode);
+            const districtData = response.data.districts.map((district: any) => ({
+                code: district.code,
+                name: district.name,
+            }));
+            setDistricts(districtData);
+        } catch (error) {
+            console.error('Error fetching districts:', error);
+        }
+    };
+
+    // Get user's location
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLocation({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    console.error('Error getting location:', error);
+                }
+            );
+        }
+    }, []);
+
+    // Trigger filter change
+    useEffect(() => {
+        const newFilters = {
+            keyword: '',
+            categoryId: categories.filter((c) => c.checked).map((c) => c.id),
+            city: selectedCity,
+            district: selectedDistrict,
+            openTimeId: selectedClosingHour,
+            scoreReview: selectedRating !== null ? selectedRating : 0, // Default to 0 if not selected
+            latitude: location.latitude,
+            longitude: location.longitude,
+        };
+        onFilterChange(newFilters);
+    }, [
+        categories,
+        selectedCity,
+        selectedDistrict,
+        selectedClosingHour,
+        selectedRating,
+        location,
+    ]);
+
+    // Handlers for single-selection
+    const handleCityChange = (code: string) => {
+        if (selectedCity === code) {
+            setSelectedCity(''); // Deselect if already selected
+            setDistricts([]); // Clear districts if city is deselected
+            setSelectedDistrict('');
+        } else {
+            setSelectedCity(code);
+            fetchDistricts(code); // Fetch districts for the new city
+        }
+    };
+
+    const handleDistrictChange = (code: string) => {
+        setSelectedDistrict(selectedDistrict === code ? '' : code); // Toggle selection
+    };
+
+    const handleClosingHourChange = (localTime: string) => {
+        setSelectedClosingHour(selectedClosingHour === localTime ? '' : localTime); // Toggle selection
+    };
+
+    const handleRatingChange = (value: number) => {
+        setSelectedRating(selectedRating === value ? null : value); // Toggle selection
+    };
+
+    // Multi-select handler for categories
+    const handleCategoryChange = (id: string) => {
+        setCategories((prev) =>
+            prev.map((category) =>
+                category.id === id ? { ...category, checked: !category.checked } : category
             )
         );
     };
 
-    // Opening hours change handler
-    const handleHourChange = (id: string) => {
-        setOpeningHours(
-            openingHours.map((hour) =>
-                hour.id === id ? { ...hour, selected: !hour.selected } : hour
-            )
-        );
+    // Modal handlers
+    const handleOpenModal = (type: 'categories' | 'provinces' | 'districts' | 'closingHours') => {
+        setModalType(type);
+        setModalOpen(true);
     };
 
-    // Distance change handler
-    const handleDistanceChange = (value: number) => {
-        setDistance(value);
+    const handleCloseModal = () => {
+        setModalOpen(false);
+        setModalType(null);
     };
 
-    // Rating change handler
-    const handleRatingChange = (id: number) => {
-        setRatings(
-            ratings.map((rating) =>
-                rating.id === id ? { ...rating, checked: !rating.checked } : rating
-            )
-        );
-    };
-
-    // Reset all filters
+    // Reset filters
     const handleReset = () => {
-        setCategories(categories.map((category) => ({ ...category, checked: false })));
-        setOpeningHours(openingHours.map((hour) => ({ ...hour, selected: false })));
-        setDistance(0);
-        setRatings(ratings.map((rating) => ({ ...rating, checked: false })));
+        setCategories((prev) => prev.map((category) => ({ ...category, checked: false })));
+        setSelectedCity('');
+        setSelectedDistrict('');
+        setSelectedClosingHour('');
+        setSelectedRating(null);
+        setDistricts([]);
     };
 
     return (
-        <div className="w-full max-w-xs space-y-4 p-4">
-            {/* Categories */}
-            <Collapse
-                defaultActiveKey={['1']}
-                className="bg-white rounded-lg shadow-sm"
-                expandIconPosition="end"
-            >
-                <Panel header="Danh mục" key="1">
-                    <div className="space-y-2">
-                        {categories.map((category) => (
-                            <div key={category.id}>
-                                <Checkbox
-                                    checked={category.checked}
-                                    onChange={handleCategoryChange(category.id)}
-                                >
-                                    {category.name}
-                                </Checkbox>
-                            </div>
+        <Box sx={{ width: '100%', maxWidth: 300 }}>
+            {/* Categories (Multi-select) */}
+            <Box sx={{ bgcolor: 'white', borderRadius: 2, boxShadow: 1, mb: 2 }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 2,
+                        cursor: 'pointer',
+                    }}
+                    onClick={() => setOpenCategories(!openCategories)}
+                >
+                    <Typography variant="subtitle1" fontWeight="medium">
+                        Danh mục
+                    </Typography>
+                    {openCategories ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </Box>
+                {openCategories && (
+                    <Box sx={{ p: 2, pt: 0 }}>
+                        {categories.slice(0, 4).map((category) => (
+                            <FormControlLabel
+                                key={category.id}
+                                control={
+                                    <Checkbox
+                                        checked={category.checked}
+                                        onChange={() => handleCategoryChange(category.id)}
+                                    />
+                                }
+                                label={category.name}
+                                sx={{ display: 'block' }}
+                            />
                         ))}
-                        <Button type="link" className="text-emerald-500 p-0">
-                            Xem thêm
-                        </Button>
-                    </div>
-                </Panel>
-            </Collapse>
+                        {categories.length > 4 && (
+                            <Button
+                                variant="text"
+                                color="primary"
+                                onClick={() => handleOpenModal('categories')}
+                                sx={{ p: 0, mt: 1 }}
+                            >
+                                Xem thêm
+                            </Button>
+                        )}
+                    </Box>
+                )}
+            </Box>
 
-            {/* Opening Hours */}
-            <div className="bg-white rounded-lg shadow-sm p-4 space-y-2">
-                <Typography variant="subtitle2" className="font-medium">
-                    Thời gian mở cửa
-                </Typography>
-                <div className="space-y-2">
-                    {openingHours.map((hour) => (
-                        <div
-                            key={hour.id}
-                            className={`p-2 rounded cursor-pointer transition-colors ${
-                                hour.selected
-                                    ? 'bg-emerald-50 text-emerald-600'
-                                    : 'hover:bg-gray-50'
-                            }`}
-                            onClick={() => handleHourChange(hour.id)}
-                        >
-                            {hour.time}
-                        </div>
-                    ))}
-                    <Button type="link" className="text-emerald-500 p-0">
-                        Xem thêm
-                    </Button>
-                </div>
-            </div>
+            {/* Closing Hours (Single-select) */}
+            <Box sx={{ bgcolor: 'white', borderRadius: 2, boxShadow: 1, mb: 2 }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 2,
+                        cursor: 'pointer',
+                    }}
+                    onClick={() => setOpenClosingHours(!openClosingHours)}
+                >
+                    <Typography variant="subtitle1" fontWeight="medium">
+                        Thời gian đóng cửa
+                    </Typography>
+                    {openClosingHours ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </Box>
+                {openClosingHours && (
+                    <Box sx={{ p: 2, pt: 0 }}>
+                        {closingHours.slice(0, 4).map((hour) => (
+                            <FormControlLabel
+                                key={hour.id}
+                                control={
+                                    <Radio
+                                        checked={selectedClosingHour === hour.localTime}
+                                        onChange={() => handleClosingHourChange(hour.localTime)}
+                                    />
+                                }
+                                label={hour.time}
+                                sx={{ display: 'block' }}
+                            />
+                        ))}
+                        {closingHours.length > 4 && (
+                            <Button
+                                variant="text"
+                                color="primary"
+                                onClick={() => handleOpenModal('closingHours')}
+                                sx={{ p: 0, mt: 1 }}
+                            >
+                                Xem thêm
+                            </Button>
+                        )}
+                    </Box>
+                )}
+            </Box>
 
-            {/* Distance Range */}
-            <Collapse
-                defaultActiveKey={['1']}
-                className="bg-white rounded-lg shadow-sm"
-                expandIconPosition="end"
-            >
-                <Panel header="Khoảng cách" key="1">
-                    <div className="px-2">
-                        <Slider
-                            min={0}
-                            max={10}
-                            value={distance}
-                            onChange={handleDistanceChange}
-                            tooltip={{
-                                formatter: (value) => `${value}km`,
-                            }}
-                            trackStyle={{ backgroundColor: '#10b981' }}
-                            handleStyle={{ borderColor: '#10b981' }}
-                        />
-                        <div className="flex justify-between text-sm text-gray-500">
-                            <span>0km</span>
-                            <span>Từ {distance}km</span>
-                            <span>10km</span>
-                        </div>
-                    </div>
-                </Panel>
-            </Collapse>
+            {/* Ratings (Single-select) */}
+            <Box sx={{ bgcolor: 'white', borderRadius: 2, boxShadow: 1, mb: 2 }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 2,
+                        cursor: 'pointer',
+                    }}
+                    onClick={() => setOpenRatings(!openRatings)}
+                >
+                    <Typography variant="subtitle1" fontWeight="medium">
+                        Điểm số đánh giá
+                    </Typography>
+                    {openRatings ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </Box>
+                {openRatings && (
+                    <Box sx={{ p: 2, pt: 0 }}>
+                        {ratings.map((rating) => (
+                            <Box
+                                key={rating.id}
+                                sx={{ display: 'flex', alignItems: 'center', mb: 1 }}
+                            >
+                                <Radio
+                                    checked={selectedRating === rating.value}
+                                    onChange={() => handleRatingChange(rating.value)}
+                                />
+                                <Rating value={rating.value} readOnly />
+                            </Box>
+                        ))}
+                    </Box>
+                )}
+            </Box>
 
-            {/* Review Score */}
-            <div className="bg-white rounded-lg shadow-sm p-4 space-y-2">
-                <Typography variant="subtitle2" className="font-medium">
-                    REVIEW SCORE
-                </Typography>
-                <div className="space-y-2">
-                    {ratings.map((rating) => (
-                        <div
-                            key={rating.id}
-                            className="flex items-center space-x-2 cursor-pointer"
-                            onClick={() => handleRatingChange(rating.id)}
-                        >
-                            <Checkbox checked={rating.checked} />
-                            <div className="flex">
-                                {[...Array(5)].map((_, index) =>
-                                    index < rating.value ? (
-                                        <StarFilled key={index} className="text-yellow-400" />
-                                    ) : (
-                                        <StarOutlined key={index} className="text-gray-300" />
-                                    )
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            {/* Provinces (Single-select) */}
+            <Box sx={{ bgcolor: 'white', borderRadius: 2, boxShadow: 1, mb: 2 }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 2,
+                        cursor: 'pointer',
+                    }}
+                    onClick={() => setOpenProvinces(!openProvinces)}
+                >
+                    <Typography variant="subtitle1" fontWeight="medium">
+                        Tỉnh
+                    </Typography>
+                    {openProvinces ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </Box>
+                {openProvinces && (
+                    <Box sx={{ p: 2, pt: 0 }}>
+                        {provinces.slice(0, 4).map((province) => (
+                            <FormControlLabel
+                                key={province.code}
+                                control={
+                                    <Radio
+                                        checked={selectedCity === province.code}
+                                        onChange={() => handleCityChange(province.code)}
+                                    />
+                                }
+                                label={province.name}
+                                sx={{ display: 'block' }}
+                            />
+                        ))}
+                        {provinces.length > 4 && (
+                            <Button
+                                variant="text"
+                                color="primary"
+                                onClick={() => handleOpenModal('provinces')}
+                                sx={{ p: 0, mt: 1 }}
+                            >
+                                Xem thêm
+                            </Button>
+                        )}
+                    </Box>
+                )}
+            </Box>
+
+            {/* Districts (Single-select) */}
+            <Box sx={{ bgcolor: 'white', borderRadius: 2, boxShadow: 1, mb: 2 }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 2,
+                        cursor: 'pointer',
+                    }}
+                    onClick={() => setOpenDistricts(!openDistricts)}
+                >
+                    <Typography variant="subtitle1" fontWeight="medium">
+                        Huyện
+                    </Typography>
+                    {openDistricts ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </Box>
+                {openDistricts && (
+                    <Box sx={{ p: 2, pt: 0 }}>
+                        {districts.length > 0 ? (
+                            districts.slice(0, 4).map((district) => (
+                                <FormControlLabel
+                                    key={district.code}
+                                    control={
+                                        <Radio
+                                            checked={selectedDistrict === district.code}
+                                            onChange={() => handleDistrictChange(district.code)}
+                                        />
+                                    }
+                                    label={district.name}
+                                    sx={{ display: 'block' }}
+                                />
+                            ))
+                        ) : (
+                            <Typography variant="body2" color="text.secondary">
+                                Vui lòng chọn tỉnh để hiển thị huyện
+                            </Typography>
+                        )}
+                        {districts.length > 4 && (
+                            <Button
+                                variant="text"
+                                color="primary"
+                                onClick={() => handleOpenModal('districts')}
+                                sx={{ p: 0, mt: 1 }}
+                            >
+                                Xem thêm
+                            </Button>
+                        )}
+                    </Box>
+                )}
+            </Box>
 
             {/* Reset Button */}
-            <Button onClick={handleReset} className="w-full border-gray-300 hover:border-gray-400">
-                Reset filter
+            <Button
+                variant="outlined"
+                color="secondary"
+                onClick={handleReset}
+                sx={{ width: '100%', mt: 2 }}
+            >
+                Reset bộ lọc
             </Button>
-        </div>
+
+            {/* Modal */}
+            <Modal
+                open={modalOpen}
+                onClose={handleCloseModal}
+                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+                <Box
+                    sx={{
+                        bgcolor: 'white',
+                        borderRadius: 2,
+                        boxShadow: 24,
+                        p: 3,
+                        width: '90%',
+                        maxWidth: 400,
+                        maxHeight: '80vh',
+                        overflowY: 'auto',
+                    }}
+                >
+                    <Typography variant="h6" mb={2}>
+                        {modalType === 'categories' && 'Tất cả danh mục'}
+                        {modalType === 'provinces' && 'Tất cả tỉnh'}
+                        {modalType === 'districts' && 'Tất cả huyện'}
+                        {modalType === 'closingHours' && 'Tất cả thời gian đóng cửa'}
+                    </Typography>
+                    <List>
+                        {modalType === 'categories' &&
+                            categories.map((category) => (
+                                <ListItem
+                                    key={category.id}
+                                    onClick={() => handleCategoryChange(category.id)}
+                                >
+                                    <FormControlLabel
+                                        control={<Checkbox checked={category.checked} />}
+                                        label={category.name}
+                                    />
+                                </ListItem>
+                            ))}
+                        {modalType === 'provinces' &&
+                            provinces.map((province) => (
+                                <ListItem
+                                    key={province.code}
+                                    onClick={() => handleCityChange(province.code)}
+                                >
+                                    <FormControlLabel
+                                        control={
+                                            <Radio checked={selectedCity === province.code} />
+                                        }
+                                        label={province.name}
+                                    />
+                                </ListItem>
+                            ))}
+                        {modalType === 'districts' &&
+                            districts.map((district) => (
+                                <ListItem
+                                    key={district.code}
+                                    onClick={() => handleDistrictChange(district.code)}
+                                >
+                                    <FormControlLabel
+                                        control={
+                                            <Radio checked={selectedDistrict === district.code} />
+                                        }
+                                        label={district.name}
+                                    />
+                                </ListItem>
+                            ))}
+                        {modalType === 'closingHours' &&
+                            closingHours.map((hour) => (
+                                <ListItem
+                                    key={hour.id}
+                                    onClick={() => handleClosingHourChange(hour.localTime)}
+                                >
+                                    <FormControlLabel
+                                        control={
+                                            <Radio
+                                                checked={selectedClosingHour === hour.localTime}
+                                            />
+                                        }
+                                        label={hour.time}
+                                    />
+                                </ListItem>
+                            ))}
+                    </List>
+                    <Divider sx={{ my: 2 }} />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleCloseModal}
+                        sx={{ width: '100%' }}
+                    >
+                        Đóng
+                    </Button>
+                </Box>
+            </Modal>
+        </Box>
     );
 }
