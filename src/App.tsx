@@ -39,6 +39,7 @@ import ServicesPage from './pages/owner/ServicesPage';
 import ReviewsPage from './pages/owner/ReviewsPage';
 import OwnerProfile from './pages/owner/ProfilePage';
 import BusinessInfo from './pages/owner/BusinessInfo';
+import AdvertisementPage from './pages/admin/AdvertisementPage';
 // import BusinessInfo from './pages/owner/BusinessInfo';
 export default function App() {
     const dispatch = useDispatch();
@@ -98,6 +99,7 @@ export default function App() {
                     <Route path="moderation" element={<ModerationPage />} />
                     <Route path="categories" element={<CategoriesPage />} />
                     <Route path="users" element={<UsersPage />} />
+                    <Route path="advertisement" element={<AdvertisementPage />} />
                 </Route>
             </Routes>
         </BrowserRouter>

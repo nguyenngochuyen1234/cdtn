@@ -82,7 +82,8 @@ function CreateTagPage() {
                     tags: selectedChildCategories,
                 });
                 if (result.data.success) {
-                    dispatch(setNewShop({ idCategory: result.data.data.id, ...store }));
+                    const idCategory = result.data.data.id;
+                    dispatch(setNewShop({ idCategory: idCategory, ...store }));
                     navigate('/biz/upload-image');
                 }
             }

@@ -31,7 +31,6 @@ function BusinessSearch() {
     const [suggestedLocations, setSuggestedLocations] = useState<string[]>([]);
     const [shops, setShops] = useState<Shop[] | null>(null);
     const theme = useTheme();
-
     const fetchCategory = async () => {
         try {
             const response = await usersCategory.getAllCategories();

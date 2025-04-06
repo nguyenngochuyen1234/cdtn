@@ -16,6 +16,8 @@ const NAVIGATION = [
     { segment: 'moderation', title: 'Kiểm duyệt', icon: <AdminPanelSettings /> },
     { segment: 'categories', title: 'Danh mục', icon: <Category /> },
     { segment: 'users', title: 'Người dùng', icon: <People /> },
+    { segment: 'advertisement', title: 'Quảng cáo', icon: <Category /> },
+
     { segment: 'logout', title: 'Đăng xuất', icon: <Logout /> },
 ];
 

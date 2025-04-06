@@ -64,10 +64,9 @@ function UploadImagePage() {
                     );
                     if (response.data.success) {
                         if (index === 0) {
-                            dispatch(setNewShop({ avatar: response.data.data, ...store }));
+                            localStorage.setItem('AVATAR', response.data.data);
                         } else if (index === 1) {
-                            dispatch(setNewShop({ imageBusiness: response.data.data, ...store }));
-                            navigate('/finish-create-shop');
+                            localStorage.setItem('IMAGE_BUSINESS', response.data.data);
                         }
                     }
                 } catch (error) {
@@ -79,6 +78,7 @@ function UploadImagePage() {
                 const results = await Promise.all(uploadPromises);
                 const successMessages = results.filter((msg) => msg !== null).join('\n');
                 setUploadSuccess(successMessages);
+                navigate('/finish-create-shop');
             } catch (error: any) {
                 setUploadError(error.message);
             } finally {
@@ -86,7 +86,6 @@ function UploadImagePage() {
             }
         }
     };
-
     return (
         <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, p: 3, boxShadow: 2, borderRadius: 2 }}>
             <Typography variant="h5" fontWeight="bold" gutterBottom>

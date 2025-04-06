@@ -158,9 +158,9 @@ const App: React.FC = () => {
             );
             const response = await shopApi.createShop({
                 name: formData.name,
-                avatar: store?.avatar,
-                imageBusiness: store?.imageBusiness,
-                email: store?.email,
+                avatar: localStorage.getItem('AVATAR') || '',
+                imageBusiness: localStorage.getItem('IMAGE_BUSINESS') || '',
+                email: localStorage.getItem('EMAIL_BIZ'),
                 mediaUrls: meadiaUrls.data.data,
                 description: formData.description,
                 urlWebsite: formData.urlWebsite,
