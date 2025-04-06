@@ -21,9 +21,10 @@ export interface Shop {
     hasAnOwner: boolean;
     type: string;
     description: string;
-    categoryResponse: { tags: string[] };
+    categoryResponse: string;
     price: number;
     statusShop: 'ACTIVE' | 'INACTIVE' | 'BANNED';
+    view: number;
 }
 export interface OpenTime {
     id: string;

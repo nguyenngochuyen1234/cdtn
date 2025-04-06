@@ -47,6 +47,9 @@ import PoliciesPage from './pages/policy';
 import ReviewList from './components/ReviewList';
 import { ToastContainer } from 'react-toastify';
 import WriteReview from './components/shop/WriteReview';
+import ServicesList from './components/shop/Service';
+import ServiceDetailPage from './components/shop/ServiceDetailPage';
+import FavoriteStores from './components/shop/FavoritePage';
 
 >>>>>>> f3ef8d80d1c7a33462f8034cf81c0a8b62d31337
 export default function App() {
@@ -94,7 +97,11 @@ export default function App() {
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="policy" element={<PoliciesPage />} />
                     <Route path="/reviews" element={<ReviewList />} />
-                    <Route path="write-review/:shopId" element={<WriteReview />} />
+                    <Route path="write-review/shop/:shopId" element={<WriteReview />} />
+                    <Route path="write-review/service/:serviceId" element={<WriteReview />} />
+                    <Route path="/shop/:shopId/service" element={<ServicesList />} />
+                    <Route path="/shop/service/:serviceId" element={<ServiceDetailPage />} />
+                    <Route path='/favorites' element = {<FavoriteStores></FavoriteStores>}></Route>
                 </Route>
                 <Route path="/auth" element={<AuthPage />}>
                     <Route path="login" element={<LoginPage />} />

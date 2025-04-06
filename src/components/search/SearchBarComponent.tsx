@@ -3,48 +3,61 @@ import {
     Box,
     TextField,
     Button,
-    IconButton,
     Divider,
-    Select,
-    MenuItem,
-    Stack,
-    makeStyles,
     Typography,
     useMediaQuery,
     useTheme,
 } from '@mui/material';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import { colors } from '@/themes/colors';
-import LocationPicker from '../location/LocationPicker';
+import { useNavigate } from 'react-router-dom';
 import GoogleLocation from '../location/GoogleLocation';
-import { Link, useNavigate } from 'react-router-dom';
+
 interface SearchBarProps {
-    onSearch: (keyword: string) => void;
-    isSearchPage?: boolean; // New prop to distinguish usage context
+    onSearch: (keyword: string, location?: { latitude: number; longitude: number }) => void;
+    isSearchPage?: boolean;
     initialKeyword?: string;
+    initialLocation?: { latitude: number; longitude: number };
 }
-const SearchBarComponent: React.FC<SearchBarProps> = ({ onSearch, isSearchPage, initialKeyword = ''}) => {
+
+const SearchBarComponent: React.FC<SearchBarProps> = ({
+    onSearch,
+    isSearchPage,
+    initialKeyword = '',
+    initialLocation,
+}) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [keyword, setKeyword] = useState<string>(initialKeyword);
+    const [location, setLocation] = useState<{ latitude: number; longitude: number } | undefined>(
+        initialLocation
+    );
     const navigate = useNavigate();
-        // Cập nhật keyword khi initialKeyword thay đổi (dành cho SearchPage)
+
+    // Update keyword when initialKeyword changes
     useEffect(() => {
         setKeyword(initialKeyword);
     }, [initialKeyword]);
+
+    // Update location when initialLocation changes
+    useEffect(() => {
+        setLocation(initialLocation);
+    }, [initialLocation]);
+
+    const handleLocationChange = (newLocation: { lat: number; lng: number }) => {
+        setLocation({
+            latitude: newLocation.lat,
+            longitude: newLocation.lng,
+        });
+    };
+
     const handleSearch = () => {
-        if (keyword.trim()) {
-            if (!isSearchPage) {
-                // Từ trang chủ: chuyển hướng đến search page và truyền state
-                navigate('/search', { state: { keyword: keyword.trim() } });
-                setKeyword('');
-            } else {
-                // Trong search page: gọi onSearch để tìm kiếm
-                onSearch(keyword.trim());
-            }
+        const trimmedKeyword = keyword.trim();
+        if (!isSearchPage) {
+            // From HomePage: navigate to SearchPage and pass keyword and location
+            navigate('/search', { state: { keyword: trimmedKeyword, location } });
+        } else {
+            // In SearchPage: call onSearch with keyword and location
+            onSearch(trimmedKeyword, location);
         }
     };
 
@@ -81,13 +94,14 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({ onSearch, isSearchPage, 
                         },
                     }}
                 />
-                {!isMobile && <GoogleLocation />}
+                {!isMobile && (
+                    <GoogleLocation
+                        onLocationChange={handleLocationChange}
+                        selectedLocation={location}
+                    />
+                )}
                 <Divider orientation="vertical" flexItem />
-                <Button
-                    color="primary"
-                    variant="contained"
-                    onClick={handleSearch}
-                >
+                <Button color="primary" variant="contained" onClick={handleSearch}>
                     <SearchIcon sx={{ color: '#fff' }} />
                 </Button>
             </Box>
