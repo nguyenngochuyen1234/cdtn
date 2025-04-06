@@ -19,6 +19,7 @@ import { ParamFilterShop, Shop, ShopSearchResponse } from '@/models';
 import { colors } from '@/themes/colors';
 import PaginationComponent from '@/components/shop/Panigation';
 import { useLocation } from 'react-router-dom';
+import CustomPagination from '@/components/shop/CustomPagination';
 
 interface FilterParams {
     keyword: string;
@@ -53,7 +54,6 @@ export default function SearchPage() {
 
     const fetchDataShop = async () => {
         try {
-
             const apiParams: ParamFilterShop = {
                 keyword: filterParams.keyword !== undefined ? filterParams.keyword : '', // Truyền '' nếu không có keyword
                 categoryId:
@@ -75,7 +75,6 @@ export default function SearchPage() {
             setShops([]);
             setTotalShops(0);
         }
-
     };
 
     const sortShops = (shops: Shop[], sort: string) => {
@@ -196,14 +195,11 @@ export default function SearchPage() {
                             <Box sx={{ flexGrow: 1 }}>
                                 <ShopSearch shops={shops} />
                             </Box>
-                            <Box mt={1}>
-                                {' '}
-                                {/* Giảm khoảng cách trên của Pagination */}
-                                <PaginationComponent
-                                    totalItems={totalShops}
-                                    itemsPerPage={pageSize}
-                                    currentPage={page}
-                                    onPageChange={handlePageChange}
+                            <Box mt={1} alignContent={'center'}>
+                                <CustomPagination
+                                    page={page + 1} // vì MUI Pagination bắt đầu từ 1
+                                    totalPages={Math.ceil(totalShops / pageSize)}
+                                    onPageChange={(newPage) => setPage(newPage - 1)} // vì state page của bạn bắt đầu từ 0
                                 />
                             </Box>
                         </Card>

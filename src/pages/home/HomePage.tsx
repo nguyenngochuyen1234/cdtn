@@ -15,6 +15,9 @@ import SearchBarComponent from '@/components/search/SearchBarComponent';
 import ShopCard from '@/components/shop/ShopCard';
 import reviewApi from '@/api/reviewApi';
 import shopApi from '@/api/shopApi';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/stores';
+import axiosClient from '@/api/axiosClient';
 
 const categories = [
     {
@@ -34,75 +37,130 @@ const categories = [
         name: 'Khách Sạn',
     },
 ];
+
 const imageStyle: React.CSSProperties = {
     width: '100%',
     height: '80vh',
     objectFit: 'cover',
     borderRadius: 10,
 };
+
 const HomePage = () => {
     const [dataReviews, setDataReview] = useState<Review[] | null>(null);
     const [shops, setShops] = useState([]);
     const navigate = useNavigate();
+    const user = useSelector((state: RootState) => state.user.user);
+    const [initialLocation, setInitialLocation] = useState<
+        { latitude: number; longitude: number } | undefined
+    >(undefined);
+
+    useEffect(() => {
+        const storedLocation = localStorage.getItem('userLocation');
+        if (storedLocation) {
+            const locationData = JSON.parse(storedLocation);
+            setInitialLocation({
+                latitude: locationData.lat,
+                longitude: locationData.lng,
+            });
+        }
+    }, []);
+
     const fetchReviewRecently = async () => {
         try {
             const response = await reviewApi.getAllReviewRecently();
-            setDataReview(response.data.data); // Lưu dữ liệu từ API vào state
+            setDataReview(response.data.data);
         } catch (error) {
             console.error('Error fetching recent reviews:', error);
-            setDataReview([]); // Nếu lỗ
+            setDataReview([]);
         }
     };
+
     useEffect(() => {
         fetchReviewRecently();
     }, []);
-    console.log(dataReviews);
+
     useEffect(() => {
-        const fetchSuggestedShops = async () => {
+        const fetchShops = async () => {
             try {
-                const userLocation = localStorage.getItem('userLocation');
+                if (user) {
+                    const userLocation = localStorage.getItem('userLocation');
+                    let longitude = null;
+                    let latitude = null;
 
-                let longitude = null;
-                let latitude = null;
+                    if (userLocation) {
+                        try {
+                            const locationData = JSON.parse(userLocation);
+                            longitude = locationData.lng;
+                            latitude = locationData.lat;
+                        } catch (error) {
+                            console.error('Lỗi khi parse userLocation từ localStorage:', error);
+                        }
+                    }
 
-                if (userLocation) {
-                    try {
-                        const locationData = JSON.parse(userLocation);
-                        longitude = locationData.lng;
-                        latitude = locationData.lat;
-                    } catch (error) {
-                        console.error('Lỗi khi parse userLocation từ localStorage:', error);
+                    const requestBody = {
+                        page: 0,
+                        size: 4,
+                        checkType: 'forme',
+                        ...(longitude &&
+                            latitude && {
+                                longitude: parseFloat(longitude),
+                                latitude: parseFloat(latitude),
+                            }),
+                    };
+
+                    const response = await shopApi.getShopsSuggest(requestBody);
+                    if (response.data.success) {
+                        setShops(response.data.data);
+                    }
+                } else {
+                    const response = await shopApi.getShopAds();
+                    if (response.data.success) {
+                        const sponsoredShops = response.data.data;
+                        const shopsWithOpenTimes = await Promise.all(
+                            sponsoredShops.map(async (shop: any) => {
+                                let openTimeResponses = [];
+                                if (shop.listIdOpenTime && Array.isArray(shop.listIdOpenTime)) {
+                                    try {
+                                        const openTimePromises = shop.listIdOpenTime.map(
+                                            (id: string) => shopApi.getOpenTimeById(id)
+                                        );
+                                        const openTimeResults = await Promise.all(openTimePromises);
+                                        openTimeResponses = openTimeResults
+                                            .filter((result: any) => result.data.success)
+                                            .map((result: any) => ({
+                                                closeTime: result.data.data.closeTime || '10.00 PM',
+                                            }));
+                                    } catch (error) {
+                                        console.error(
+                                            `Error fetching open time for shop ${shop.id}:`,
+                                            error
+                                        );
+                                    }
+                                }
+                                return {
+                                    ...shop,
+                                    openTimeResponses,
+                                    point: shop.point ?? 0,
+                                    countReview: shop.countReview ?? 0,
+                                };
+                            })
+                        );
+                        setShops(shopsWithOpenTimes);
                     }
                 }
-                // Tạo body request
-                const requestBody = {
-                    page: 0,
-                    size: 4,
-                    checkType: 'forme',
-                    ...(longitude &&
-                        latitude && {
-                            longitude: parseFloat(longitude),
-                            latitude: parseFloat(latitude),
-                        }),
-                };
-
-                const response = await shopApi.suggestShop(requestBody);
-                if (response.data.success) {
-                    setShops(response.data.data);
-                }
             } catch (error) {
-                console.error('Error fetching suggested shops:', error);
+                console.error('Error fetching shops:', error);
+                setShops([]);
             }
         };
 
-        fetchSuggestedShops();
-    }, []);
+        fetchShops();
+    }, [user]);
 
-    // Handle search from SearchBarComponent
-    const handleSearch = (keyword: string) => {
-        // Chuyển hướng sang SearchPage và truyền keyword qua state thay vì URL params
-        navigate('/search', { state: { keyword } });
+    const handleSearch = (keyword: string, location?: { latitude: number; longitude: number }) => {
+        navigate('/search', { state: { keyword, location } });
     };
+
     return (
         <div className="px-[50px] py-[30px] bg-[#FAFBFC]">
             <div className="relative">
@@ -129,7 +187,6 @@ const HomePage = () => {
                     </Carousel>
                 </div>
 
-                {/* Phiên bản cho màn hình nhỏ */}
                 <div className="block md:hidden">
                     <img
                         style={imageStyle}
@@ -137,7 +194,6 @@ const HomePage = () => {
                     />
                 </div>
 
-                {/* Search component */}
                 <div
                     className="absolute bg-[#fff] rounded-md shadow-lg p-4 bottom-[-40px] left-1/2 transform -translate-x-1/2"
                     style={{ width: 'min(90%, 800px)' }}
@@ -145,35 +201,32 @@ const HomePage = () => {
                     <SearchBarComponent onSearch={handleSearch} isSearchPage={false} />{' '}
                 </div>
             </div>
+
             <main className="mt-[30px]">
-                {/* Tiêu đề phần cửa hàng */}
                 <Box
                     justifyContent="space-between"
                     display="flex"
                     alignItems="center"
                     sx={{
                         mb: 1,
-                        flexDirection: { xs: 'column', md: 'row' }, // Cột trên mobile, hàng trên desktop
-                        textAlign: { xs: 'center', md: 'left' }, // Căn giữa trên mobile
+                        flexDirection: { xs: 'column', md: 'row' },
+                        textAlign: { xs: 'center', md: 'left' },
                     }}
                 >
                     <div>
-                        <h2>Các cửa hàng bạn nên đến</h2>
-                        <span>Gợi ý những cửa hàng phù hợp</span>
+                        <h2>{user ? 'Các cửa hàng bạn nên đến' : 'Các cửa hàng được tài trợ'}</h2>
+                        <span>
+                            {user ? 'Gợi ý những cửa hàng phù hợp' : 'Các cửa hàng được quảng cáo'}
+                        </span>
                     </div>
-                    <Link to={'/shops'}>
-                        <Button
-                            variant="outlined"
-                            color="error"
-                            sx={{ mt: { xs: 2, md: 0 } }} // Thêm khoảng cách trên mobile
-                        >
+                    <Link to={'/search'}>
+                        <Button variant="outlined" color="error" sx={{ mt: { xs: 2, md: 0 } }}>
                             Xem thêm
                         </Button>
                     </Link>
                 </Box>
 
-                {/* Danh sách cửa hàng */}
-                <Grid container spacing={3} sx={{ pb: 1 }}>
+                <Grid container spacing={3} sx={{ pb: 1, mb: 2 }}>
                     {shops && shops.length > 0 ? (
                         shops.map((shop, index) => (
                             <Grid item xs={12} sm={6} md={3} key={index}>
@@ -182,39 +235,33 @@ const HomePage = () => {
                         ))
                     ) : (
                         <Typography variant="body1" sx={{ textAlign: 'center', width: '100%' }}>
-                            Đang tải đánh giá hoặc không có đánh giá nào...
+                            Đang tải cửa hàng hoặc không có cửa hàng nào...
                         </Typography>
                     )}
                 </Grid>
-            </main>
-            <main>
-                {/* Tiêu đề phần bài viết */}
+
                 <Box
                     justifyContent="space-between"
                     display="flex"
                     alignItems="center"
                     sx={{
                         mb: 1,
-                        flexDirection: { xs: 'column', md: 'row' }, // Chuyển về cột trên màn hình nhỏ
-                        textAlign: { xs: 'center', md: 'left' }, // Căn giữa text trên màn hình nhỏ
+                        flexDirection: { xs: 'column', md: 'row' },
+                        textAlign: { xs: 'center', md: 'left' },
                     }}
                 >
                     <div>
-                        <h2>Các bài viết gần đây</h2>
+                        <h2>Danh sách đánh giá gần đây</h2>
                         <span>Tổng hợp các bài viết review</span>
                     </div>
                     <Link to={'/reviews'}>
-                        <Button
-                            variant="outlined"
-                            color="error"
-                            sx={{ mt: { xs: 2, md: 0 } }} // Thêm margin trên màn hình nhỏ để không bị dính
-                        >
+                        <Button variant="outlined" color="error" sx={{ mt: { xs: 2, md: 0 } }}>
                             Xem thêm
                         </Button>
                     </Link>
                 </Box>
 
-                <Grid container spacing={2}>
+                <Grid container spacing={3} sx={{ pb: 1 }}>
                     {dataReviews && dataReviews.length > 0 ? (
                         dataReviews.map((review, index) => (
                             <Grid item xs={12} sm={6} md={3} key={index}>

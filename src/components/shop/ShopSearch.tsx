@@ -304,7 +304,7 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                                         )}
                                     </Button>
                                 </Tooltip>
-                                <Link to={`/write-review/${shop.id}`}>
+                                <Link to={`/write-review/shop/${shop.id}`}>
                                     <Button
                                         variant="contained"
                                         color="error"

@@ -8,7 +8,7 @@ interface SuggestShopsProps {
     type: string;
 }
 
-const SuggestShops: React.FC<SuggestShopsProps> = ({ type }) => {
+const Sponsored: React.FC<SuggestShopsProps> = ({ type }) => {
     const [shops, setShops] = useState<Shop[]>([]);
 
     useEffect(() => {
@@ -28,9 +28,9 @@ const SuggestShops: React.FC<SuggestShopsProps> = ({ type }) => {
     }, [type]);
 
     return (
-        <Box sx={{ mt: 0 }}>
+        <Box sx={{ mt: 4 }}>
             <Typography variant="h6" fontWeight="bold">
-                Có thể bạn quan tâm
+                Được tài trợ
             </Typography>
 
             {shops.map((shop) => (
@@ -70,4 +70,4 @@ const SuggestShops: React.FC<SuggestShopsProps> = ({ type }) => {
     );
 };
 
-export default SuggestShops;
+export default Sponsored;

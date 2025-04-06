@@ -34,23 +34,7 @@ const ShopCard = ({ shop }: ShopCardProps) => {
     const [openDialog, setOpenDialog] = useState(false);
     const navigate = useNavigate();
     const user = useSelector((state: RootState) => state.user.user);
-    // Lấy danh sách yêu thích khi component mount nếu đã đăng nhập
-    useEffect(() => {
-        const checkFavoriteStatus = async () => {
-            if (user) {
-                try {
-                    const response = await favoritesApi.getAllFavorite('createdAt', 1, 100);
-                    const favorites = response.data?.data || [];
-                    const isShopFavorite = favorites.some((fav: any) => fav.idShop === shop.id);
-                    setIsFavorite(isShopFavorite);
-                } catch (error) {
-                    console.error('Error fetching favorites:', error);
-                }
-            }
-        };
-        checkFavoriteStatus();
-    }, [user, shop.id]);
-    // Lấy danh sách yêu thích khi component mount nếu đã đăng nhập
+
     useEffect(() => {
         const checkFavoriteStatus = async () => {
             if (user) {
@@ -82,8 +66,8 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                 if (!response.data.success) {
                     toast.error(response.data.message || 'Có lỗi xảy ra');
                     return;
-                }else{
-                    toast.success("Xóa cửa hàng yêu thích thành công")
+                } else {
+                    toast.success('Xóa cửa hàng yêu thích thành công');
                 }
                 setIsFavorite(false);
             } else {
@@ -93,8 +77,8 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                 if (!response.data.success) {
                     toast.error(response.data.message || 'Có lỗi xảy ra');
                     return;
-                }else{
-                    toast.success("Thêm cửa hàng yêu thích thành công")
+                } else {
+                    toast.success('Thêm cửa hàng yêu thích thành công');
                 }
                 setIsFavorite(true);
             }
@@ -115,29 +99,33 @@ const ShopCard = ({ shop }: ShopCardProps) => {
     return (
         <Card
             sx={{
-                maxWidth: 345,
+                width: 300, // Fixed width
+                height: 350, // Fixed height
                 borderRadius: 2,
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                 border: '1px solid #e0e0e0',
                 overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
             }}
         >
             <Link to={`/detailPost/${shop.id}`}>
                 <CardMedia
                     component="img"
-                    image={shop.avatar || 'https://via.placeholder.com/345x140'}
+                    image={shop.avatar || 'https://via.placeholder.com/300x140'}
                     alt={shop.name}
                     sx={{
-                        height: '140px',
+                        height: 140, // Fixed image height
                         width: '100%',
                         objectFit: 'cover',
-                        borderRadius: 0,
                     }}
                 />
             </Link>
 
-            <Box sx={{ position: 'relative' }}>
-                <CardContent sx={{ pb: 2 }}>
+            <Box
+                sx={{ position: 'relative', flexGrow: 1, display: 'flex', flexDirection: 'column' }}
+            >
+                <CardContent sx={{ pb: 2, flexGrow: 1 }}>
                     <Box
                         sx={{
                             display: 'flex',
@@ -151,6 +139,9 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                             component="div"
                             sx={{
                                 fontWeight: 'bold',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
                             }}
                         >
                             {shop.name}
@@ -182,7 +173,15 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                                 color="action"
                                 sx={{ mr: 0.5 }}
                             />
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
                                 {shop.city}
                             </Typography>
                         </Box>
@@ -192,8 +191,16 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                                 color="action"
                                 sx={{ mr: 0.5 }}
                             />
-                            <Typography variant="body2" color="text.secondary">
-                                Đóng cửa lúc {shop.openTimeResponses[0]?.closeTime || 'N/A'}
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                Đóng cửa lúc {shop.openTimeResponses[0]?.closeTime || '10.00PM'}
                             </Typography>
                         </Box>
                     </Stack>
@@ -207,6 +214,7 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical',
+                            height: 40, // Fixed height for description
                         }}
                     >
                         {shop.description}

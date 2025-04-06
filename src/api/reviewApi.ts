@@ -28,9 +28,9 @@ const reviewApi = {
         const url = '/reviews';
         return axiosClient.post(url, data);
     },
-    getAllReviewByIdShop(idShop: string) {
+    getAllReviewByIdShop(idShop: string, body: any) {
         const url = `/reviews/getall/shop/${idShop}`;
-        return axiosClient.get(url);
+        return axiosClient.post(url, body);
     },
     getAllReviewByIdService(idService: string) {
         const url = `/reviews/getall/service/${idService}`;
