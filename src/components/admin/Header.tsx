@@ -8,16 +8,16 @@ import {
     Typography,
     styled,
     Stack,
-} from '@mui/material'
-import { NotificationsOutlined } from '@mui/icons-material'
-import { SearchBar } from './searchBar'
+} from '@mui/material';
+import { NotificationsOutlined } from '@mui/icons-material';
+import { SearchBar } from './searchBar';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
     backgroundColor: 'white',
     color: theme.palette.text.primary,
     boxShadow: 'none',
     borderBottom: `1px solid ${theme.palette.divider}`,
-}))
+}));
 
 const NotificationBadge = styled(Badge)(({ theme }) => ({
     '& .MuiBadge-badge': {
@@ -27,7 +27,7 @@ const NotificationBadge = styled(Badge)(({ theme }) => ({
         height: 18,
         padding: '0 4px',
     },
-}))
+}));
 
 export function Header() {
     return (
@@ -37,11 +37,6 @@ export function Header() {
                     <SearchBar />
                 </Box>
                 <Stack flexDirection="row">
-                    <IconButton size="large" color="inherit">
-                        <NotificationBadge badgeContent={5}>
-                            <NotificationsOutlined />
-                        </NotificationBadge>
-                    </IconButton>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Avatar
                             src="/placeholder.svg?height=32&width=32"
@@ -57,7 +52,6 @@ export function Header() {
                     </Box>
                 </Stack>
             </Toolbar>
-        </StyledAppBar >
-    )
+        </StyledAppBar>
+    );
 }
-

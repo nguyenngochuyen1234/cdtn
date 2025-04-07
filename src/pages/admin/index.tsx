@@ -12,7 +12,6 @@ import * as React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 const NAVIGATION = [
     { segment: '', title: 'Tổng quan', icon: <Dashboard /> },
-    { segment: 'statistics', title: 'Thống kê', icon: <BarChart /> },
     { segment: 'moderation', title: 'Kiểm duyệt', icon: <AdminPanelSettings /> },
     { segment: 'categories', title: 'Danh mục', icon: <Category /> },
     { segment: 'users', title: 'Người dùng', icon: <People /> },
@@ -73,7 +72,7 @@ const AdminPage = () => {
                     ))}
                 </List>
             </Drawer>
-            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', p: 3, height: '100vh' }}>
+            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', p: 3, minHeight: '100vh' }}>
                 <AppBar position="fixed" sx={{ width: `calc(100% - 240px)`, ml: '240px' }}>
                     <Header />
                 </AppBar>

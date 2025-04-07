@@ -38,17 +38,15 @@ import ServicesPage from './pages/owner/ServicesPage';
 import ReviewsPage from './pages/owner/ReviewsPage';
 import OwnerProfile from './pages/owner/ProfilePage';
 import BusinessInfo from './pages/owner/BusinessInfo';
-<<<<<<< HEAD
 import AdvertisementPage from './pages/admin/AdvertisementPage';
 // import BusinessInfo from './pages/owner/BusinessInfo';
-=======
 import AboutPage from './pages/about';
 import PoliciesPage from './pages/policy';
 import ReviewList from './components/ReviewList';
 import { ToastContainer } from 'react-toastify';
 import WriteReview from './components/shop/WriteReview';
+import OpeningHoursPage from './pages/owner/OpeningHoursPage';
 
->>>>>>> f3ef8d80d1c7a33462f8034cf81c0a8b62d31337
 export default function App() {
     const dispatch = useDispatch();
 
@@ -105,10 +103,11 @@ export default function App() {
                     <Route path="verify-account" element={<ActiveCodeUser />} />
                 </Route>
                 <Route path="/owner" element={<OwnerPage />}>
+                    <Route index element={<StatisticsPageOwner />} />
                     <Route path="profile" element={<OwnerProfile />} />
                     <Route path="business-info" element={<BusinessInfo />} />
                     <Route path="services" element={<ServicesPage />} />
-                    <Route path="statistics" element={<StatisticsPageOwner />} />
+                    <Route path="opening-hours" element={<OpeningHoursPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                 </Route>
                 <Route path="/biz" element={<CreateShop />}>
@@ -121,8 +120,7 @@ export default function App() {
                 <Route path="writeareview" element={<BusinessSearch />} />
                 <Route path="writeareview/biz/:id" element={<ReviewBusiness />} />
                 <Route path="/admin" element={<AdminPage />}>
-                    <Route index element={<OverviewPage />} />
-                    <Route path="statistics" element={<StatisticsPage />} />
+                    <Route index element={<StatisticsPage />} />
                     <Route path="moderation" element={<ModerationPage />} />
                     <Route path="categories" element={<CategoriesPage />} />
                     <Route path="users" element={<UsersPage />} />

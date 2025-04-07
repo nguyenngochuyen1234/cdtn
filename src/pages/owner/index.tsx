@@ -1,31 +1,8 @@
-import * as React from 'react';
-import {
-    Avatar,
-    Box,
-    CssBaseline,
-    AppBar,
-    Toolbar,
-    Typography,
-    IconButton,
-    Drawer,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-} from '@mui/material';
-import {
-    Dashboard,
-    Article,
-    BarChart,
-    AdminPanelSettings,
-    RateReview,
-    DesignServices,
-    Business,
-    Person,
-} from '@mui/icons-material';
-import { BrowserRouter as Router, Route, Routes, Link, Outlet } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/admin/Header';
+import { Business, Dashboard, DesignServices, Person, RateReview } from '@mui/icons-material';
+import { AppBar, Box, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import * as React from 'react';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 
 // Tạo Theme cho MUI
 const demoTheme = {
@@ -37,10 +14,11 @@ const demoTheme = {
 
 // Navigation Menu
 const NAVIGATION = [
+    { segment: '', title: 'Tổng quan', icon: <Dashboard /> },
     { segment: 'profile', title: 'Thông tin cá nhân', icon: <Person /> },
     { segment: 'business-info', title: 'Thông tin doanh nghiệp', icon: <Business /> },
     { segment: 'services', title: 'Danh sách dịch vụ', icon: <DesignServices /> },
-    { segment: 'statistics', title: 'Thống kê', icon: <BarChart /> },
+    { segment: 'opening-hours', title: 'Giờ mở cửa', icon: <DesignServices /> },
     { segment: 'reviews', title: 'Quản lý danh sách đánh giá', icon: <RateReview /> },
 ];
 const AdminPage = () => {

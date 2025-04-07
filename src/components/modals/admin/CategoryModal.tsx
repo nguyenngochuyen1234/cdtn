@@ -85,10 +85,10 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
 
     return (
         <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Create New Category</DialogTitle>
+            <DialogTitle>{currentCategory ? 'Chỉnh sửa danh mục' : 'Tạo danh mục mới'}</DialogTitle>
             <DialogContent>
                 <TextField
-                    label="Category Name"
+                    label="Tên danh mục"
                     name="name"
                     value={newCategory.name}
                     onChange={handleTextFieldChange}
@@ -96,7 +96,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                     margin="normal"
                 />
                 <TextField
-                    label="Description"
+                    label="Mô tả"
                     name="description"
                     value={newCategory.description}
                     onChange={handleTextFieldChange}
@@ -104,9 +104,9 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                     margin="normal"
                 />
                 <FormControl fullWidth margin="normal">
-                    <InputLabel>Category Type</InputLabel>
+                    <InputLabel>Loại danh mục</InputLabel>
                     <Select
-                        label="Category Type"
+                        label="Loại danh mục"
                         name="type"
                         value={newCategory.type}
                         onChange={handleSelectChange}
@@ -119,7 +119,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                     </Select>
                 </FormControl>
                 <TextField
-                    label="New Tag"
+                    label="Thẻ mới"
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
                     fullWidth
@@ -132,10 +132,9 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                     disabled={!newTag.trim()}
                     style={{ marginTop: '10px' }}
                 >
-                    Add Tag
+                    Thêm thẻ
                 </Button>
                 <div style={{ marginTop: '10px' }}>
-                    {/* Display added tags as chips */}
                     {tags.map((tag, index) => (
                         <Chip
                             key={index}
@@ -148,10 +147,10 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="secondary">
-                    Cancel
+                    Hủy
                 </Button>
                 <Button onClick={handleSubmit} color="primary">
-                    Submit
+                    Lưu
                 </Button>
             </DialogActions>
         </Dialog>

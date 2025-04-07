@@ -147,12 +147,12 @@ const CategoriesPage: React.FC = () => {
                     <TableHead>
                         <TableRow>
                             <StyledTableCell />
-                            <StyledTableCell>Name</StyledTableCell>
-                            <StyledTableCell>Type</StyledTableCell>
-                            <StyledTableCell>Description</StyledTableCell>
-                            <StyledTableCell sx={{ width: 150 }}>Actions</StyledTableCell>
+                            <StyledTableCell>Tên danh mục</StyledTableCell>
+                            <StyledTableCell>Loại</StyledTableCell>
+                            <StyledTableCell sx={{ width: 150 }}>Hành động</StyledTableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {categories?.map((category) => (
                             <React.Fragment key={category.id}>
@@ -171,7 +171,6 @@ const CategoriesPage: React.FC = () => {
                                     </StyledTableCell>
                                     <StyledTableCell>{category.name}</StyledTableCell>
                                     <StyledTableCell>{category.type}</StyledTableCell>
-                                    <StyledTableCell>{category.description}</StyledTableCell>
                                     <StyledTableCell>
                                         <IconButton
                                             color="primary"

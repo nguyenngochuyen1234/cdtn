@@ -29,6 +29,10 @@ const ownerApi = {
         const url = `/own/shop/get-shop`;
         return axiosClient.get(url);
     },
+    getReview(data: { limit: 12; page: 0 }) {
+        const url = `/own/shop/get-review`;
+        return axiosClient.post(url, data);
+    },
     getServiceById_1(idComment: string) {
         const url = `/own/shop/service/${id}`;
         return axiosClient.get(url);
