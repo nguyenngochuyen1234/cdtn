@@ -1,8 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Modal, TextField, Typography, CircularProgress, Grid } from '@mui/material';
+import {
+    Box,
+    Button,
+    Modal,
+    TextField,
+    Typography,
+    CircularProgress,
+    Grid,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+} from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import ownerApi from '@/api/ownApi';
 import { Review } from '@/models';
+import { ReplyIcon } from 'lucide-react';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DeleteIcon from '@mui/icons-material/Delete';
+import commentApi from '@/api/comment';
 
 const modalStyle = {
     position: 'absolute' as const,
@@ -24,9 +41,10 @@ const ReviewsPage = () => {
     const [replyModalOpen, setReplyModalOpen] = useState(false);
     const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
     const [replyContent, setReplyContent] = useState('');
-
     const [detailModalOpen, setDetailModalOpen] = useState(false);
     const [selectedReviewDetail, setSelectedReviewDetail] = useState<Review | null>(null);
+    const [comment, setComment] = useState<{ id: string; content: string } | null>(null);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
     const fetchDataShop = async () => {
         try {
@@ -40,22 +58,81 @@ const ReviewsPage = () => {
         }
     };
 
+    const fetchCommentsByReviewId = async (reviewId: string) => {
+        try {
+            const resComment = await commentApi.getCommentsByReviewId(reviewId);
+            console.log('Fetched comment:', resComment.data.data);
+            const commentData = resComment.data.data;
+            setComment(commentData ? { id: commentData.id, content: commentData.content } : null);
+            return commentData;
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+            setComment(null);
+            return null;
+        }
+    };
+
     useEffect(() => {
         fetchDataShop();
     }, []);
 
-    const handleOpenReplyModal = (reviewId: string) => {
+    const handleOpenReplyModal = async (reviewId: string) => {
         setSelectedReviewId(reviewId);
+        const existingComment = await fetchCommentsByReviewId(reviewId);
+        if (existingComment) {
+            setReplyContent(existingComment.content);
+        } else {
+            setReplyContent('');
+        }
         setReplyModalOpen(true);
     };
 
-    const handleSendReply = async () => {
-        console.log('Send reply for:', selectedReviewId, replyContent);
-        setReplyModalOpen(false);
-        setReplyContent('');
+    const handleSendOrUpdateReply = async () => {
+        if (!selectedReviewId || !replyContent.trim()) return;
+
+        try {
+            if (comment) {
+                await commentApi.updateComment(comment.id, { content: replyContent });
+                console.log('Comment updated:', replyContent);
+                setComment({ ...comment, content: replyContent });
+            } else {
+                const res = await commentApi.createComment(selectedReviewId, {
+                    content: replyContent,
+                });
+                console.log('Reply sent for:', selectedReviewId, replyContent);
+                setComment({ id: res.data.data.id, content: replyContent });
+            }
+            setReplyModalOpen(false);
+            setReplyContent('');
+        } catch (error) {
+            console.error('Error sending/updating reply:', error);
+        }
     };
 
-    const handleRowClick = (params: any) => {
+    const handleOpenDeleteConfirm = () => {
+        if (comment?.id) {
+            setDeleteConfirmOpen(true); // Open confirmation dialog
+        }
+    };
+
+    const handleDeleteComment = async () => {
+        if (!comment?.id) return;
+
+        try {
+            await commentApi.deleteComment(comment.id);
+            console.log('Comment deleted:', comment.id);
+            setComment(null);
+            setReplyContent('');
+            setReplyModalOpen(false); // Close reply modal after deletion
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        } finally {
+            setDeleteConfirmOpen(false); // Close confirmation dialog
+        }
+    };
+
+    const handleRowClick = async (params: any) => {
+        await fetchCommentsByReviewId(params.row.id);
         setSelectedReviewDetail(params.row);
         setDetailModalOpen(true);
     };
@@ -64,44 +141,36 @@ const ReviewsPage = () => {
         {
             field: 'reviewContent',
             headerName: 'Nội dung',
+            width: 500,
             flex: 1,
         },
         {
             field: 'rating',
-            headerName: 'Số sao',
-            width: 100,
-        },
-        {
-            field: 'mediaUrlReview',
-            headerName: 'Ảnh',
-            width: 100,
-            renderCell: (params) => {
-                const firstImage = (params.value as string[])[0];
-                return firstImage ? (
-                    <img
-                        src={firstImage}
-                        alt="media"
-                        width={40}
-                        height={40}
-                        style={{ objectFit: 'cover', borderRadius: 4 }}
-                    />
-                ) : null;
-            },
+            headerName: 'Điểm đánh giá',
+            width: 200,
         },
         {
             field: 'createdAt',
             headerName: 'Ngày tạo',
-            width: 180,
-            valueFormatter: (params) => new Date(params.value).toLocaleString(),
+            width: 200,
+            valueFormatter: (params) => new Date(params).toLocaleString(),
         },
         {
             field: 'actions',
-            headerName: '',
+            headerName: 'Hành động',
             width: 150,
             renderCell: (params) => (
-                <Button variant="outlined" onClick={() => handleOpenReplyModal(params.row.id)}>
-                    Trả lời
-                </Button>
+                <div>
+                    <IconButton
+                        aria-label="reply"
+                        onClick={() => handleOpenReplyModal(params.row.id)}
+                    >
+                        <ReplyIcon />
+                    </IconButton>
+                    <IconButton aria-label="view details" onClick={() => handleRowClick(params)}>
+                        <VisibilityIcon />
+                    </IconButton>
+                </div>
             ),
         },
     ];
@@ -120,7 +189,6 @@ const ReviewsPage = () => {
                     getRowId={(row) => row.id}
                     autoHeight
                     pageSizeOptions={[5, 10]}
-                    onRowClick={handleRowClick}
                 />
             )}
 
@@ -128,7 +196,7 @@ const ReviewsPage = () => {
             <Modal open={replyModalOpen} onClose={() => setReplyModalOpen(false)}>
                 <Box sx={modalStyle}>
                     <Typography variant="h6" gutterBottom>
-                        Trả lời đánh giá
+                        {comment ? 'Chỉnh sửa phản hồi' : 'Trả lời đánh giá'}
                     </Typography>
                     <TextField
                         label="Nội dung phản hồi"
@@ -139,11 +207,40 @@ const ReviewsPage = () => {
                         onChange={(e) => setReplyContent(e.target.value)}
                         margin="normal"
                     />
-                    <Button variant="contained" onClick={handleSendReply} fullWidth>
-                        Gửi phản hồi
-                    </Button>
+                    <Box display="flex" gap={2}>
+                        <Button variant="contained" onClick={handleSendOrUpdateReply} fullWidth>
+                            {comment ? 'Cập nhật' : 'Gửi phản hồi'}
+                        </Button>
+                        {comment && (
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={handleOpenDeleteConfirm} // Open confirmation dialog
+                                startIcon={<DeleteIcon />}
+                                fullWidth
+                            >
+                                Xóa
+                            </Button>
+                        )}
+                    </Box>
                 </Box>
             </Modal>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+                <DialogTitle>Xác nhận xóa phản hồi</DialogTitle>
+                <DialogContent>
+                    <Typography>Bạn có chắc chắn muốn xóa phản hồi này không?</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteConfirmOpen(false)} color="primary">
+                        Hủy
+                    </Button>
+                    <Button onClick={handleDeleteComment} color="error" variant="contained">
+                        Xóa
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Modal xem chi tiết */}
             <Modal open={detailModalOpen} onClose={() => setDetailModalOpen(false)}>
@@ -177,6 +274,12 @@ const ReviewsPage = () => {
                                         </Grid>
                                     ))}
                                 </Grid>
+                            </Box>
+                            <Box mt={2}>
+                                <Typography fontWeight="bold">Phản hồi:</Typography>
+                                <Typography>
+                                    {comment ? comment.content : 'Chưa có phản hồi nào.'}
+                                </Typography>
                             </Box>
                         </>
                     )}

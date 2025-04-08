@@ -93,6 +93,35 @@ export const HeaderComponent = () => {
 
                 {user ? (
                     <>
+                        {/* Nút "Cửa Hàng Yêu Thích" */}
+                        <Button
+                            sx={{
+                                textTransform: 'none',
+                                py: isMobile ? 0.5 : 1,
+                                px: isMobile ? 1 : 2,
+                            }}
+                            onClick={() => navigate('/favorites')}
+                        >
+                            <Typography
+                                variant="subtitle2"
+                                sx={{
+                                    fontWeight: 600,
+                                    color: colors.textColor,
+                                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                    display: isMobile ? 'none' : 'block',
+                                }}
+                            >
+                                Cửa Hàng Yêu Thích
+                            </Typography>
+                            {isMobile && (
+                                <FavoriteIcon sx={{ color: colors.textColor, fontSize: '16px' }} />
+                            )}
+                        </Button>
+
+                        {!isMobile && (
+                            <Box sx={{ width: '1px', height: '16px', bgcolor: 'black' }} />
+                        )}
+
                         {/* Nút "Viết bài đánh giá" */}
                         <Button
                             sx={{
@@ -141,7 +170,7 @@ export const HeaderComponent = () => {
                                 py: isMobile ? 0.5 : 1,
                                 px: isMobile ? 1 : 2,
                             }}
-                            onClick={handleProfileClick} // Sử dụng hàm mới để bật/tắt menu
+                            onClick={handleProfileClick}
                         >
                             <Typography
                                 variant="subtitle2"
@@ -242,3 +271,5 @@ export const HeaderComponent = () => {
         </Box>
     );
 };
+
+export default HeaderComponent;

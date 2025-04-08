@@ -1,7 +1,16 @@
+// components/WriteReview.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Box, Typography, Rating, TextField, Button, IconButton } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import {
+    Box,
+    Typography,
+    Rating,
+    TextField,
+    Button,
+    IconButton,
+    CircularProgress,
+} from '@mui/material';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import shopApi from '@/api/shopApi';
 import userApi from '@/api/userApi';
@@ -9,51 +18,66 @@ import reviewApi from '@/api/reviewApi';
 import { toast } from 'react-toastify';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
+
 interface ReviewData {
     reviewTitle: string;
     reviewContent: string;
     rating: number;
     mediaUrlReview: string[];
     idService?: string;
-    idShop: string;
+    idShop?: string;
 }
 
-export default function WriteReview() {
-    const { shopId } = useParams<{ shopId: string }>();
+const WriteReview: React.FC = () => {
+    const { shopId, serviceId } = useParams<{ shopId?: string; serviceId?: string }>();
     const navigate = useNavigate();
     const location = useLocation();
-    const [shopName, setShopName] = useState<string>('');
+    const [entityName, setEntityName] = useState<string>(''); // Could be shop or service name
     const [rating, setRating] = useState<number | null>(null);
     const [reviewTitle, setReviewTitle] = useState<string>('');
     const [reviewContent, setReviewContent] = useState<string>('');
     const [photos, setPhotos] = useState<File[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [resolvedShopId, setResolvedShopId] = useState<string | null>(null);
 
-    // Kiểm tra đăng nhập bằng access_token
+    // Check authentication
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token) {
-            // Truyền location.state để lưu trữ trang hiện tại
             navigate('/auth/login', { state: { from: location.pathname } });
         }
     }, [navigate, location]);
 
-    // Lấy thông tin cửa hàng
+    // Fetch shop or service details
     useEffect(() => {
-        const fetchShop = async () => {
-            if (shopId) {
-                try {
+        const fetchEntityDetails = async () => {
+            try {
+                if (serviceId) {
+                    // Fetch service details
+                    const response = await shopApi.getDetailServiceById(serviceId);
+                    if (response?.data) {
+                        const serviceData = response.data.data;
+                        setEntityName(serviceData.name || 'Dịch vụ không xác định');
+                        setResolvedShopId(serviceData.idShop); // Get shopId from service
+                    }
+                } else if (shopId) {
+                    // Fetch shop details
                     const response = await shopApi.getShopById(shopId);
-                    setShopName(response.data.data.name || 'Cửa hàng không xác định');
-                } catch (error) {
-                    console.error('Error fetching shop:', error);
-                    toast.error('Không thể lấy thông tin cửa hàng');
+                    if (response?.data) {
+                        setEntityName(response.data.data.name || 'Cửa hàng không xác định');
+                        setResolvedShopId(shopId);
+                    }
                 }
+            } catch (error) {
+                console.error('Error fetching entity details:', error);
+                toast.error('Không thể lấy thông tin');
             }
         };
-        fetchShop();
-    }, [shopId]);
 
-    // Xử lý upload ảnh
+        fetchEntityDetails();
+    }, [shopId, serviceId]);
+
+    // Handle photo upload
     const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const newPhotos = Array.from(event.target.files);
@@ -68,14 +92,19 @@ export default function WriteReview() {
         }
     };
 
-    // Upload ảnh lên server và lấy URL
+    // Handle photo removal
+    const handleRemovePhoto = (index: number) => {
+        setPhotos((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    // Upload photos to server
     const uploadPhotos = async (files: File[]): Promise<string[]> => {
         const uploadedUrls: string[] = [];
         for (const file of files) {
             try {
                 const response = await userApi.uploadImage(file);
                 if (response.data) {
-                    uploadedUrls.push(response.data.url); // Giả sử API trả về URL của ảnh
+                    uploadedUrls.push(response.data.url);
                 }
             } catch (error) {
                 console.error('Error uploading photo:', error);
@@ -84,13 +113,9 @@ export default function WriteReview() {
         }
         return uploadedUrls;
     };
-    // Xử lý xóa ảnh
-    const handleRemovePhoto = (index: number) => {
-        setPhotos((prev) => prev.filter((_, i) => i !== index));
-    };
-    // Xử lý gửi đánh giá
+
+    // Handle review submission
     const handleSubmit = async () => {
-        // Validate các trường
         if (!rating) {
             toast.error('Vui lòng chọn số sao đánh giá');
             return;
@@ -100,28 +125,26 @@ export default function WriteReview() {
             return;
         }
         if (reviewContent.length < 30) {
-            toast.error('Đánh giá phải có ít nhất 50 ký tự');
+            toast.error('Đánh giá phải có ít nhất 30 ký tự');
             return;
         }
 
+        setLoading(true);
         try {
-            // Upload ảnh trước khi gửi đánh giá
             let uploadedPhotoUrls: string[] = [];
             if (photos.length > 0) {
                 uploadedPhotoUrls = await uploadPhotos(photos);
             }
 
-            // Tạo dữ liệu đánh giá
             const reviewData: ReviewData = {
                 reviewTitle,
                 reviewContent,
                 rating: rating!,
                 mediaUrlReview: uploadedPhotoUrls,
-                idShop: shopId!,
-                idService: undefined, // Bạn có thể thêm logic để lấy idService nếu cần
+                idShop: resolvedShopId || undefined,
+                idService: serviceId || undefined,
             };
 
-            // Gửi đánh giá lên server
             const response = await reviewApi.AddReview(reviewData);
             if (!response.data.success) {
                 toast.error(response.data.message || 'Có lỗi xảy ra khi gửi đánh giá');
@@ -129,17 +152,19 @@ export default function WriteReview() {
             }
 
             toast.success('Đánh giá đã được gửi thành công');
-            navigate(`/detailPost/${shopId}`);
+            navigate(`/detailPost/${resolvedShopId}`);
         } catch (error) {
             console.error('Error submitting review:', error);
             toast.error('Có lỗi xảy ra khi gửi đánh giá');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <Box sx={{ maxWidth: 600, mx: 'auto', p: 5 }}>
             <Typography variant="h5" fontWeight="bold" mb={2}>
-                {shopName}
+                Đánh giá : {entityName}
             </Typography>
             <Box
                 sx={{
@@ -159,6 +184,14 @@ export default function WriteReview() {
                     />
                     <Typography variant="body1">Điểm đánh giá</Typography>
                 </Box>
+                <TextField
+                    label="Tiêu đề đánh giá (tùy chọn)"
+                    fullWidth
+                    value={reviewTitle}
+                    onChange={(e) => setReviewTitle(e.target.value)}
+                    variant="outlined"
+                    sx={{ mb: 2 }}
+                />
                 <TextField
                     label="Nội dung đánh giá..."
                     multiline
@@ -242,10 +275,13 @@ export default function WriteReview() {
                 color="error"
                 fullWidth
                 onClick={handleSubmit}
+                disabled={loading}
                 sx={{ textTransform: 'none' }}
             >
-                Gửi đánh giá
+                {loading ? <CircularProgress size={24} /> : 'Gửi đánh giá'}
             </Button>
         </Box>
     );
-}
+};
+
+export default WriteReview;

@@ -1,6 +1,7 @@
 import { ParamFilterShop, StoreCreation } from '@/models';
 import axiosClient from './axiosClient';
 import axios from 'axios';
+import { id } from 'date-fns/locale';
 const shopApi = {
     uploadMultipleImage(files: File[], email: string) {
         if (files.length === 0) {
@@ -59,6 +60,10 @@ const shopApi = {
         const url = '/shops/service';
         return axiosClient.get(url);
     },
+    getServiceByIdShop(idShop: string, data: any) {
+        const url = `/shops/list-service/${idShop}`;
+        return axiosClient.post(url, data);
+    },
     deleteShopService(id: string) {
         const url = `/shops/service/${id}`;
         return axiosClient.get(url);
@@ -75,9 +80,23 @@ const shopApi = {
         const url = `/shops/search`;
         return axiosClient.post(url, data);
     },
+
     getShopsSuggest(data: { page: number; size: number; checkType: string }) {
         const url = `/shops/suggest`;
         return axiosClient.post(url, data);
     },
+
+    getDetailServiceById(id: string){
+        const url = `/shops/detail-service/${id}`
+        return axiosClient.get(url);
+    },
+    getShopAds(){
+        const url = "/ads/get-shop"
+        return axiosClient.get(url);
+    },
+    getOpenTimeById(id:string){
+        const url = `/shops/detail-opentime/${id}`
+        return axiosClient.get(url);
+    }
 };
 export default shopApi;

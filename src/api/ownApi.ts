@@ -33,10 +33,6 @@ const ownerApi = {
         const url = `/own/shop/get-review`;
         return axiosClient.post(url, data);
     },
-    getServiceById_1(idComment: string) {
-        const url = `/own/shop/service/${id}`;
-        return axiosClient.get(url);
-    },
     getListOpenTime() {
         const url = `/own/shop/get-open-time`;
         return axiosClient.get(url);

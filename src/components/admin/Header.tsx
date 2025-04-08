@@ -36,21 +36,6 @@ export function Header() {
                 <Box sx={{ px: 2, mb: 2 }}>
                     <SearchBar />
                 </Box>
-                <Stack flexDirection="row">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar
-                            src="/placeholder.svg?height=32&width=32"
-                            alt="User Avatar"
-                            sx={{ width: 32, height: 32 }}
-                        />
-                        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                            <Typography variant="subtitle2">User A</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                Quản trị
-                            </Typography>
-                        </Box>
-                    </Box>
-                </Stack>
             </Toolbar>
         </StyledAppBar>
     );
