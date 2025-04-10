@@ -129,7 +129,7 @@ export const HeaderComponent = () => {
                                 py: isMobile ? 0.5 : 1,
                                 px: isMobile ? 1 : 2,
                             }}
-                            onClick={() => navigate('/search')}
+                            onClick={() => navigate('/writeareview')}
                         >
                             <Typography
                                 variant="subtitle2"

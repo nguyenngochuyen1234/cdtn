@@ -25,5 +25,9 @@ const authApi = {
         const url = '/auth/active-account';
         return axiosClient.get(url);
     },
+    updateAds(id: string) {
+        const url = '/auth/active-account';
+        return axiosClient.get(url);
+    },
 };
 export default authApi;

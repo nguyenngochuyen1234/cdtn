@@ -38,11 +38,14 @@ import ServicesPage from './pages/owner/ServicesPage';
 import ReviewsPage from './pages/owner/ReviewsPage';
 import OwnerProfile from './pages/owner/ProfilePage';
 import BusinessInfo from './pages/owner/BusinessInfo';
+import AdvertisementPage from './pages/admin/AdvertisementPage';
+// import BusinessInfo from './pages/owner/BusinessInfo';
 import AboutPage from './pages/about';
 import PoliciesPage from './pages/policy';
 import ReviewList from './components/ReviewList';
 import { ToastContainer } from 'react-toastify';
 import WriteReview from './components/shop/WriteReview';
+import OpeningHoursPage from './pages/owner/OpeningHoursPage';
 import ServicesList from './components/shop/Service';
 import ServiceDetailPage from './components/shop/ServiceDetailPage';
 import FavoriteStores from './components/shop/FavoritePage';
@@ -96,7 +99,7 @@ export default function App() {
                     <Route path="write-review/service/:serviceId" element={<WriteReview />} />
                     <Route path="/shop/:shopId/service" element={<ServicesList />} />
                     <Route path="/shop/service/:serviceId" element={<ServiceDetailPage />} />
-                    <Route path='/favorites' element = {<FavoriteStores></FavoriteStores>}></Route>
+                    <Route path="/favorites" element={<FavoriteStores></FavoriteStores>}></Route>
                 </Route>
                 <Route path="/auth" element={<AuthPage />}>
                     <Route path="login" element={<LoginPage />} />
@@ -107,10 +110,11 @@ export default function App() {
                     <Route path="verify-account" element={<ActiveCodeUser />} />
                 </Route>
                 <Route path="/owner" element={<OwnerPage />}>
+                    <Route index element={<StatisticsPageOwner />} />
                     <Route path="profile" element={<OwnerProfile />} />
                     <Route path="business-info" element={<BusinessInfo />} />
                     <Route path="services" element={<ServicesPage />} />
-                    <Route path="statistics" element={<StatisticsPageOwner />} />
+                    <Route path="opening-hours" element={<OpeningHoursPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                 </Route>
                 <Route path="/biz" element={<CreateShop />}>
@@ -123,11 +127,11 @@ export default function App() {
                 <Route path="writeareview" element={<BusinessSearch />} />
                 <Route path="writeareview/biz/:id" element={<ReviewBusiness />} />
                 <Route path="/admin" element={<AdminPage />}>
-                    <Route index element={<OverviewPage />} />
-                    <Route path="statistics" element={<StatisticsPage />} />
+                    <Route index element={<StatisticsPage />} />
                     <Route path="moderation" element={<ModerationPage />} />
                     <Route path="categories" element={<CategoriesPage />} />
                     <Route path="users" element={<UsersPage />} />
+                    <Route path="advertisement" element={<AdvertisementPage />} />
                 </Route>
             </Routes>
             <ToastContainer position="bottom-center" autoClose={3000} pauseOnFocusLoss={false} />

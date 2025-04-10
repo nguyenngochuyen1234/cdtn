@@ -32,7 +32,7 @@ const ServiceTable: React.FC = () => {
             const res = await userApi.getUser();
             const dataService = await ownerApi.getAllService({
                 limit: 12,
-                page: 1,
+                page: 0,
             });
             if (res.data.success) {
                 setEmail(res.data.data.email);

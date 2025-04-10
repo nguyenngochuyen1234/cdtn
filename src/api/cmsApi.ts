@@ -42,7 +42,7 @@ const cmsApi = {
             tags: tags,
         });
     },
-    getAllListShopDeactive(data: { page: number; size: number; deActive: boolean }) {
+    getAllListShopDeactive(data: { page: number; size: number; statusShopEnums: string }) {
         const url = '/cms/shops/list-shop-deactive';
         return axiosClient.post(url, data);
     },
