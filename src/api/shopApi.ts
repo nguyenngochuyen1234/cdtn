@@ -97,6 +97,10 @@ const shopApi = {
     getOpenTimeById(id:string){
         const url = `/shops/detail-opentime/${id}`
         return axiosClient.get(url);
+    },
+    increView(body: any){
+        const url = `/shops/record-view`
+        return axiosClient.post(url, body)
     }
 };
 export default shopApi;

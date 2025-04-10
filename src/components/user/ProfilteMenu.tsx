@@ -41,12 +41,6 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
             link: '/profile',
         },
         {
-            id: 'posts',
-            label: 'Bài viết của bạn',
-            icon: <Article sx={{ color: '#000' }} />,
-            link: '/',
-        },
-        {
             id: 'logout',
             label: 'Đăng xuất',
             icon: <Logout sx={{ color: '#000' }} />,

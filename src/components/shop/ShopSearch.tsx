@@ -95,7 +95,10 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
         navigate('/auth/login');
     };
 
-    return (
+    const handleCardClick = (id:string) => {
+        navigate(`/detailPost/${id}`, { state: { from: 'sponsored' } })
+    }
+    return ( 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {shops.map((shop) => {
                 const isFavorite = favorites.includes(shop.id); // Kiểm tra từng shop có trong favorites không
@@ -112,6 +115,7 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                             p: { xs: 1.5, sm: 2 },
                             flexDirection: { xs: 'column', sm: 'row' },
                         }}
+                        onClick={() => handleCardClick(shop.id)} // Thêm sự kiện click
                     >
                         <Box
                             sx={{
@@ -260,7 +264,7 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                                             sx={{ fontSize: 18, color: 'text.secondary', mr: 0.5 }}
                                         />
                                         <Typography variant="body2" color="text.secondary">
-                                            {shop.view || 0} + lượt xem
+                                            {shop.view || 10} + lượt xem
                                         </Typography>
                                     </Box>
                                 </Box>

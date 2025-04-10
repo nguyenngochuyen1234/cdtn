@@ -59,9 +59,6 @@ const SuggestShops: React.FC<SuggestShopsProps> = ({ type }) => {
                                 {shop.point} ({shop.countReview} reviews)
                             </Typography>
                         </Box>
-                        <Typography variant="body2" color="text.secondary">
-                            '3.3 miles'
-                        </Typography>
                         <Typography variant="body2">{shop.description}</Typography>
                     </CardContent>
                 </Card>

@@ -25,6 +25,7 @@ export interface Shop {
     price: number;
     statusShop: 'ACTIVE' | 'INACTIVE' | 'BANNED';
     view: number;
+    categoryName: string
 }
 export interface OpenTime {
     id: string;
