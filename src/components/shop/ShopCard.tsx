@@ -109,7 +109,7 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                 flexDirection: 'column',
             }}
         >
-            <Link to={`/detailPost/${shop.id}`}>
+            <Link to={`/detailPost/${shop.id}`} state={{ from: 'suggest' }}>
                 <CardMedia
                     component="img"
                     image={shop.avatar || 'https://via.placeholder.com/300x140'}

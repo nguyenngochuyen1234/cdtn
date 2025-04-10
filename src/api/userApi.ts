@@ -17,7 +17,7 @@ const userApi = {
             },
         });
     },
-    updateProfile(data: User) {
+    updateProfile(data: any) {
         const url = '/users/change-profile';
         return axiosClient.put(url, data);
     },

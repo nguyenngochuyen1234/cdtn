@@ -3,6 +3,7 @@ import { Box, Typography, Grid, Card, CardMedia, CardContent } from '@mui/materi
 import StarIcon from '@mui/icons-material/Star';
 import shopApi from '@/api/shopApi';
 import { Shop } from '@/models';
+import { useNavigate } from 'react-router-dom';
 
 interface SuggestShopsProps {
     type: string;
@@ -10,7 +11,7 @@ interface SuggestShopsProps {
 
 const Sponsored: React.FC<SuggestShopsProps> = ({ type }) => {
     const [shops, setShops] = useState<Shop[]>([]);
-
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchDataSuggestShop = async () => {
             try {
@@ -26,7 +27,9 @@ const Sponsored: React.FC<SuggestShopsProps> = ({ type }) => {
         };
         fetchDataSuggestShop();
     }, [type]);
-
+    const handleShopClick = (shopId: string) => {
+        navigate(`/detailPost/${shopId}`, { state: { from: 'sponsored' } });
+    };
     return (
         <Box sx={{ mt: 4 }}>
             <Typography variant="h6" fontWeight="bold">
@@ -34,7 +37,11 @@ const Sponsored: React.FC<SuggestShopsProps> = ({ type }) => {
             </Typography>
 
             {shops.map((shop) => (
-                <Card key={shop.id} sx={{ display: 'flex', mb: 2, mt: 2 }}>
+                <Card
+                    key={shop.id}
+                    sx={{ display: 'flex', mb: 2, mt: 2 }}
+                    onClick={() => handleShopClick(shop.id)}
+                >
                     <CardMedia
                         component="img"
                         sx={{ width: 100, height: 100 }}
@@ -59,9 +66,6 @@ const Sponsored: React.FC<SuggestShopsProps> = ({ type }) => {
                                 {shop.point} ({shop.countReview} reviews)
                             </Typography>
                         </Box>
-                        <Typography variant="body2" color="text.secondary">
-                            '3.3 miles'
-                        </Typography>
                         <Typography variant="body2">{shop.description}</Typography>
                     </CardContent>
                 </Card>

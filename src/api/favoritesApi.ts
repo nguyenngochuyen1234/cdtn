@@ -18,6 +18,6 @@ const favoritesApi = {
         return axiosClient.delete(url, {
             data: data // Truyền body trong config object
         })
-    },
+    }
 }
 export default favoritesApi

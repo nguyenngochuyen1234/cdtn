@@ -156,13 +156,13 @@ export const HeaderComponent = () => {
                             startIcon={
                                 <Avatar
                                     sx={{
-                                        bgcolor: deepOrange[500],
+                                        bgcolor: deepOrange[500], // Màu nền mặc định nếu ảnh không tải được
                                         width: isMobile ? 24 : 32,
                                         height: isMobile ? 24 : 32,
                                     }}
-                                >
-                                    N
-                                </Avatar>
+                                    src={user?.avatar || '/default-avatar.png'} // Lấy ảnh từ user.avatar hoặc ảnh mặc định
+                                    alt={user?.username || 'User Avatar'} // Alt text dựa trên username
+                                />
                             }
                             sx={{
                                 textTransform: 'none',
