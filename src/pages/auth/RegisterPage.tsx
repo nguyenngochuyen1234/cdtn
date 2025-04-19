@@ -53,6 +53,7 @@ const RegisterPage: React.FC = () => {
             setSnackbarMessage('Mật khẩu và xác nhận mật khẩu không khớp!');
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
+            setLoading(false);
             return;
         }
 
@@ -73,6 +74,7 @@ const RegisterPage: React.FC = () => {
                 setSnackbarOpen(true);
             }
         } catch (err) {
+            console.log(err);
             setSnackbarMessage('Đăng ký thất bại');
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
