@@ -25,6 +25,9 @@ import { SearchBar } from './searchBar';
 import { MenuAdminItem } from '@/models';
 import { colors } from '@/themes/colors';
 import { useNavigate } from 'react-router-dom';
+import { logoutAPI } from '@/utils/JwtService';
+
+// Import the logoutAPI function
 
 const DRAWER_WIDTH = 280;
 
@@ -45,6 +48,12 @@ export function SidebarMenu() {
     const theme = useTheme();
     const [selectedKey, setSelectedKey] = useState('overview');
     const navigate = useNavigate();
+
+    // Handle logout action
+    const handleLogout = () => {
+        setSelectedKey('logout'); // Update selected state for UI consistency
+        logoutAPI(navigate); // Call the logoutAPI function
+    };
 
     return (
         <Drawer
@@ -124,7 +133,14 @@ export function SidebarMenu() {
                         <ListItem key={item.key} disablePadding>
                             <ListItemButton
                                 selected={selectedKey === item.key}
-                                onClick={() => setSelectedKey(item.key)}
+                                onClick={() => {
+                                    if (item.key === 'logout') {
+                                        handleLogout(); // Call logout handler for logout item
+                                    } else {
+                                        setSelectedKey(item.key);
+                                        navigate(`/admin${item.path}`);
+                                    }
+                                }}
                                 sx={{
                                     mx: 1,
                                     borderRadius: 1,

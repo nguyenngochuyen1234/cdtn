@@ -178,11 +178,24 @@ const WriteReview: React.FC = () => {
                         value={rating}
                         onChange={(event, newValue) => setRating(newValue)}
                         size="large"
-                        sx={{ mr: 2 }}
+                        precision={1} // Allows half-star ratings
+                        sx={{
+                            mr: 2,
+                            fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }, // Increase size across breakpoints
+                            '& .MuiRating-iconFilled': {
+                                color: '#FFD700', // Gold color for filled stars
+                            },
+                            '& .MuiRating-iconEmpty': {
+                                color: '#D3D3D3', // Light gray color for empty stars
+                            },
+                            '& .MuiRating-iconHover': {
+                                color: '#FFC107', // Slightly darker gold on hover
+                            },
+                        }}
                     />
                     <Typography variant="body1">Điểm đánh giá</Typography>
                 </Box>
-                
+
                 <TextField
                     label="Nội dung đánh giá..."
                     multiline

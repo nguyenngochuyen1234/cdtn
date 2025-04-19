@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import {
     Box,
     Typography,
@@ -22,13 +22,13 @@ import usersCategory from '@/api/usersCategory';
 interface Category {
     id: string;
     name: string;
-    checked: boolean; // Multi-select with checkboxes
+    checked: boolean;
 }
 
 interface ClosingHour {
     id: string;
-    time: string; // Display time (e.g., "12 PM")
-    localTime: string; // ISO time (e.g., "12:00:00")
+    time: string;
+    localTime: string;
 }
 
 interface StarRating {
@@ -49,11 +49,11 @@ interface District {
 interface FilterPanelProps {
     onFilterChange: (filters: {
         keyword: string;
-        categoryId: string[]; // Multi-select
-        city: string; // Single-select
-        district: string; // Single-select
-        openTimeId: string; // Single-select
-        scoreReview: number; // Single-select
+        categoryId: string[];
+        city: string;
+        district: string;
+        openTimeId: string;
+        scoreReview: number;
         latitude?: number;
         longitude?: number;
     }) => void;
@@ -63,7 +63,7 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
     const [categories, setCategories] = useState<Category[]>([]);
     const [provinces, setProvinces] = useState<Province[]>([]);
     const [districts, setDistricts] = useState<District[]>([]);
-    const [closingHours, setClosingHours] = useState<ClosingHour[]>([
+    const [closingHours] = useState<ClosingHour[]>([
         { id: '1', time: '4:00 PM', localTime: '16:00:00' },
         { id: '2', time: '5:00 PM', localTime: '17:00:00' },
         { id: '3', time: '6:00 PM', localTime: '18:00:00' },
@@ -72,9 +72,9 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
         { id: '6', time: '9:00 PM', localTime: '21:00:00' },
         { id: '7', time: '10:00 PM', localTime: '22:00:00' },
         { id: '8', time: '11:00 PM', localTime: '23:00:00' },
-        { id: '9', time: '12:00 PM', localTime: '00:00:00' }, // midnight
+        { id: '9', time: '12:00 PM', localTime: '00:00:00' },
     ]);
-    const [ratings, setRatings] = useState<StarRating[]>([
+    const [ratings] = useState<StarRating[]>([
         { id: 5, value: 5 },
         { id: 4, value: 4 },
         { id: 3, value: 3 },
@@ -82,14 +82,12 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
         { id: 1, value: 1 },
     ]);
 
-    // Single-selection states
     const [selectedCity, setSelectedCity] = useState<string>('');
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [selectedClosingHour, setSelectedClosingHour] = useState<string>('');
     const [selectedRating, setSelectedRating] = useState<number | null>(null);
     const [location, setLocation] = useState<{ latitude?: number; longitude?: number }>({});
 
-    // Modal and collapse states
     const [modalOpen, setModalOpen] = useState(false);
     const [modalType, setModalType] = useState<
         'categories' | 'provinces' | 'districts' | 'closingHours' | null
@@ -99,6 +97,10 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
     const [openRatings, setOpenRatings] = useState(true);
     const [openProvinces, setOpenProvinces] = useState(true);
     const [openDistricts, setOpenDistricts] = useState(true);
+
+    // Track initial loading
+    const isInitialLoad = useRef(true);
+    const prevFilters = useRef<string>('');
 
     // Fetch categories
     useEffect(() => {
@@ -166,54 +168,64 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
         }
     }, []);
 
-    // Trigger filter change
-    useEffect(() => {
-        const newFilters = {
+    // Compute filters and trigger onFilterChange only when necessary
+    const filters = useMemo(
+        () => ({
             keyword: '',
             categoryId: categories.filter((c) => c.checked).map((c) => c.id),
             city: selectedCity,
             district: selectedDistrict,
             openTimeId: selectedClosingHour,
-            scoreReview: selectedRating !== null ? selectedRating : 0, // Default to 0 if not selected
+            scoreReview: selectedRating !== null ? selectedRating : 0,
             latitude: location.latitude,
             longitude: location.longitude,
-        };
-        onFilterChange(newFilters);
-    }, [
-        categories,
-        selectedCity,
-        selectedDistrict,
-        selectedClosingHour,
-        selectedRating,
-        location,
-        onFilterChange,
-    ]);
+        }),
+        [categories, selectedCity, selectedDistrict, selectedClosingHour, selectedRating, location]
+    );
 
-    // Handlers for single-selection
+    useEffect(() => {
+        // Skip during initial load
+        if (isInitialLoad.current) {
+            if (categories.length > 0 && provinces.length > 0) {
+                isInitialLoad.current = false;
+            }
+            return;
+        }
+
+        // Compare current filters with previous filters
+        const filtersString = JSON.stringify(filters);
+        if (filtersString !== prevFilters.current) {
+            console.log('FilterPanel: Triggering onFilterChange', filters);
+            onFilterChange(filters);
+            prevFilters.current = filtersString;
+        } else {
+            console.log('FilterPanel: Skipping onFilterChange, no changes detected');
+        }
+    }, [filters, onFilterChange]);
+
     const handleCityChange = (code: string) => {
         if (selectedCity === code) {
-            setSelectedCity(''); // Deselect if already selected
-            setDistricts([]); // Clear districts if city is deselected
+            setSelectedCity('');
+            setDistricts([]);
             setSelectedDistrict('');
         } else {
             setSelectedCity(code);
-            fetchDistricts(code); // Fetch districts for the new city
+            fetchDistricts(code);
         }
     };
 
     const handleDistrictChange = (code: string) => {
-        setSelectedDistrict(selectedDistrict === code ? '' : code); // Toggle selection
+        setSelectedDistrict(selectedDistrict === code ? '' : code);
     };
 
     const handleClosingHourChange = (localTime: string) => {
-        setSelectedClosingHour(selectedClosingHour === localTime ? '' : localTime); // Toggle selection
+        setSelectedClosingHour(selectedClosingHour === localTime ? '' : localTime);
     };
 
     const handleRatingChange = (value: number) => {
-        setSelectedRating(selectedRating === value ? null : value); // Toggle selection
+        setSelectedRating(selectedRating === value ? null : value);
     };
 
-    // Multi-select handler for categories
     const handleCategoryChange = (id: string) => {
         setCategories((prev) =>
             prev.map((category) =>
@@ -222,7 +234,6 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
         );
     };
 
-    // Modal handlers
     const handleOpenModal = (type: 'categories' | 'provinces' | 'districts' | 'closingHours') => {
         setModalType(type);
         setModalOpen(true);
@@ -233,7 +244,6 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
         setModalType(null);
     };
 
-    // Reset filters
     const handleReset = () => {
         setCategories((prev) => prev.map((category) => ({ ...category, checked: false })));
         setSelectedCity('');
