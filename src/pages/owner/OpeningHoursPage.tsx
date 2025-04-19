@@ -15,12 +15,83 @@ const OpeningHoursPage: React.FC = () => {
 
     const fetchData = async () => {
         try {
-            const res = await ownerApi.getShop();
+            const res = await ownerApi.getListOpenTime();
             if (res.data.success) {
-                setOpenTimes(res.data.data.listOpenTimes || []);
+                const fetchedOpenTimes = res.data.data || [];
+                // Định nghĩa 7 ngày mặc định
+                const defaultOpenTimes: OpenTime[] = [
+                    {
+                        id: '1',
+                        dayOfWeekEnum: 'MONDAY',
+                        openTime: '',
+                        closeTime: '',
+                        dayOff: false,
+                    },
+                    {
+                        id: '2',
+                        dayOfWeekEnum: 'TUESDAY',
+                        openTime: '',
+                        closeTime: '',
+                        dayOff: false,
+                    },
+                    {
+                        id: '3',
+                        dayOfWeekEnum: 'WEDNESDAY',
+                        openTime: '',
+                        closeTime: '',
+                        dayOff: false,
+                    },
+                    {
+                        id: '4',
+                        dayOfWeekEnum: 'THURSDAY',
+                        openTime: '',
+                        closeTime: '',
+                        dayOff: false,
+                    },
+                    {
+                        id: '5',
+                        dayOfWeekEnum: 'FRIDAY',
+                        openTime: '',
+                        closeTime: '',
+                        dayOff: false,
+                    },
+                    {
+                        id: '6',
+                        dayOfWeekEnum: 'SATURDAY',
+                        openTime: '',
+                        closeTime: '',
+                        dayOff: false,
+                    },
+                    {
+                        id: '7',
+                        dayOfWeekEnum: 'SUNDAY',
+                        openTime: '',
+                        closeTime: '',
+                        dayOff: false,
+                    },
+                ];
+
+                // Ánh xạ dữ liệu từ API vào 7 ngày mặc định
+                const updatedOpenTimes = defaultOpenTimes.map((defaultDay) => {
+                    const apiDay = fetchedOpenTimes.find(
+                        (apiDay: OpenTime) => apiDay.dayOfWeekEnum === defaultDay.dayOfWeekEnum
+                    );
+                    if (apiDay) {
+                        return {
+                            ...defaultDay,
+                            id: apiDay.id, // Sử dụng id từ API
+                            openTime: apiDay.openTime || '',
+                            closeTime: apiDay.closeTime || '',
+                            dayOff: apiDay.dayOff || false,
+                        };
+                    }
+                    return defaultDay;
+                });
+
+                setOpenTimes(updatedOpenTimes);
             }
         } catch (error) {
-            console.error('Error fetching shop data:', error);
+            console.error('Error fetching open times:', error);
         }
     };
 

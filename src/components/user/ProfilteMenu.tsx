@@ -15,6 +15,7 @@ import { AccountCircle, Article, ChevronRight, HelpOutline, Logout } from '@mui/
 import { MenuItem, User } from '@/models';
 import { useDispatch } from 'react-redux';
 import { setUser } from '@/redux/userSlice';
+import { getLastNameByToken } from '@/utils/JwtService';
 
 interface ProfileMenuProps {
     user: User;
@@ -58,7 +59,7 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
                     <ListItemText
                         primary={
                             <Typography variant="subtitle1" fontWeight={500}>
-                                {user.username}
+                                {getLastNameByToken()}
                             </Typography>
                         }
                         

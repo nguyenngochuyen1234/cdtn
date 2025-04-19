@@ -37,5 +37,10 @@ const userApi = {
         const url = 'users/get-user';
         return axiosClient.get(url);
     },
+    loginGoogle(data:any){
+        const url = `http://localhost:8080/auth/login-google`
+        return axiosClient.post(url, data)
+    }
+    
 };
 export default userApi;

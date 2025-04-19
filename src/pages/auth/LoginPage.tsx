@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getRoleByToken } from '@/utils/JwtService';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -59,15 +60,14 @@ const LoginPage: React.FC = () => {
             if (result.data.success) {
                 dispatch(setUser(result.data.data));
                 localStorage.setItem('access_token', result.data.data.accessToken);
-                const role = result.data.data.userInfoResponse.role[0];
-                const from = location.state?.from || '/';
-
-                if (role === 'OWNER') {
+                const role = getRoleByToken();
+                console.log('Decoded role:', role);
+                if (role?.[0] === 'OWNER') {
                     navigate('/owner');
-                } else if (role === 'ADMIN') {
+                } else if (role?.[0] === 'ADMIN') {
                     navigate('/admin');
                 } else {
-                    navigate(from, { replace: true });
+                    navigate('/');
                 }
             }
         } catch (err) {

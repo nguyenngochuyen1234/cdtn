@@ -10,6 +10,7 @@ import { MenuItem, User } from '@/models';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/stores';
 import ProfileMenu from './user/ProfilteMenu';
+import { getAvatarByToken, getLastNameByToken, getUsernameByToken } from '@/utils/JwtService';
 
 export const HeaderComponent = () => {
     const user = useSelector((state: RootState) => state.user.user);
@@ -129,7 +130,7 @@ export const HeaderComponent = () => {
                                 py: isMobile ? 0.5 : 1,
                                 px: isMobile ? 1 : 2,
                             }}
-                            onClick={() => navigate('/writeareview')}
+                            onClick={() => navigate('/search')}
                         >
                             <Typography
                                 variant="subtitle2"
@@ -160,8 +161,8 @@ export const HeaderComponent = () => {
                                         width: isMobile ? 24 : 32,
                                         height: isMobile ? 24 : 32,
                                     }}
-                                    src={user?.avatar || '/default-avatar.png'} // Lấy ảnh từ user.avatar hoặc ảnh mặc định
-                                    alt={user?.username || 'User Avatar'} // Alt text dựa trên username
+                                    src={getAvatarByToken() || '/default-avatar.png'} // Lấy ảnh từ user.avatar hoặc ảnh mặc định
+                                    alt={getLastNameByToken() || 'User Avatar'} // Alt text dựa trên username
                                 />
                             }
                             sx={{
@@ -181,7 +182,7 @@ export const HeaderComponent = () => {
                                     display: isMobile ? 'none' : 'block',
                                 }}
                             >
-                                {user.username}
+                                {getLastNameByToken()}
                             </Typography>
                         </Button>
 

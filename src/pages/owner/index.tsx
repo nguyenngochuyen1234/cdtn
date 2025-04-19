@@ -22,17 +22,46 @@ import {
     RateReview,
     Lock,
     AccountCircle,
+    AdUnits,
 } from '@mui/icons-material';
+import { HistoryIcon } from 'lucide-react';
 
 // Navigation Menu
 const NAVIGATION = [
-    { segment: '', title: 'Tổng quan', icon: <Dashboard /> },
-    { segment: 'profile', title: 'Thông tin cá nhân', icon: <Person /> },
-    { segment: 'business-info', title: 'Thông tin doanh nghiệp', icon: <Business /> },
-    { segment: 'services', title: 'Danh sách dịch vụ', icon: <RoomService /> },
-    { segment: 'opening-hours', title: 'Giờ mở cửa', icon: <AccessTime /> },
-    { segment: 'reviews', title: 'Quản lý danh sách đánh giá', icon: <RateReview /> },
-    { segment: 'change-password', title: 'Đổi mật khẩu', icon: <Lock /> },
+    { segment: '', title: 'Tổng quan', icon: <Dashboard sx={{ color: '#4CAF50' }} /> },
+
+    {
+        segment: 'services',
+        title: 'Danh sách dịch vụ',
+        icon: <RoomService sx={{ color: '#FF9800' }} />,
+    },
+
+    {
+        segment: 'reviews',
+        title: 'Quản lý danh sách đánh giá',
+        icon: <RateReview sx={{ color: '#009688' }} />,
+    },
+    {
+        segment: 'advertisement',
+        title: 'Quản lý gói quảng cáo',
+        icon: <AdUnits sx={{ color: '#009688' }} />,
+    },
+    {
+        segment: 'history',
+        title: 'Lịch sử giao dịch',
+        icon: <HistoryIcon />,
+    },
+    { segment: 'profile', title: 'Thông tin cá nhân', icon: <Person sx={{ color: '#9C27B0' }} /> },
+    {
+        segment: 'business-info',
+        title: 'Thông tin doanh nghiệp',
+        icon: <Business sx={{ color: '#FF9888' }} />,
+    },
+    {
+        segment: 'opening-hours',
+        title: 'Giờ mở cửa',
+        icon: <AccessTime sx={{ color: '#F44336' }} />,
+    },
     { segment: 'user-page', title: 'Trang người dùng', icon: <AccountCircle /> },
 ];
 

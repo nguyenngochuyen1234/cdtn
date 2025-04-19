@@ -200,7 +200,7 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                                     whiteSpace: 'nowrap',
                                 }}
                             >
-                                Đóng cửa lúc {shop.openTimeResponses[0]?.closeTime || '10.00PM'}
+                                Đóng cửa {shop.openTimeResponses[0]?.closeTime || '10.00PM'}
                             </Typography>
                         </Box>
                     </Stack>
