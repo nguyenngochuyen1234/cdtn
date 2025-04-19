@@ -5,7 +5,7 @@ const ownerApi = {
         const url = `/own/shop/update-shop`;
         return axiosClient.put(url, data);
     },
-    updateService(id: string, data: Service) {
+    updateService(id: string, data: any) {
         const url = `/own/shop/update-service/${id}`;
         return axiosClient.put(url, data);
     },
@@ -13,14 +13,14 @@ const ownerApi = {
         const url = `/own/shop/update-open-time`;
         return axiosClient.put(url, data);
     },
-    createService(data: Comment) {
+    createService(data: any) {
         const url = `/own/shop/create-service`;
         return axiosClient.post(url, data);
     },
-    getShopById_1(idComment: string, data: Comment) {
-        const url = `/own/shop/${id}`;
-        return axiosClient.get(url, data);
-    },
+    // getShopById_1(idComment: string, data: Comment) {
+    //     const url = `/own/shop/${idComment}`;
+    //     return axiosClient.get(url, data);
+    // },
     getAllService(data: { limit: number; page: number }) {
         const url = `/own/shop/get-list-service`;
         return axiosClient.post(url, data);

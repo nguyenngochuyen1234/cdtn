@@ -8,12 +8,11 @@ import {
     Modal,
     List,
     ListItem,
-    ListItemText,
+    FormControlLabel,
+    Radio,
+    Checkbox,
     Divider,
     Rating,
-    Radio,
-    FormControlLabel,
-    Checkbox,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -23,13 +22,13 @@ import usersCategory from '@/api/usersCategory';
 interface Category {
     id: string;
     name: string;
-    checked: boolean; // Still multi-select with checkboxes
+    checked: boolean; // Multi-select with checkboxes
 }
 
 interface ClosingHour {
     id: string;
-    time: string; // Display time (e.g., "9 PM")
-    localTime: string; // ISO time (e.g., "21:00:00")
+    time: string; // Display time (e.g., "12 PM")
+    localTime: string; // ISO time (e.g., "12:00:00")
 }
 
 interface StarRating {
@@ -65,11 +64,15 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
     const [provinces, setProvinces] = useState<Province[]>([]);
     const [districts, setDistricts] = useState<District[]>([]);
     const [closingHours, setClosingHours] = useState<ClosingHour[]>([
-        { id: '1', time: '6 PM', localTime: '18:00:00' },
-        { id: '2', time: '7 PM', localTime: '19:00:00' },
-        { id: '3', time: '8 PM', localTime: '20:00:00' },
-        { id: '4', time: '9 PM', localTime: '21:00:00' },
-        { id: '5', time: '10 PM', localTime: '22:00:00' },
+        { id: '1', time: '4:00 PM', localTime: '16:00:00' },
+        { id: '2', time: '5:00 PM', localTime: '17:00:00' },
+        { id: '3', time: '6:00 PM', localTime: '18:00:00' },
+        { id: '4', time: '7:00 PM', localTime: '19:00:00' },
+        { id: '5', time: '8:00 PM', localTime: '20:00:00' },
+        { id: '6', time: '9:00 PM', localTime: '21:00:00' },
+        { id: '7', time: '10:00 PM', localTime: '22:00:00' },
+        { id: '8', time: '11:00 PM', localTime: '23:00:00' },
+        { id: '9', time: '12:00 PM', localTime: '00:00:00' }, // midnight
     ]);
     const [ratings, setRatings] = useState<StarRating[]>([
         { id: 5, value: 5 },
@@ -183,6 +186,7 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
         selectedClosingHour,
         selectedRating,
         location,
+        onFilterChange,
     ]);
 
     // Handlers for single-selection
@@ -434,19 +438,21 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
                 {openDistricts && (
                     <Box sx={{ p: 2, pt: 0 }}>
                         {districts.length > 0 ? (
-                            districts.slice(0, 4).map((district) => (
-                                <FormControlLabel
-                                    key={district.code}
-                                    control={
-                                        <Radio
-                                            checked={selectedDistrict === district.code}
-                                            onChange={() => handleDistrictChange(district.code)}
-                                        />
-                                    }
-                                    label={district.name}
-                                    sx={{ display: 'block' }}
-                                />
-                            ))
+                            districts
+                                .slice(0, 4)
+                                .map((district) => (
+                                    <FormControlLabel
+                                        key={district.code}
+                                        control={
+                                            <Radio
+                                                checked={selectedDistrict === district.code}
+                                                onChange={() => handleDistrictChange(district.code)}
+                                            />
+                                        }
+                                        label={district.name}
+                                        sx={{ display: 'block' }}
+                                    />
+                                ))
                         ) : (
                             <Typography variant="body2" color="text.secondary">
                                 Vui lòng chọn tỉnh để hiển thị huyện
@@ -520,9 +526,7 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
                                     onClick={() => handleCityChange(province.code)}
                                 >
                                     <FormControlLabel
-                                        control={
-                                            <Radio checked={selectedCity === province.code} />
-                                        }
+                                        control={<Radio checked={selectedCity === province.code} />}
                                         label={province.name}
                                     />
                                 </ListItem>

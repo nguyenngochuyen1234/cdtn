@@ -20,7 +20,6 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 
 interface ReviewData {
-    reviewTitle: string;
     reviewContent: string;
     rating: number;
     mediaUrlReview: string[];
@@ -104,7 +103,7 @@ const WriteReview: React.FC = () => {
             try {
                 const response = await userApi.uploadImage(file);
                 if (response.data) {
-                    uploadedUrls.push(response.data.url);
+                    uploadedUrls.push(response.data.data);
                 }
             } catch (error) {
                 console.error('Error uploading photo:', error);
@@ -124,7 +123,7 @@ const WriteReview: React.FC = () => {
             toast.error('Nội dung đánh giá không được để trống');
             return;
         }
-        if (reviewContent.length < 30) {
+        if (reviewContent.length < 20) {
             toast.error('Đánh giá phải có ít nhất 30 ký tự');
             return;
         }
@@ -137,7 +136,6 @@ const WriteReview: React.FC = () => {
             }
 
             const reviewData: ReviewData = {
-                reviewTitle,
                 reviewContent,
                 rating: rating!,
                 mediaUrlReview: uploadedPhotoUrls,
@@ -184,14 +182,7 @@ const WriteReview: React.FC = () => {
                     />
                     <Typography variant="body1">Điểm đánh giá</Typography>
                 </Box>
-                <TextField
-                    label="Tiêu đề đánh giá (tùy chọn)"
-                    fullWidth
-                    value={reviewTitle}
-                    onChange={(e) => setReviewTitle(e.target.value)}
-                    variant="outlined"
-                    sx={{ mb: 2 }}
-                />
+                
                 <TextField
                     label="Nội dung đánh giá..."
                     multiline
@@ -203,7 +194,7 @@ const WriteReview: React.FC = () => {
                     sx={{ mb: 1 }}
                 />
                 <Typography variant="body2" color="text.secondary">
-                    Nội dung đánh giá cần ít nhất 30 ký tự
+                    Nội dung đánh giá cần ít nhất 20 ký tự
                 </Typography>
             </Box>
 

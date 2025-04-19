@@ -195,7 +195,7 @@ const FavoriteShopCard: React.FC<FavoriteShopCardProps> = ({ shop, onFavoriteCha
                                         whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    Đóng cửa lúc {shop.openTimeResponses?.[0]?.closeTime || '20:00'}
+                                    Đóng cửa {shop.openTimeResponses?.[0]?.closeTime || '20:00'}
                                 </Typography>
                             </Box>
                         </Stack>

@@ -1,8 +1,7 @@
 import React from 'react';
-import { Select, MenuItem, Button, FormControlLabel, Checkbox } from '@mui/material';
+import { FormControlLabel, Checkbox, Typography } from '@mui/material';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from 'dayjs';
-import { daysOfWeek } from '@/common';
 import { OpenTime } from '@/models';
 
 interface OpeningHoursProps {
@@ -11,6 +10,16 @@ interface OpeningHoursProps {
     handleOpenTimeChange: (id: string, field: keyof OpenTime, value: string | boolean) => void;
 }
 
+const daysOfWeekLabel: { [key: string]: string } = {
+    MONDAY: 'Monday',
+    TUESDAY: 'Tuesday',
+    WEDNESDAY: 'Wednesday',
+    THURSDAY: 'Thursday',
+    FRIDAY: 'Friday',
+    SATURDAY: 'Saturday',
+    SUNDAY: 'Sunday',
+};
+
 const OpeningHours: React.FC<OpeningHoursProps> = ({
     openTimes,
     setOpenTimes,
@@ -18,25 +27,6 @@ const OpeningHours: React.FC<OpeningHoursProps> = ({
 }) => {
     return (
         <div>
-            <Button
-                variant="contained"
-                color="primary"
-                sx={{ marginBottom: 2 }}
-                onClick={() =>
-                    setOpenTimes([
-                        ...openTimes,
-                        {
-                            id: Date.now().toString(),
-                            dayOfWeekEnum: '',
-                            openTime: '',
-                            closeTime: '',
-                            dayOff: false,
-                        },
-                    ])
-                }
-            >
-                Thêm giờ mở cửa
-            </Button>
             {openTimes.map((time) => (
                 <div
                     key={time.id}
@@ -47,45 +37,44 @@ const OpeningHours: React.FC<OpeningHoursProps> = ({
                         marginBottom: 12,
                     }}
                 >
-                    <Select
-                        value={time.dayOfWeekEnum}
-                        onChange={(e) =>
-                            handleOpenTimeChange(time.id, 'dayOfWeekEnum', e.target.value)
-                        }
-                        displayEmpty
-                        sx={{ width: 120 }}
+                    <Typography
+                        sx={{
+                            minWidth: 100, // Đảm bảo chiều rộng tối thiểu để thẳng hàng
+                            fontWeight: 'bold',
+                        }}
                     >
-                        <MenuItem value="" disabled>
-                            Chọn ngày
-                        </MenuItem>
-                        {daysOfWeek.map((day) => (
-                            <MenuItem key={day.value} value={day.value}>
-                                {day.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
+                        {daysOfWeekLabel[time.dayOfWeekEnum] || 'Monday'}
+                    </Typography>
 
                     <TimePicker
                         label="Mở cửa"
-                        value={time.openTime ? dayjs(time.openTime) : null}
+                        value={time.openTime ? dayjs(`2023-01-01T${time.openTime}:00`) : null}
                         onChange={(newValue) =>
                             handleOpenTimeChange(
                                 time.id,
                                 'openTime',
-                                newValue ? newValue.format('YYYY-MM-DDTHH:mm') : ''
+                                newValue ? newValue.format('HH:mm') : ''
                             )
                         }
+                        disabled={time.dayOff}
+                        ampm={true}
+                        views={['hours', 'minutes']}
+                        sx={{ width: 150 }} // Đảm bảo kích thước đồng đều
                     />
                     <TimePicker
                         label="Đóng cửa"
-                        value={time.closeTime ? dayjs(time.closeTime) : null}
+                        value={time.closeTime ? dayjs(`2023-01-01T${time.closeTime}:00`) : null}
                         onChange={(newValue) =>
                             handleOpenTimeChange(
                                 time.id,
                                 'closeTime',
-                                newValue ? newValue.format('YYYY-MM-DDTHH:mm') : ''
+                                newValue ? newValue.format('HH:mm') : ''
                             )
                         }
+                        disabled={time.dayOff}
+                        ampm={true}
+                        views={['hours', 'minutes']}
+                        sx={{ width: 150 }} // Đảm bảo kích thước đồng đều
                     />
                     <FormControlLabel
                         control={

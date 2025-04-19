@@ -1,31 +1,42 @@
 import React from 'react';
-import { Grid, Button, Typography } from '@mui/material';
-import { Outlet, useNavigate } from 'react-router-dom';
-import Illustration from '@/assets/images/wishlist.png';
+import { Grid, Button, Typography, Box } from '@mui/material';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import CreationStepper from './StepperComponent';
 
 function CreateShop() {
     const navigate = useNavigate();
 
     return (
-        <Grid container sx={{ height: '100vh' }}>
+        <Grid container sx={{ height: '100vh', bgcolor: 'background.default' }}>
             {/* Header */}
-            {/* <Grid
+            <Grid
                 item
                 xs={12}
                 sx={{
-                    width: '100%',
+                    p: 2,
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    display: 'flex',
                     alignItems: 'center',
+                    bgcolor: 'background.paper',
                 }}
             >
-                <Button onClick={() => navigate('/')}>
-                    <Typography variant="h4" fontWeight="bold">
-                        Logo
-                    </Typography>
-                    <Typography sx={{ textTransform: 'none', mx: 1 }} variant="h6">
-                        for business
-                    </Typography>
+                <Button
+                    onClick={() => navigate('/')}
+                    sx={{ display: 'flex', alignItems: 'center' }}
+                >
+                    <Link to="/">
+                        <img
+                            src="/Bright Web.png"
+                            alt="Logo"
+                            style={{
+                                height:  '18px',
+                                width: 'auto',
+                            }}
+                        />
+                    </Link>
                 </Button>
-            </Grid> */}
+            </Grid>
 
             {/* Main Content */}
             <Grid
@@ -45,10 +56,11 @@ function CreateShop() {
                     xs={12}
                     md={6}
                     sx={{
-                        paddingX: 4,
+                        p: 4,
                         display: 'flex',
+                        flexDirection: 'column',
                         justifyContent: 'center',
-                        alignItems: 'center',
+                        bgcolor: 'background.paper',
                     }}
                 >
                     <Outlet />
@@ -60,20 +72,23 @@ function CreateShop() {
                     xs={12}
                     md={6}
                     sx={{
-                        display: 'flex',
+                        display: { xs: 'none', md: 'flex' },
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: '#f5f5f5',
-                        borderRadius: 2,
-                        overflow: 'hidden',
+                        bgcolor: '#f5f5f5',
+                        p: 4,
                     }}
                 >
-                    <img
+                    <Box
+                        component="img"
                         src="https://img.freepik.com/free-vector/shop-with-sign-we-are-open_52683-38687.jpg"
                         alt="Shop Illustration"
-                        style={{
-                            width: '100%',
-                            height: 'auto',
+                        sx={{
+                            maxWidth: '100%',
+                            maxHeight: '80%',
+                            objectFit: 'contain',
+                            borderRadius: 2,
+                            boxShadow: 3,
                         }}
                     />
                 </Grid>

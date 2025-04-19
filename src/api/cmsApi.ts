@@ -10,13 +10,17 @@ const cmsApi = {
         const url = `/cms/shops/active-shop/${idShop}`;
         return axiosClient.put(url, { idShop });
     },
+    getListCatShop(body: any) {
+        const url = `/cms/categories/shops`;
+        return axiosClient.post(url, body);
+    },
 
     getDetailsCategories(id: string) {
         const url = `/cms/categories/${id}`;
         return axiosClient.get(url);
     },
     getAllCategories() {
-        const url = '/cms/categories';
+        const url = '/cms/categories/parent';
         return axiosClient.get(url);
     },
     updateCategory(data: Category) {

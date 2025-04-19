@@ -1,66 +1,85 @@
-
-import type React from "react"
-import { useEffect, useState } from "react"
-import { Link, useParams } from "react-router-dom"
-import { Typography, Box, Container, Paper } from "@mui/material"
-import { styled } from "@mui/system"
-
-const StyledLink = styled(Link)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  textDecoration: "none",
-  "&:hover": {
-    textDecoration: "underline",
-  },
-}))
+import React, { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Container, Paper, Typography, CircularProgress, Alert, Box } from '@mui/material';
 
 const ActiveCodeUser: React.FC = () => {
-  const { activeCode } = useParams()
-  const [enable, setEnable] = useState(false)
-  const [notification, setNotification] = useState("")
+    const [searchParams] = useSearchParams();
+    const [enable, setEnable] = useState(false);
+    const [notification, setNotification] = useState('');
+    const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (activeCode) {
-      handleActiveCode()
-    }
-  }, [activeCode]) // Added activeCode to dependencies
+    // Extract the code from the query string
+    const activeCode = searchParams.get('code') || Array.from(searchParams)[0]?.[0] || '';
 
-  const handleActiveCode = async () => {
-    console.log("MaKichHoat:", activeCode)
-    try {
-      const endpoint = `http://localhost:8080/auth/active-account?code=${activeCode}`
-      const response = await fetch(endpoint, { method: "GET" })
-      const data = await response.json()
+    useEffect(() => {
+        if (activeCode) {
+            handleActiveCode();
+        } else {
+            setNotification('Mã kích hoạt không hợp lệ hoặc thiếu.');
+        }
+    }, [activeCode]);
 
-      if (data.success) {
-        setEnable(true)
-      } else {
-        setNotification(data.text || "Activation failed")
-      }
-    } catch (error) {
-      console.log(error)
-      setNotification("An error occurred during activation")
-    }
-  }
+    const handleActiveCode = async () => {
+        console.log('MaKichHoat:', activeCode);
+        setLoading(true);
+        try {
+            const endpoint = `http://localhost:8080/auth/active-account?code=${encodeURIComponent(activeCode)}`;
+            const response = await fetch(endpoint, { method: 'GET' });
+            const data = await response.json();
 
-  return (
-    <Container maxWidth="sm">
-      <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          KÍCH HOẠT TÀI KHOẢN
-        </Typography>
-        <Box mt={2}>
-          {enable ? (
-            <Typography align="center">
-              Tài khoản kích hoạt thành công. Vui lòng <StyledLink to="/auth/login">Đăng nhập</StyledLink>
-            </Typography>
-          ) : (
-            <Typography color="error">Tài khoản kích hoạt thất bại. Lỗi: {notification}</Typography>
-          )}
-        </Box>
-      </Paper>
-    </Container>
-  )
-}
+            if (data.success) {
+                setEnable(true);
+                setNotification('Kích hoạt tài khoản thành công!');
+            } else {
+                setNotification(data.text || 'Kích hoạt thất bại.');
+            }
+        } catch (error) {
+            console.error('Error during activation:', error);
+            setNotification('Đã xảy ra lỗi trong quá trình kích hoạt.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-export default ActiveCodeUser
+    return (
+        <Container maxWidth="sm">
+            <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
+                <Typography variant="h4" align="center" gutterBottom>
+                    KÍCH HOẠT TÀI KHOẢN
+                </Typography>
+                {loading ? (
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        minHeight="100px"
+                    >
+                        <CircularProgress />
+                    </Box>
+                ) : (
+                    <>
+                        {notification && (
+                            <Alert severity={enable ? 'success' : 'error'} sx={{ mb: 2 }}>
+                                {notification}
+                            </Alert>
+                        )}
+                        {enable ? (
+                            <Link to="/auth/login">
+                                <Typography variant="body1" align="center">
+                                    Tài khoản của bạn đã được kích hoạt thành công. Bạn có thể đăng
+                                    nhập ngay bây giờ.
+                                </Typography>
+                            </Link>
+                        ) : (
+                            <Typography variant="body1" align="center">
+                                Vui lòng kiểm tra lại liên kết kích hoạt hoặc liên hệ hỗ trợ.
+                            </Typography>
+                        )}
+                    </>
+                )}
+            </Paper>
+        </Container>
+    );
+};
 
+export default ActiveCodeUser;

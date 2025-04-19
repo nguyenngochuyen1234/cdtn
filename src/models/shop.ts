@@ -73,4 +73,7 @@ export interface StoreCreation {
     idCategory?: string;
     phone?: string;
     owner?: boolean;
+    codeCity?: number;
+    codeWard?: number;
+    codeDistrict?: number
 }

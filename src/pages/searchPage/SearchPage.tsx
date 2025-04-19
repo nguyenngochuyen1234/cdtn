@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
     Box,
     Card,
@@ -20,6 +20,7 @@ import { colors } from '@/themes/colors';
 import CustomPagination from '@/components/shop/CustomPagination';
 import { useLocation } from 'react-router-dom';
 import ShopAds from '@/components/detailPost/ShopAds';
+import { toast } from 'react-toastify';
 
 interface FilterParams {
     keyword: string;
@@ -35,7 +36,9 @@ interface FilterParams {
 export default function SearchPage() {
     const [shops, setShops] = useState<ShopSearchResponse[]>([]);
     const [totalShops, setTotalShops] = useState<number>(0);
+    const [totalPages, setTotalPages] = useState<number>(1);
     const [sortOption, setSortOption] = useState<string>('name_asc');
+    const [isLoading, setIsLoading] = useState(false);
     const location = useLocation();
     const initialKeyword = location.state?.keyword || '';
 
@@ -62,10 +65,14 @@ export default function SearchPage() {
     const [page, setPage] = useState<number>(0);
     const pageSize = 6;
 
+    // Memoize filterParamsString to prevent unnecessary recalculations
+    const filterParamsString = useMemo(() => JSON.stringify(filterParams), [filterParams]);
+
     const fetchDataShop = async () => {
+        setIsLoading(true);
         try {
             const apiParams: ParamFilterShop = {
-                keyword: filterParams.keyword !== undefined ? filterParams.keyword : '',
+                keyword: filterParams.keyword || '',
                 categoryId:
                     filterParams.categoryId.length > 0 ? filterParams.categoryId : undefined,
                 city: filterParams.city || undefined,
@@ -77,15 +84,31 @@ export default function SearchPage() {
                 latitude: filterParams.latitude || undefined,
                 longitude: filterParams.longitude || undefined,
             };
+            console.log('Fetching shops with params:', apiParams);
             const response = await shopApi.searchShop(apiParams);
+            console.log('API Response:', response?.data);
             const shopData = response?.data.data || [];
             const sortedShops = sortShops(shopData, sortOption);
+            const newTotalShops = response?.data.meta.total || shopData.length;
+
             setShops(sortedShops);
-            setTotalShops(response?.data.total || shopData.length);
-        } catch (error) {
-            console.error('Error fetching shops:', error);
+            // Only update totalShops and totalPages when filters change, not on page change
+            setTotalShops(newTotalShops);
+            setTotalPages(response.data.meta.totalPage);
+        } catch (error: any) {
+            console.error(
+                'Error fetching shops:',
+                error.message,
+                error.response?.data,
+                error.config
+            );
+            toast.error('Không thể tải danh sách cửa hàng. Vui lòng thử lại.');
             setShops([]);
             setTotalShops(0);
+            setTotalPages(1);
+            setPage(0);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -95,7 +118,7 @@ export default function SearchPage() {
             case 'name_asc':
                 return sortedShops.sort((a, b) => a.name.localeCompare(b.name));
             case 'name_desc':
-                return sortedShops.sort((a, b) => b.name.localeCompare(a.name));
+                return sortedShops.sort((a, b) => b.name.localeCompare(b.name));
             case 'reviews_asc':
                 return sortedShops.sort((a, b) => (a.countReview || 0) - (b.countReview || 0));
             case 'reviews_desc':
@@ -106,14 +129,21 @@ export default function SearchPage() {
     };
 
     useEffect(() => {
+        // Reset page to 0 and fetch data when filters or sort option change
+        setPage(0); // Reset to page 1 when filters/sort change
         fetchDataShop();
-    }, [filterParams, sortOption, page]);
+    }, [filterParamsString, sortOption]);
+
+    useEffect(() => {
+        // Fetch data when page changes, but don't reset page
+        fetchDataShop();
+    }, [page]);
 
     const handleFilterChange = (newFilters: Partial<FilterParams>) => {
         setFilterParams((prev) => ({
             ...prev,
             ...newFilters,
-            keyword: prev.keyword !== undefined ? prev.keyword : '',
+            keyword: prev.keyword || '',
         }));
         setPage(0);
     };
@@ -127,9 +157,23 @@ export default function SearchPage() {
     };
 
     const handlePageChange = (newPage: number) => {
-        setPage(newPage);
-    };
+        // Đảm bảo không có logic nào từ nơi khác đang reset page về 0
+        const newPageIndex = newPage - 1; // Chuyển từ 1-based sang 0-based
+        console.log(
+            'Changing to page:',
+            newPage,
+            'index:',
+            newPageIndex,
+            'totalPages:',
+            totalPages
+        );
 
+        if (newPageIndex >= 0 && newPageIndex < totalPages) {
+            setPage(newPageIndex);
+        } else if (newPageIndex >= totalPages && totalPages > 0) {
+            setPage(totalPages - 1);
+        }
+    };
     return (
         <div>
             <div
@@ -186,13 +230,19 @@ export default function SearchPage() {
                                 </FormControl>
                             </Box>
                             <Box sx={{ flexGrow: 1 }}>
-                                <ShopSearch shops={shops} />
+                                {isLoading ? (
+                                    <Typography>Đang tải...</Typography>
+                                ) : shops.length === 0 ? (
+                                    <Typography>Không tìm thấy cửa hàng nào.</Typography>
+                                ) : (
+                                    <ShopSearch shops={shops} />
+                                )}
                             </Box>
                             <Box mt={1} display="flex" justifyContent="center" alignItems="center">
                                 <CustomPagination
                                     page={page + 1}
-                                    totalPages={Math.ceil(totalShops / pageSize)}
-                                    onPageChange={(newPage) => setPage(newPage - 1)}
+                                    totalPages={totalPages}
+                                    onPageChange={handlePageChange}
                                 />
                             </Box>
                         </Card>
@@ -207,13 +257,13 @@ export default function SearchPage() {
                             <Card
                                 sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}
                             >
-                                <ShopAds /> {/* Sử dụng component ShopAds */}
+                                <ShopAds />
                             </Card>
                             <Divider orientation="horizontal" flexItem />
                             <Card
                                 sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}
                             >
-                                <ShopAds type="forme" /> {/* Sử dụng component Sponsored */}
+                                <ShopAds type="forme" />
                             </Card>
                         </Stack>
                     </Grid>

@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { TextField, Button, Grid, Container, Box, Snackbar, CircularProgress } from '@mui/material';
+import {
+    TextField,
+    Button,
+    Grid,
+    Box,
+    Snackbar,
+    CircularProgress,
+    Alert,
+    Typography,
+} from '@mui/material';
 import { RegisterUser } from '@/models';
 import authApi from '@/api/authApi';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,6 +19,8 @@ import { AppDispatch, RootState } from '@/redux/stores';
 import provincesApi from '@/api/provincesApi';
 import AddressSelector from '@/components/AddressSelector';
 import { setNewShop } from '@/redux/createShop';
+import axios from 'axios';
+import CreationStepper from './StepperComponent';
 
 const RegisterAccountShopPage = () => {
     const navigate = useNavigate();
@@ -31,15 +42,28 @@ const RegisterAccountShopPage = () => {
         handleSubmit,
         formState: { errors },
         watch,
-    } = useForm<RegisterUser>();
+    } = useForm<RegisterUser>({
+        defaultValues: {
+            email: '',
+            password: '',
+            confirmPassword: '',
+            phone: '',
+        },
+    });
 
-    const [provinces, setProvinces] = useState([]);
-    const [districts, setDistricts] = useState([]);
-    const [wards, setWards] = useState([]);
-
+    const [provinces, setProvinces] = useState<any[]>([]);
+    const [districts, setDistricts] = useState<any[]>([]);
+    const [wards, setWards] = useState<any[]>([]);
     const [selectedProvince, setSelectedProvince] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
     const [selectedWard, setSelectedWard] = useState('');
+    const [provinceName, setProvinceName] = useState('');
+    const [districtName, setDistrictName] = useState('');
+    const [wardName, setWardName] = useState('');
+    const [codeCity, setCodeCity] = useState<number | undefined>(undefined);
+    const [codeDistrict, setCodeDistrict] = useState<number | undefined>(undefined);
+    const [codeWard, setCodeWard] = useState<number | undefined>(undefined);
+
     useEffect(() => {
         const fetchProvinces = async () => {
             try {
@@ -70,6 +94,74 @@ const RegisterAccountShopPage = () => {
             console.error('Lỗi khi lấy danh sách xã/phường:', error);
         }
     };
+
+    const fetchCoordinates = async (ward: string, district: string, province: string) => {
+        try {
+            const query = `${ward}, ${district}, ${province}, Vietnam`;
+            const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+                params: {
+                    q: query,
+                    format: 'json',
+                    limit: 1,
+                },
+            });
+            if (response.data.length > 0) {
+                const { lat, lon } = response.data[0];
+                return { latitude: parseFloat(lat), longitude: parseFloat(lon) };
+            }
+            return null;
+        } catch (error) {
+            console.error('Lỗi khi lấy tọa độ:', error);
+            return null;
+        }
+    };
+
+    const handleProvinceChange = (provinceCode: string) => {
+        const province = provinces.find((p) => p.code === provinceCode);
+        setProvinceName(province?.name || '');
+        setCodeCity(province?.code ? parseInt(province.code) : undefined);
+        setSelectedProvince(provinceCode);
+        setSelectedDistrict('');
+        setSelectedWard('');
+        setDistrictName('');
+        setWardName('');
+        setCodeDistrict(undefined);
+        setCodeWard(undefined);
+        fetchDistricts(provinceCode);
+    };
+
+    const handleDistrictChange = (districtCode: string) => {
+        const district = districts.find((d) => d.code === districtCode);
+        setDistrictName(district?.name || '');
+        setCodeDistrict(district?.code ? parseInt(district.code) : undefined);
+        setSelectedDistrict(districtCode);
+        setSelectedWard('');
+        setWardName('');
+        setCodeWard(undefined);
+        fetchWards(districtCode);
+    };
+
+    const handleWardChange = async (wardCode: string) => {
+        const ward = wards.find((w) => w.code === wardCode);
+        setWardName(ward?.name || '');
+        setCodeWard(ward?.code ? parseInt(ward.code) : undefined);
+        setSelectedWard(wardCode);
+        const coords = await fetchCoordinates(ward?.name || '', districtName, provinceName);
+        dispatch(
+            setNewShop({
+                ...store,
+                city: provinceName,
+                district: districtName,
+                ward: ward?.name || '',
+                codeCity,
+                codeDistrict,
+                codeWard: ward?.code ? parseInt(ward.code) : undefined,
+                latitude: coords?.latitude || 21.0285,
+                longitude: coords?.longitude || 105.8542,
+            })
+        );
+    };
+
     const onSubmit = async (data: RegisterUser) => {
         setLoading(true);
         try {
@@ -77,19 +169,28 @@ const RegisterAccountShopPage = () => {
                 email: data.email,
                 password: data.password,
                 phone: data.phone,
-                city: selectedProvince,
-                ward: selectedWard,
-                district: selectedDistrict,
+                city: provinceName,
+                ward: wardName,
+                district: districtName,
+                codeCity,
+                codeDistrict,
+                codeWard,
             });
             if (result?.data?.success) {
                 localStorage.setItem('EMAIL_BIZ', data.email);
                 dispatch(
                     setNewShop({
-                        ...data,
                         ...store,
-                        city: selectedProvince,
-                        ward: selectedWard,
-                        district: selectedDistrict,
+                        email: data.email,
+                        phone: data.phone,
+                        city: provinceName,
+                        ward: wardName,
+                        district: districtName,
+                        codeCity,
+                        codeDistrict,
+                        codeWard,
+                        latitude: store?.latitude || 21.0285,
+                        longitude: store?.longitude || 105.8542,
                     })
                 );
                 setSnackbar({ open: true, message: 'Đăng ký thành công!', severity: 'success' });
@@ -97,12 +198,11 @@ const RegisterAccountShopPage = () => {
             } else {
                 setSnackbar({
                     open: true,
-                    message: result?.data?.message,
+                    message: result?.data?.message || 'Đăng ký thất bại.',
                     severity: 'error',
                 });
             }
         } catch (err) {
-            console.log(err);
             setSnackbar({
                 open: true,
                 message: 'Có lỗi xảy ra. Vui lòng thử lại.',
@@ -112,120 +212,102 @@ const RegisterAccountShopPage = () => {
             setLoading(false);
         }
     };
-    const handleProvinceChange = (provinceCode: string) => {
-        setSelectedProvince(provinceCode);
-        setSelectedDistrict('');
-        setSelectedWard('');
-        fetchDistricts(provinceCode);
-    };
-
-    const handleDistrictChange = (districtCode: string) => {
-        setSelectedDistrict(districtCode);
-        setSelectedWard('');
-        fetchWards(districtCode);
-    };
-
-    const handleWardChange = (wardCode: string) => {
-        setSelectedWard(wardCode);
-    };
 
     return (
-        <Container
+        <Box
             sx={{
-                display: 'flex',
-                justifyContent: 'center',
+                maxWidth: 600,
+                mx: 'auto',
+                my: 4,
+                p: 3,
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                boxShadow: 1,
             }}
         >
-            <Box sx={{ my: 4 }}>
+            <CreationStepper />
+            <Typography variant="h4" fontWeight="bold" gutterBottom>
+                Đăng Ký cửa hàng
+            </Typography>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <Grid container spacing={2}>
-                    <h2>Đăng Ký Tài Khoản</h2>
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        <Grid container spacing={2}>
-                            {[
-                                // { name: 'username', label: 'Username' },
-                                { name: 'email', label: 'Email *' },
-                                { name: 'password', label: 'Mật khẩu *', type: 'password' },
-                                {
-                                    name: 'confirmPassword',
-                                    label: 'Nhập lại mật khẩu *',
-                                    type: 'password',
-                                },
-                                { name: 'phone', label: 'Số điện thoại *' },
-                            ].map(({ name, label, type = 'text' }) => (
-                                <Grid item xs={12} sm={6} key={name}>
-                                    <Controller
-                                        name={name as keyof RegisterUser}
-                                        control={control}
-                                        rules={{
-                                            required: `${label} là trường bắt buộc`,
-                                            validate:
-                                                name === 'confirmPassword'
-                                                    ? (value) =>
-                                                          value === watch('password') ||
-                                                          'Mật khẩu không khớp'
-                                                    : undefined,
-                                        }}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label={label}
-                                                type={type}
-                                                fullWidth
-                                                error={!!errors[name as keyof RegisterUser]}
-                                                helperText={
-                                                    errors[name as keyof RegisterUser]?.message
+                    {[
+                        { name: 'email', label: 'Email *' },
+                        { name: 'password', label: 'Mật khẩu *', type: 'password' },
+                        { name: 'confirmPassword', label: 'Nhập lại mật khẩu *', type: 'password' },
+                        { name: 'phone', label: 'Số điện thoại *' },
+                    ].map(({ name, label, type = 'text' }) => (
+                        <Grid item xs={12} key={name}>
+                            <Controller
+                                name={name as keyof RegisterUser}
+                                control={control}
+                                rules={{
+                                    required: `${label} là trường bắt buộc`,
+                                    validate:
+                                        name === 'confirmPassword'
+                                            ? (value) =>
+                                                  value === watch('password') ||
+                                                  'Mật khẩu không khớp'
+                                            : undefined,
+                                    pattern:
+                                        name === 'email'
+                                            ? {
+                                                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                                  message: 'Email không hợp lệ',
+                                              }
+                                            : name === 'phone'
+                                              ? {
+                                                    value: /^[0-9]{10}$/,
+                                                    message: 'Số điện thoại phải có 10 chữ số',
                                                 }
-                                                InputLabelProps={
-                                                    type === 'date' ? { shrink: true } : undefined
-                                                }
-                                            />
-                                        )}
+                                              : undefined,
+                                }}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        label={label}
+                                        type={type}
+                                        fullWidth
+                                        error={!!errors[name as keyof RegisterUser]}
+                                        helperText={errors[name as keyof RegisterUser]?.message}
                                     />
-                                </Grid>
-                            ))}
-                            <Grid item xs={24} sm={12}>
-                                <AddressSelector
-                                    disable={false}
-                                    provinces={provinces}
-                                    districts={districts}
-                                    wards={wards}
-                                    selectedProvince={selectedProvince}
-                                    selectedDistrict={selectedDistrict}
-                                    selectedWard={selectedWard}
-                                    onProvinceChange={handleProvinceChange}
-                                    onDistrictChange={handleDistrictChange}
-                                    onWardChange={handleWardChange}
-                                />
-                            </Grid>
+                                )}
+                            />
                         </Grid>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            sx={{ mt: 2, position: 'relative' }}
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <CircularProgress
-                                    size={24}
-                                    sx={{ color: 'white', position: 'absolute' }}
-                                />
-                            ) : (
-                                'Tiếp theo'
-                            )}
-                        </Button>
-                    </form>
+                    ))}
+                    <Grid item xs={12}>
+                        <AddressSelector
+                            disable={false}
+                            provinces={provinces}
+                            districts={districts}
+                            wards={wards}
+                            selectedProvince={selectedProvince}
+                            selectedDistrict={selectedDistrict}
+                            selectedWard={selectedWard}
+                            onProvinceChange={handleProvinceChange}
+                            onDistrictChange={handleDistrictChange}
+                            onWardChange={handleWardChange}
+                        />
+                    </Grid>
                 </Grid>
-            </Box>
-
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 3, width: '100%' }}
+                    disabled={loading}
+                >
+                    {loading ? <CircularProgress size={24} /> : 'Tiếp theo'}
+                </Button>
+            </form>
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={6000}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
-                message={snackbar.message}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            />
-        </Container>
+            >
+                <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+            </Snackbar>
+        </Box>
     );
 };
 
