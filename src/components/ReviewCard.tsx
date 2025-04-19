@@ -120,7 +120,7 @@ const ReviewCard = ({ review }: ReviewCardProps) => {
                             <Avatar
                                 src={
                                     review.userReviewInfo?.avatar ||
-                                    'https://via.placeholder.com/40'
+                                    'http://res.cloudinary.com/dbk09oy6h/image/upload/v1745074840/IMAGE_USER/68036fd9e50e7d57aa4b353e/1745074841434.png.png'
                                 }
                                 alt={
                                     `${review.userReviewInfo?.firstName} ${review.userReviewInfo?.lastName}` ||
@@ -138,7 +138,12 @@ const ReviewCard = ({ review }: ReviewCardProps) => {
                                 }}
                             >
                                 {review.userReviewInfo
-                                    ? `${review.userReviewInfo.lastName} ${review.userReviewInfo.firstName}`
+                                    ? review.userReviewInfo.lastName ||
+                                      review.userReviewInfo.firstName
+                                        ? `${review.userReviewInfo.lastName || ''} ${review.userReviewInfo.firstName || ''}`.trim()
+                                        : review.userReviewInfo.username?.includes('@gmail')
+                                          ? review.userReviewInfo.username.replace('@gmail.com', '')
+                                          : review.userReviewInfo.username
                                     : 'Anonymous'}
                             </Typography>
                         </Box>
@@ -158,7 +163,10 @@ const ReviewCard = ({ review }: ReviewCardProps) => {
                             objectFit: 'cover',
                             borderRadius: 0,
                         }}
-                        image={review.mediaUrlReview[0] || 'https://via.placeholder.com/300x200'}
+                        image={
+                            review.mediaUrlReview[0] ||
+                            'http://res.cloudinary.com/dbk09oy6h/image/upload/v1744996048/IMAGE_SHOP/680286055f6b6806678e06b0/1744996046721.jpg.jpg'
+                        }
                         alt={review.reviewTitle || 'Review Image'}
                     />
 

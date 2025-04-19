@@ -58,8 +58,31 @@ export function getRoleByToken() {
         return decodedToken.role;
     }
 }
-export function logout(navigate: any) {
-    navigate('/login');
-    localStorage.removeItem('token');
-    localStorage.removeItem('cart');
+export function logoutAPI(navigate: any) {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+        fetch('http://localhost:8080/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ token }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    console.error('Logout API failed:', response.statusText);
+                }
+                localStorage.removeItem('access_token');
+                navigate('/auth/login');
+            })
+            .catch((error) => {
+                console.error('Error calling logout API:', error);
+                localStorage.removeItem('access_token');
+                navigate('/login');
+            });
+    } else {
+        localStorage.removeItem('access_token');
+        navigate('/login');
+    }
 }

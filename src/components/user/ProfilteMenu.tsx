@@ -15,7 +15,8 @@ import { AccountCircle, Article, ChevronRight, HelpOutline, Logout } from '@mui/
 import { MenuItem, User } from '@/models';
 import { useDispatch } from 'react-redux';
 import { setUser } from '@/redux/userSlice';
-import { getLastNameByToken } from '@/utils/JwtService';
+import { getAvatarByToken, getLastNameByToken, logoutAPI } from '@/utils/JwtService';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 
 interface ProfileMenuProps {
     user: User;
@@ -24,14 +25,17 @@ interface ProfileMenuProps {
 
 export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps) {
     const dispatch = useDispatch();
+    const navigate = useNavigate(); // Hook for navigation
 
     const handleMenuItemClick = (item: MenuItem) => {
         if (item.id === 'logout') {
-            localStorage.clear();
-            sessionStorage.clear();
-            dispatch(setUser(null));
+            // Call logoutAPI instead of manual logout logic
+            logoutAPI(navigate);
+            // Dispatch setUser(null) is already handled in logoutAPI (if needed)
+            // localStorage and sessionStorage clearing is handled in logoutAPI
+        } else {
+            onMenuItemClick(item);
         }
-        onMenuItemClick(item);
     };
 
     const menuItems = [
@@ -45,7 +49,7 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
             id: 'logout',
             label: 'Đăng xuất',
             icon: <Logout sx={{ color: '#000' }} />,
-            link: '/',
+            link: '/', // This will be overridden by logoutAPI
         },
     ];
 
@@ -54,7 +58,13 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
             <List disablePadding>
                 <ListItem>
                     <ListItemAvatar>
-                        <Avatar src={user.avatar} sx={{ width: 40, height: 40 }} />
+                        <Avatar
+                            src={
+                                getAvatarByToken() ||
+                                'http://res.cloudinary.com/dbk09oy6h/image/upload/v1745074840/IMAGE_USER/68036fd9e50e7d57aa4b353e/1745074841434.png.png'
+                            }
+                            sx={{ width: 40, height: 40 }}
+                        />
                     </ListItemAvatar>
                     <ListItemText
                         primary={
@@ -62,7 +72,6 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
                                 {getLastNameByToken()}
                             </Typography>
                         }
-                        
                     />
                 </ListItem>
 

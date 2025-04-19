@@ -15,11 +15,7 @@ const Sponsored: React.FC<SuggestShopsProps> = ({ type }) => {
     useEffect(() => {
         const fetchDataSuggestShop = async () => {
             try {
-                const response = await shopApi.getShopsSuggest({
-                    page: 0,
-                    size: 3,
-                    checkType: type,
-                });
+                const response = await shopApi.getShopAds();
                 if (response?.data.data) {
                     setShops(response.data.data);
                 }
@@ -57,13 +53,24 @@ const Sponsored: React.FC<SuggestShopsProps> = ({ type }) => {
                                 <StarIcon
                                     key={index}
                                     sx={{
-                                        color: '#f44336',
+                                        color:
+                                            index <
+                                            Math.floor(
+                                                shop.countReview > 0
+                                                    ? shop.point / shop.countReview
+                                                    : 0
+                                            )
+                                                ? '#f44336'
+                                                : '#e0e0e0',
                                         fontSize: 16,
                                     }}
                                 />
                             ))}
                             <Typography variant="body2" ml={1}>
-                                {shop.point} ({shop.countReview} reviews)
+                                {shop.countReview > 0
+                                    ? `${(shop.point / shop.countReview).toFixed(1)}`
+                                    : '1.0'}{' '}
+                                ({shop.countReview} reviews)
                             </Typography>
                         </Box>
                         <Typography variant="body2">{shop.description}</Typography>

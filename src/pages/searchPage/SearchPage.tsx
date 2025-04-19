@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import {
     Box,
     Card,
@@ -21,6 +21,7 @@ import CustomPagination from '@/components/shop/CustomPagination';
 import { useLocation } from 'react-router-dom';
 import ShopAds from '@/components/detailPost/ShopAds';
 import { toast } from 'react-toastify';
+import { debounce } from 'lodash';
 
 interface FilterParams {
     keyword: string;
@@ -41,6 +42,8 @@ export default function SearchPage() {
     const [isLoading, setIsLoading] = useState(false);
     const location = useLocation();
     const initialKeyword = location.state?.keyword || '';
+    const isInitialMount = useRef(true);
+    const isFilterChanging = useRef(false);
 
     const [filterParams, setFilterParams] = useState<FilterParams>(() => {
         const storedLocation = localStorage.getItem('userLocation');
@@ -65,52 +68,61 @@ export default function SearchPage() {
     const [page, setPage] = useState<number>(0);
     const pageSize = 6;
 
-    // Memoize filterParamsString to prevent unnecessary recalculations
     const filterParamsString = useMemo(() => JSON.stringify(filterParams), [filterParams]);
 
-    const fetchDataShop = async () => {
-        setIsLoading(true);
-        try {
-            const apiParams: ParamFilterShop = {
-                keyword: filterParams.keyword || '',
-                categoryId:
-                    filterParams.categoryId.length > 0 ? filterParams.categoryId : undefined,
-                city: filterParams.city || undefined,
-                district: filterParams.district || undefined,
-                openTimeId: filterParams.openTimeId || undefined,
-                scoreReview: filterParams.scoreReview > 0 ? filterParams.scoreReview : undefined,
-                page: page,
-                size: pageSize,
-                latitude: filterParams.latitude || undefined,
-                longitude: filterParams.longitude || undefined,
-            };
-            console.log('Fetching shops with params:', apiParams);
-            const response = await shopApi.searchShop(apiParams);
-            console.log('API Response:', response?.data);
-            const shopData = response?.data.data || [];
-            const sortedShops = sortShops(shopData, sortOption);
-            const newTotalShops = response?.data.meta.total || shopData.length;
+    // Scroll to top when the route changes
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location.pathname, location.search]);
 
-            setShops(sortedShops);
-            // Only update totalShops and totalPages when filters change, not on page change
-            setTotalShops(newTotalShops);
-            setTotalPages(response.data.meta.totalPage);
-        } catch (error: any) {
-            console.error(
-                'Error fetching shops:',
-                error.message,
-                error.response?.data,
-                error.config
-            );
-            toast.error('Không thể tải danh sách cửa hàng. Vui lòng thử lại.');
-            setShops([]);
-            setTotalShops(0);
-            setTotalPages(1);
-            setPage(0);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const fetchDataShop = useCallback(
+        debounce(async () => {
+            setIsLoading(true);
+            try {
+                const apiParams: ParamFilterShop = {
+                    keyword: filterParams.keyword || '',
+                    categoryId:
+                        filterParams.categoryId.length > 0 ? filterParams.categoryId : undefined,
+                    city: filterParams.city || undefined,
+                    district: filterParams.district || undefined,
+                    openTimeId: filterParams.openTimeId || undefined,
+                    scoreReview:
+                        filterParams.scoreReview > 0 ? filterParams.scoreReview : undefined,
+                    page: page,
+                    size: pageSize,
+                    latitude: filterParams.latitude || undefined,
+                    longitude: filterParams.longitude || undefined,
+                };
+
+                console.log('Fetching shops with params:', apiParams, 'current page:', page);
+
+                const response = await shopApi.searchShop(apiParams);
+                console.log('API Response:', response?.data);
+
+                const shopData = response?.data.data || [];
+                const sortedShops = sortShops(shopData, sortOption);
+                const newTotalShops = response?.data.meta.total || shopData.length;
+
+                setShops(sortedShops);
+                setTotalShops(newTotalShops);
+                setTotalPages(response.data.meta.totalPage);
+            } catch (error: any) {
+                console.error(
+                    'Error fetching shops:',
+                    error.message,
+                    error.response?.data,
+                    error.config
+                );
+                toast.error('Không thể tải danh sách cửa hàng. Vui lòng thử lại.');
+                setShops([]);
+                setTotalShops(0);
+                setTotalPages(1);
+            } finally {
+                setIsLoading(false);
+            }
+        }, 0),
+        [filterParams, page, sortOption]
+    );
 
     const sortShops = (shops: Shop[], sort: string) => {
         const sortedShops = [...shops];
@@ -129,51 +141,82 @@ export default function SearchPage() {
     };
 
     useEffect(() => {
-        // Reset page to 0 and fetch data when filters or sort option change
-        setPage(0); // Reset to page 1 when filters/sort change
-        fetchDataShop();
-    }, [filterParamsString, sortOption]);
+        console.log('SearchPage: useEffect triggered', {
+            isInitialMount: isInitialMount.current,
+            isFilterChanging: isFilterChanging.current,
+            filterParamsString,
+            sortOption,
+            page,
+        });
 
-    useEffect(() => {
-        // Fetch data when page changes, but don't reset page
-        fetchDataShop();
-    }, [page]);
-
-    const handleFilterChange = (newFilters: Partial<FilterParams>) => {
-        setFilterParams((prev) => ({
-            ...prev,
-            ...newFilters,
-            keyword: prev.keyword || '',
-        }));
-        setPage(0);
-    };
-
-    const handleSearch = (keyword: string) => {
-        setFilterParams((prev) => ({
-            ...prev,
-            keyword: keyword.trim(),
-        }));
-        setPage(0);
-    };
-
-    const handlePageChange = (newPage: number) => {
-        // Đảm bảo không có logic nào từ nơi khác đang reset page về 0
-        const newPageIndex = newPage - 1; // Chuyển từ 1-based sang 0-based
-        console.log(
-            'Changing to page:',
-            newPage,
-            'index:',
-            newPageIndex,
-            'totalPages:',
-            totalPages
-        );
-
-        if (newPageIndex >= 0 && newPageIndex < totalPages) {
-            setPage(newPageIndex);
-        } else if (newPageIndex >= totalPages && totalPages > 0) {
-            setPage(totalPages - 1);
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            fetchDataShop();
+            return;
         }
-    };
+
+        if (isFilterChanging.current) {
+            isFilterChanging.current = false;
+            setPage(0);
+        }
+
+        fetchDataShop();
+
+        return () => {
+            fetchDataShop.cancel();
+        };
+    }, [filterParamsString, sortOption, page, fetchDataShop]);
+
+    const handleFilterChange = useCallback((newFilters: Partial<FilterParams>) => {
+        console.log('SearchPage: handleFilterChange', newFilters);
+        isFilterChanging.current = true;
+        setFilterParams((prev) => {
+            const updated = {
+                ...prev,
+                ...newFilters,
+                keyword: prev.keyword || '',
+            };
+            console.log('SearchPage: setFilterParams', updated);
+            return updated;
+        });
+    }, []);
+
+    const handleSearch = useCallback((keyword: string) => {
+        console.log('SearchPage: handleSearch', keyword);
+        isFilterChanging.current = true;
+        setFilterParams((prev) => {
+            const updated = {
+                ...prev,
+                keyword: keyword.trim(),
+            };
+            console.log('SearchPage: setFilterParams', updated);
+            return updated;
+        });
+    }, []);
+
+    const handlePageChange = useCallback(
+        (newPage: number) => {
+            const newPageIndex = newPage - 1;
+            console.log(
+                'Changing to page:',
+                newPage,
+                'index:',
+                newPageIndex,
+                'totalPages:',
+                totalPages,
+                'current page:',
+                page
+            );
+
+            if (newPageIndex !== page && newPageIndex >= 0 && newPageIndex < totalPages) {
+                setPage(newPageIndex);
+            } else if (newPageIndex >= totalPages && totalPages > 0) {
+                setPage(totalPages - 1);
+            }
+        },
+        [page, totalPages]
+    );
+
     return (
         <div>
             <div

@@ -244,7 +244,10 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                                             component="span"
                                             sx={{ ml: 0.5 }}
                                         >
-                                            {shop.point || 0} sao
+                                            {shop.countReview > 0
+                                                ? shop.point / shop.countReview
+                                                : 0}{' '}
+                                            sao
                                         </Typography>
                                     </Box>
                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>

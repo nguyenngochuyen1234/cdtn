@@ -21,6 +21,8 @@ import type { AppDispatch, RootState } from '@/redux/stores';
 import userApi from '@/api/userApi';
 import { jwtDecode } from 'jwt-decode';
 import { User } from '@/models';
+import { getAvatarByToken, logoutAPI } from '@/utils/JwtService';
+import { useNavigate } from 'react-router-dom';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -55,11 +57,11 @@ export default function ProfilePage() {
     const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
     const dispatch = useDispatch<AppDispatch>();
     const user = useSelector((state: RootState) => state.user.user);
-
+    const navigate = useNavigate();
     // Hàm fetch user data từ API
     const fetchUser = async () => {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('access_token');
             if (token) {
                 const decoded: DecodedToken = jwtDecode(token);
                 const userId = decoded.sub;
@@ -96,6 +98,7 @@ export default function ProfilePage() {
                 await fetchUser();
                 setOpenAvatarDialog(false);
                 setSelectedAvatar(null);
+                logoutAPI(navigate);
             } catch (error) {
                 console.error('Error uploading avatar or updating profile:', error);
                 alert('Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.');
@@ -119,7 +122,10 @@ export default function ProfilePage() {
                                 border: '4px solid white',
                                 bgcolor: 'white',
                             }}
-                            src={user?.avatar || '/default-avatar.png'}
+                            src={
+                                getAvatarByToken() ||
+                                'http://res.cloudinary.com/dbk09oy6h/image/upload/v1745074840/IMAGE_USER/68036fd9e50e7d57aa4b353e/1745074841434.png.png'
+                            }
                             alt="User avatar"
                         />
                     </Box>
