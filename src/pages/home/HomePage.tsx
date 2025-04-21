@@ -38,13 +38,6 @@ const categories = [
     },
 ];
 
-const imageStyle: React.CSSProperties = {
-    width: '100%',
-    height: '80vh',
-    objectFit: 'cover',
-    borderRadius: 10,
-};
-
 const HomePage = () => {
     const [dataReviews, setDataReview] = useState<Review[] | null>(null);
     const [shops, setShops] = useState([]);
@@ -162,26 +155,53 @@ const HomePage = () => {
     };
 
     return (
-        <div className="px-[50px] py-[30px] bg-[#FAFBFC]">
+        <div
+            className="bg-[#FAFBFC]"
+            style={{
+                padding: '20px 15px', // Reduced padding for smaller screens
+                '@media (min-width: 600px)': {
+                    padding: '30px 50px', // Larger padding for desktop
+                },
+            }}
+        >
+            {/* Carousel Section */}
             <div className="relative">
                 <div className="hidden md:block">
                     <Carousel autoplay>
                         <div>
                             <img
-                                style={imageStyle}
+                                style={{
+                                    width: '100%',
+                                    height: '80vh', // Desktop height
+                                    objectFit: 'cover',
+                                    borderRadius: 10,
+                                }}
                                 src="https://i.pinimg.com/736x/f8/a7/01/f8a70144eb881afe78df0164e657e966.jpg"
+                                alt="Carousel Image 1"
                             />
                         </div>
                         <div>
                             <img
-                                style={imageStyle}
+                                style={{
+                                    width: '100%',
+                                    height: '80vh',
+                                    objectFit: 'cover',
+                                    borderRadius: 10,
+                                }}
                                 src="https://i.pinimg.com/736x/89/39/17/893917edbcc0fee101262b467aada93d.jpg"
+                                alt="Carousel Image 2"
                             />
                         </div>
                         <div>
                             <img
-                                style={imageStyle}
+                                style={{
+                                    width: '100%',
+                                    height: '80vh',
+                                    objectFit: 'cover',
+                                    borderRadius: 10,
+                                }}
                                 src="https://i.pinimg.com/736x/b7/b4/24/b7b4243f97193771177c5986b4b44614.jpg"
+                                alt="Carousel Image 3"
                             />
                         </div>
                     </Carousel>
@@ -189,89 +209,178 @@ const HomePage = () => {
 
                 <div className="block md:hidden">
                     <img
-                        style={imageStyle}
+                        style={{
+                            width: '100%',
+                            height: '50vh', // Reduced height for mobile
+                            objectFit: 'cover',
+                            borderRadius: 10,
+                        }}
                         src="https://i.pinimg.com/736x/f8/a7/01/f8a70144eb881afe78df0164e657e966.jpg"
+                        alt="Mobile Carousel Image"
                     />
                 </div>
 
                 <div
-                    className="absolute bg-[#fff] rounded-md shadow-lg p-4 bottom-[-40px] left-1/2 transform -translate-x-1/2"
-                    style={{ width: 'min(90%, 800px)' }}
+                    className="absolute bg-[#fff] rounded-md shadow-lg p-4 bottom-[-40px] left-1/2 transform -translate-x-1/2 w-full"
+                    style={{
+                        width: 'min(90%, 800px)', // Default width for desktop
+                        bottom: '-20px', // Adjusted for mobile
+                        padding: '10px', // Reduced padding for mobile
+                        '@media (min-width: 600px)': {
+                            bottom: '-40px',
+                            padding: '15px',
+                        },
+                    }}
                 >
-                    <SearchBarComponent onSearch={handleSearch} isSearchPage={false} />{' '}
+                    <SearchBarComponent onSearch={handleSearch} isSearchPage={false} />
                 </div>
             </div>
 
-            <main className="mt-[30px]">
+            {/* Main Content */}
+            <main style={{ marginTop: '50px' }}>
+                {/* Shop Section */}
                 <Box
                     justifyContent="space-between"
                     display="flex"
                     alignItems="center"
                     sx={{
-                        mb: 1,
+                        mb: 2,
                         flexDirection: { xs: 'column', md: 'row' },
                         textAlign: { xs: 'center', md: 'left' },
+                        gap: { xs: 2, md: 0 },
                     }}
                 >
-                    <div>
-                        <h2>{user ? 'Các cửa hàng bạn nên đến' : 'Các cửa hàng được tài trợ'}</h2>
-                        <span>
+                    <Box>
+                        <Typography
+                            variant="h5"
+                            sx={{
+                                fontSize: { xs: '1.25rem', md: '1.5rem' }, // Smaller font on mobile
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            {user ? 'Các cửa hàng bạn nên đến' : 'Các cửa hàng được tài trợ'}
+                        </Typography>
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontSize: { xs: '0.875rem', md: '1rem' } }}
+                        >
                             {user ? 'Gợi ý những cửa hàng phù hợp' : 'Các cửa hàng được quảng cáo'}
-                        </span>
-                    </div>
+                        </Typography>
+                    </Box>
                     <Link to={'/search'}>
-                        <Button variant="outlined" color="error" sx={{ mt: { xs: 2, md: 0 } }}>
+                        <Button
+                            variant="outlined"
+                            color="error"
+                            sx={{
+                                mt: { xs: 0, md: 0 },
+                                fontSize: { xs: '0.75rem', md: '0.875rem' },
+                                padding: { xs: '4px 8px', md: '6px 16px' },
+                            }}
+                        >
                             Xem thêm
                         </Button>
                     </Link>
                 </Box>
 
-                <Grid container spacing={3} sx={{ pb: 1, mb: 2 }}>
+                <Grid container spacing={2} sx={{ pb: 2, mb: 3 }}>
                     {shops && shops.length > 0 ? (
                         shops.map((shop, index) => (
-                            <Grid item xs={12} sm={6} md={3} key={index}>
-                                <ShopCard shop={shop} />
+                            <Grid
+                                item
+                                xs={12}
+                                sm={6}
+                                md={3}
+                                key={index}
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center', // Center cards on mobile
+                                }}
+                            >
+                                <Box sx={{ width: '100%', maxWidth: 300 }}>
+                                    <ShopCard shop={shop} />
+                                </Box>
                             </Grid>
                         ))
                     ) : (
-                        <Typography variant="body1" sx={{ textAlign: 'center', width: '100%' }}>
-                            Đang tải cửa hàng hoặc không có cửa hàng nào...
-                        </Typography>
+                        <Grid item xs={12}>
+                            <Typography variant="body1" sx={{ textAlign: 'center' }}>
+                                Đang tải cửa hàng hoặc không có cửa hàng nào...
+                            </Typography>
+                        </Grid>
                     )}
                 </Grid>
 
+                {/* Review Section */}
                 <Box
                     justifyContent="space-between"
                     display="flex"
                     alignItems="center"
                     sx={{
-                        mb: 1,
+                        mb: 2,
                         flexDirection: { xs: 'column', md: 'row' },
                         textAlign: { xs: 'center', md: 'left' },
+                        gap: { xs: 2, md: 0 },
                     }}
                 >
-                    <div>
-                        <h2>Danh sách đánh giá gần đây</h2>
-                        <span>Tổng hợp các bài viết review</span>
-                    </div>
+                    <Box>
+                        <Typography
+                            variant="h5"
+                            sx={{
+                                fontSize: { xs: '1.25rem', md: '1.5rem' },
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            Danh sách đánh giá gần đây
+                        </Typography>
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontSize: { xs: '0.875rem', md: '1rem' } }}
+                        >
+                            Tổng hợp các bài viết review
+                        </Typography>
+                    </Box>
                     <Link to={'/reviews'}>
-                        <Button variant="outlined" color="error" sx={{ mt: { xs: 2, md: 0 } }}>
+                        <Button
+                            variant="outlined"
+                            color="error"
+                            sx={{
+                                mt: { xs: 0, md: 0 },
+                                fontSize: { xs: '0.75rem', md: '0.875rem' },
+                                padding: { xs: '4px 8px', md: '6px 16px' },
+                            }}
+                        >
                             Xem thêm
                         </Button>
                     </Link>
                 </Box>
 
-                <Grid container spacing={3} sx={{ pb: 1 }}>
+                <Grid container spacing={2} sx={{ pb: 2 }}>
                     {dataReviews && dataReviews.length > 0 ? (
                         dataReviews.map((review, index) => (
-                            <Grid item xs={12} sm={6} md={3} key={index}>
-                                <ReviewCard review={review} />
+                            <Grid
+                                item
+                                xs={12}
+                                sm={6}
+                                md={3}
+                                key={index}
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Box sx={{ width: '100%', maxWidth: 300 }}>
+                                    <ReviewCard review={review} />
+                                </Box>
                             </Grid>
                         ))
                     ) : (
-                        <Typography variant="body1" sx={{ textAlign: 'center', width: '100%' }}>
-                            Đang tải đánh giá hoặc không có đánh giá nào...
-                        </Typography>
+                        <Grid item xs={12}>
+                            <Typography variant="body1" sx={{ textAlign: 'center' }}>
+                                Đang tải đánh giá hoặc không có đánh giá nào...
+                            </Typography>
+                        </Grid>
                     )}
                 </Grid>
             </main>

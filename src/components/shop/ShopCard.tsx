@@ -99,8 +99,9 @@ const ShopCard = ({ shop }: ShopCardProps) => {
     return (
         <Card
             sx={{
-                width: 300, // Fixed width
-                height: 350, // Fixed height
+                width: '100%', // Full width of the container
+                maxWidth: 300, // Max width for larger screens
+                height: { xs: 320, sm: 350 }, // Adjust height for smaller screens
                 borderRadius: 2,
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                 border: '1px solid #e0e0e0',
@@ -115,7 +116,7 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                     image={shop.avatar || 'https://via.placeholder.com/300x140'}
                     alt={shop.name}
                     sx={{
-                        height: 140, // Fixed image height
+                        height: { xs: 120, sm: 140 }, // Smaller image height on mobile
                         width: '100%',
                         objectFit: 'cover',
                     }}
@@ -139,6 +140,7 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                             component="div"
                             sx={{
                                 fontWeight: 'bold',
+                                fontSize: { xs: '0.9rem', sm: '1rem' },
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap',
@@ -153,7 +155,13 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                                 size="small"
                                 precision={0.5}
                             />
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: 'text.secondary',
+                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                }}
+                            >
                                 {shop.countReview > 0
                                     ? (shop.point / shop.countReview).toFixed(0)
                                     : '1'}
@@ -177,6 +185,7 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                                 variant="body2"
                                 color="text.secondary"
                                 sx={{
+                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
                                     whiteSpace: 'nowrap',
@@ -195,6 +204,7 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                                 variant="body2"
                                 color="text.secondary"
                                 sx={{
+                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
                                     whiteSpace: 'nowrap',
@@ -209,12 +219,13 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                         color="text.secondary"
                         sx={{
                             mb: 1,
-                            mt: 2,
+                            mt: 1,
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             overflow: 'hidden',
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical',
-                            height: 40, // Fixed height for description
+                            height: { xs: 36, sm: 40 }, // Adjusted height for description
                         }}
                     >
                         {shop.description}
@@ -247,7 +258,8 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                             size="small"
                             sx={{
                                 textTransform: 'none',
-                                px: 2,
+                                px: { xs: 1.5, sm: 2 },
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
                                 boxShadow: 'none',
                                 borderRadius: '50px',
                             }}

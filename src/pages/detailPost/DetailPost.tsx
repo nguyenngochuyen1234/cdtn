@@ -40,6 +40,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LanguageIcon from '@mui/icons-material/Language';
+import EmailIcon from '@mui/icons-material/Email';
 import { toast } from 'react-toastify'; // Giả định bạn sử dụng react-toastify để hiển thị thông báo
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/stores';
@@ -292,14 +293,19 @@ function DetailPost() {
                                                         fontWeight="medium"
                                                         sx={{ ml: 1 }}
                                                     >
-                                                        {detailShop?.point || 5}
+                                                        {detailShop?.countReview > 0
+                                                            ? (
+                                                                  detailShop.point /
+                                                                  detailShop.countReview
+                                                              ).toFixed(1)
+                                                            : 5}{' '}
                                                     </Typography>
                                                     <Typography
                                                         variant="body2"
                                                         color="text.secondary"
                                                         sx={{ ml: 1 }}
                                                     >
-                                                        ({detailShop?.countReview || 12} đánh giá)
+                                                        ({detailShop?.countReview || 0} đánh giá)
                                                     </Typography>
                                                 </Box>
                                                 <Typography variant="body2" color="text.secondary">
@@ -341,7 +347,6 @@ function DetailPost() {
                                                 gap: 2,
                                             }}
                                         >
-                                            {/* Phone */}
                                             <Box
                                                 sx={{
                                                     display: 'flex',
@@ -349,17 +354,17 @@ function DetailPost() {
                                                     gap: 1,
                                                 }}
                                             >
-                                                <PhoneIcon
+                                                <EmailIcon
                                                     sx={{ color: 'text.secondary', fontSize: 20 }}
                                                 />
                                                 <Typography variant="body2" color="text.secondary">
-                                                    <strong>Số điện thoại:</strong>{' '}
-                                                    {detailShop?.phone || '+84 39988741'}
+                                                    <strong>Email:</strong>{' '}
+                                                    {detailShop?.email || 'example@gmail.com'}
                                                 </Typography>
                                             </Box>
 
                                             {/* Address */}
-                                            <Box
+                                            {/* <Box
                                                 sx={{
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -374,10 +379,10 @@ function DetailPost() {
                                                     {detailShop?.address ||
                                                         '123 Đại Từ, Hoàng Mai, Hà Nội'}
                                                 </Typography>
-                                            </Box>
+                                            </Box> */}
 
                                             {/* Website */}
-                                            {detailShop?.website && (
+                                            {detailShop?.urlWebsite && (
                                                 <Box
                                                     sx={{
                                                         display: 'flex',
@@ -397,7 +402,7 @@ function DetailPost() {
                                                     >
                                                         <strong>Website:</strong>{' '}
                                                         <a
-                                                            href={detailShop.website}
+                                                            href={detailShop.urlWebsite}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             style={{
@@ -405,7 +410,7 @@ function DetailPost() {
                                                                 textDecoration: 'none',
                                                             }}
                                                         >
-                                                            {detailShop.website}
+                                                            {detailShop.urlWebsite}
                                                         </a>
                                                     </Typography>
                                                 </Box>

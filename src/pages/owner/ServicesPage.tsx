@@ -49,6 +49,7 @@ import ownerApi from '@/api/ownApi';
 import axios from 'axios';
 import shopApi from '@/api/shopApi';
 import userApi from '@/api/userApi';
+import { getLastNameByToken } from '@/utils/JwtService';
 
 interface Service {
     id: string;
@@ -265,7 +266,10 @@ const ServiceManagement: React.FC = () => {
             setSaving(true);
             try {
                 const files = Array.from(e.target.files);
-                const email = localStorage.getItem('EMAIL_BIZ');
+                let email = localStorage.getItem('EMAIL_BIZ');
+                if (!email) {
+                    email = getLastNameByToken();
+                }
                 const urls = await shopApi.uploadMultipleImage(files, email);
                 setFormData({
                     ...formData,
@@ -420,25 +424,25 @@ const ServiceManagement: React.FC = () => {
                                                     {service.price.toLocaleString()}
                                                 </TableCell>
                                                 <TableCell align="center">
-                                                <Chip
-                                        label={
-                                            service.stateService === 'OPEN'
-                                                ? 'Hoạt động'
-                                                : 'Không hoạt động'
-                                        }
-                                        size="small"
-                                        sx={{
-                                            fontWeight: 600,
-                                            backgroundColor:
-                                            service.stateService === 'OPEN'
-                                                    ? 'success.light'
-                                                    : 'error.light',
-                                            color:
-                                            service.stateService === 'OPEN'
-                                                    ? 'success.dark'
-                                                    : 'error.dark',
-                                        }}
-                                    />
+                                                    <Chip
+                                                        label={
+                                                            service.stateService === 'OPEN'
+                                                                ? 'Hoạt động'
+                                                                : 'Không hoạt động'
+                                                        }
+                                                        size="small"
+                                                        sx={{
+                                                            fontWeight: 600,
+                                                            backgroundColor:
+                                                                service.stateService === 'OPEN'
+                                                                    ? 'success.light'
+                                                                    : 'error.light',
+                                                            color:
+                                                                service.stateService === 'OPEN'
+                                                                    ? 'success.dark'
+                                                                    : 'error.dark',
+                                                        }}
+                                                    />
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     <Stack

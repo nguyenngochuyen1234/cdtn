@@ -63,7 +63,6 @@ interface StoreCreation {
     codeCity?: number;
     codeWard?: number;
     codeDistrict?: number;
-    
 }
 
 interface Restaurant {
@@ -260,7 +259,7 @@ const BusinessInfo: React.FC = () => {
                             ...restaurant,
                             imageBusiness: [response.data.data], // Chỉ giữ 1 ảnh giấy phép
                         });
-                    } 
+                    }
                 }
                 setSuccessMessage('Tải ảnh lên thành công!');
                 setOpenSnackbar(true);
@@ -305,7 +304,7 @@ const BusinessInfo: React.FC = () => {
                 description: restaurant.description,
                 urlWebsite: restaurant.urlWebsite,
                 avatar: restaurant.avatar || undefined,
-                mediaUrls: restaurant.mediaUrls,
+                mediaUrls: [],
                 imageBusiness:
                     restaurant.imageBusiness.length > 0 ? restaurant.imageBusiness[0] : undefined,
             };

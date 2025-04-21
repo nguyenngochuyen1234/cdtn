@@ -74,7 +74,16 @@ function ReviewCardPost({ shopId, filter, searchKeyword }: ReviewCardPostProps) 
                             return {
                                 id: item.id,
                                 user: {
-                                    name: `${item.userReviewInfo.firstName} ${item.userReviewInfo.lastName}`,
+                                    name:
+                                        item.userReviewInfo.firstName ||
+                                        item.userReviewInfo.lastName
+                                            ? `${item.userReviewInfo.firstName || ''} ${item.userReviewInfo.lastName || ''}`.trim()
+                                            : item.userReviewInfo.username?.includes('@gmail')
+                                              ? item.userReviewInfo.username.replace(
+                                                    '@gmail.com',
+                                                    ''
+                                                )
+                                              : item.userReviewInfo.username,
                                     location: `${item.userReviewInfo.ward}, ${item.userReviewInfo.district}, ${item.userReviewInfo.city}`,
                                     profileImage: item.userReviewInfo.avatar,
                                 },
@@ -206,9 +215,11 @@ function ReviewCardPost({ shopId, filter, searchKeyword }: ReviewCardPostProps) 
                                 <Typography variant="subtitle1" fontWeight="bold">
                                     {item.user.name}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {item.user.location}
-                                </Typography>
+                                {/* {item.user.location && (
+                                    <Typography variant="body2" color="text.secondary">
+                                        {item.user.location}
+                                    </Typography>
+                                )} */}
                                 <Stack direction="row" alignItems="center" spacing={1} mt={1}>
                                     {[...Array(5)].map((_, index) => (
                                         <StarIcon
@@ -326,7 +337,7 @@ function ReviewCardPost({ shopId, filter, searchKeyword }: ReviewCardPostProps) 
                                 {item.comment && item.comment.content && (
                                     <Box sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
                                         <Typography variant="body2" fontWeight="bold">
-                                            Phản hồi của người bán
+                                            Phản hồi của cửa hàng
                                         </Typography>
                                         <Typography variant="body2">
                                             {item.comment.content}

@@ -12,7 +12,7 @@ const HeaderDetailPost: React.FC<HeaderDetailPostProps> = ({ shop, shopId }) => 
     if (!shop) return null;
 
     // Tính điểm trung bình: point / countReview
-    const averageRating = shop.countReview > 0 ? (shop.point / shop.countReview).toFixed(1) : '0.0';
+    const averageRating = shop.countReview > 0 ? (shop.point / shop.countReview).toFixed(1) : '5.0';
 
     return (
         <Box

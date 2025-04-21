@@ -23,6 +23,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import commentApi from '@/api/comment';
+import { toast } from 'react-toastify';
 
 const modalStyle = (isMobile: boolean) => ({
     position: 'absolute' as const,
@@ -115,17 +116,21 @@ const ReviewsPage = () => {
     };
 
     const handleSendOrUpdateReply = async () => {
-        if (!selectedReviewId || !replyContent.trim()) return;
-
+        if (!selectedReviewId || !replyContent.trim()) {
+            toast.error('Vui lòng nhập nội dung phản hồi!');
+            return;
+        }
         try {
             if (comment) {
                 await commentApi.updateComment(comment.id, { content: replyContent });
                 setComment({ ...comment, content: replyContent });
+                toast.success('Chỉnh sửa phản hồi thành công!');
             } else {
                 const res = await commentApi.createComment(selectedReviewId, {
                     content: replyContent,
                 });
                 setComment({ id: res.data.data.id, content: replyContent });
+                toast.success('Gửi phản hồi thành công!');
             }
             setReplyModalOpen(false);
             setReplyContent('');
@@ -141,7 +146,10 @@ const ReviewsPage = () => {
     };
 
     const handleDeleteComment = async () => {
-        if (!comment?.id) return;
+        if (!comment?.id) {
+            toast.success('Xóa đánh giá thành công!');
+            return;
+        }
 
         try {
             await commentApi.deleteComment(comment.id);

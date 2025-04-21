@@ -157,11 +157,14 @@ export const HeaderComponent = () => {
                             startIcon={
                                 <Avatar
                                     sx={{
-                                        bgcolor: deepOrange[500], // Màu nền mặc định nếu ảnh không tải được
+                                         // Màu nền mặc định nếu ảnh không tải được
                                         width: isMobile ? 24 : 32,
                                         height: isMobile ? 24 : 32,
                                     }}
-                                    src={getAvatarByToken() || '/default-avatar.png'} // Lấy ảnh từ user.avatar hoặc ảnh mặc định
+                                    src={
+                                        getAvatarByToken() ||
+                                        'http://res.cloudinary.com/dbk09oy6h/image/upload/v1745074840/IMAGE_USER/68036fd9e50e7d57aa4b353e/1745074841434.png.png'
+                                    } // Lấy ảnh từ user.avatar hoặc ảnh mặc định
                                     alt={getLastNameByToken() || 'User Avatar'} // Alt text dựa trên username
                                 />
                             }
