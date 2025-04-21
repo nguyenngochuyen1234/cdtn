@@ -17,12 +17,12 @@ interface ShopSearchProps {
 }
 
 export default function ShopSearch({ shops }: ShopSearchProps) {
-    const [favorites, setFavorites] = useState<string[]>([]); // Danh sách ID cửa hàng yêu thích
+    const [favorites, setFavorites] = useState<string[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const navigate = useNavigate();
     const user = useSelector((state: RootState) => state.user.user);
 
-    // Lấy danh sách yêu thích khi component mount nếu đã đăng nhập
+    // Fetch favorites only when user changes
     useEffect(() => {
         const fetchFavorites = async () => {
             if (user) {
@@ -32,27 +32,14 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                     setFavorites(favoriteShops);
                 } catch (error) {
                     console.error('Error fetching favorites:', error);
+                    toast.error('Không thể tải danh sách yêu thích.');
                 }
+            } else {
+                setFavorites([]); // Clear favorites if user logs out
             }
         };
         fetchFavorites();
     }, [user]);
-
-    // Cập nhật danh sách yêu thích khi danh sách cửa hàng thay đổi
-    useEffect(() => {
-        if (user && shops.length > 0) {
-            const fetchFavorites = async () => {
-                try {
-                    const response = await favoritesApi.getAllFavorite('createdAt', 1, 100);
-                    const favoriteShops = response.data?.data?.map((fav: any) => fav.idShop) || [];
-                    setFavorites(favoriteShops);
-                } catch (error) {
-                    console.error('Error fetching favorites:', error);
-                }
-            };
-            fetchFavorites();
-        }
-    }, [shops, user]);
 
     const handleFavoriteClick = async (shopId: string) => {
         if (!user) {
@@ -95,13 +82,14 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
         navigate('/auth/login');
     };
 
-    const handleCardClick = (id:string) => {
-        navigate(`/detailPost/${id}`, { state: { from: 'sponsored' } })
-    }
-    return ( 
+    const handleCardClick = (id: string) => {
+        navigate(`/detailPost/${id}`, { state: { from: 'sponsored' } });
+    };
+
+    return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {shops.map((shop) => {
-                const isFavorite = favorites.includes(shop.id); // Kiểm tra từng shop có trong favorites không
+                const isFavorite = favorites.includes(shop.id);
                 return (
                     <Card
                         key={shop.id}
@@ -115,7 +103,7 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                             p: { xs: 1.5, sm: 2 },
                             flexDirection: { xs: 'column', sm: 'row' },
                         }}
-                        onClick={() => handleCardClick(shop.id)} // Thêm sự kiện click
+                        onClick={() => handleCardClick(shop.id)}
                     >
                         <Box
                             sx={{
@@ -298,7 +286,10 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                                     title={isFavorite ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
                                 >
                                     <Button
-                                        onClick={() => handleFavoriteClick(shop.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleFavoriteClick(shop.id);
+                                        }}
                                         sx={{ minWidth: 0, p: 0 }}
                                     >
                                         {isFavorite ? (
@@ -308,7 +299,10 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                                         )}
                                     </Button>
                                 </Tooltip>
-                                <Link to={`/write-review/shop/${shop.id}`}>
+                                <Link
+                                    to={`/write-review/shop/${shop.id}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
                                     <Button
                                         variant="contained"
                                         color="error"
@@ -323,7 +317,10 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                                         Viết đánh giá
                                     </Button>
                                 </Link>
-                                <Link to={`/detailPost/${shop.id}`}>
+                                <Link
+                                    to={`/detailPost/${shop.id}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
                                     <Button
                                         variant="contained"
                                         color="error"

@@ -49,6 +49,8 @@ import OpeningHoursPage from './pages/owner/OpeningHoursPage';
 import ServicesList from './components/shop/Service';
 import ServiceDetailPage from './components/shop/ServiceDetailPage';
 import FavoriteStores from './components/shop/FavoritePage';
+import AdvertisementPackageList from './pages/owner/AdvertisementPackageList';
+import PaymentStatus from './pages/owner/PaymentCard';
 
 export default function App() {
     const dispatch = useDispatch();
@@ -116,7 +118,13 @@ export default function App() {
                     <Route path="services" element={<ServicesPage />} />
                     <Route path="opening-hours" element={<OpeningHoursPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
+                    <Route
+                        path="advertisement"
+                        element={<AdvertisementPackageList></AdvertisementPackageList>}
+                    ></Route>
+                    <Route path="history" element={<PaymentStatus></PaymentStatus>}></Route>
                 </Route>
+
                 <Route path="/biz" element={<CreateShop />}>
                     <Route path="register-shop" element={<RegisterAccountShopPage />} />
                     <Route path="create-tag" element={<CreateTagPage />} />
@@ -124,7 +132,7 @@ export default function App() {
                     <Route path="upload-image" element={<UploadImagePage />} />
                 </Route>
                 <Route path="finish-create-shop" element={<FinishCreateShop />} />
-                <Route path="writeareview" element={<BusinessSearch />} />
+                {/* <Route path="writeareview" element={<BusinessSearch />} /> */}
                 <Route path="writeareview/biz/:id" element={<ReviewBusiness />} />
                 <Route path="/admin" element={<AdminPage />}>
                     <Route index element={<StatisticsPage />} />

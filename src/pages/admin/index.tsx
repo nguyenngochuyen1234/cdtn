@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Drawer,
@@ -10,6 +10,7 @@ import {
     Stack,
     Avatar,
     Typography,
+    CircularProgress,
 } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '@/components/admin/Header';
@@ -19,37 +20,65 @@ import {
     Dashboard,
     Logout,
     People,
-    Lock, // For change password
-    AccountCircle, // For user page
+    Lock,
+    AccountCircle,
 } from '@mui/icons-material';
+import axios from 'axios';
+import userApi from '@/api/userApi';
 
-// Updated Navigation Menu
+// Navigation Menu
 const NAVIGATION = [
-    { segment: '', title: 'Tổng quan', icon: <Dashboard /> },
-    { segment: 'moderation', title: 'Kiểm duyệt', icon: <AdminPanelSettings /> },
-    { segment: 'categories', title: 'Danh mục', icon: <Category /> },
-    { segment: 'users', title: 'Người dùng', icon: <People /> },
-    { segment: 'advertisement', title: 'Quảng cáo', icon: <Category /> },
-    { segment: 'change-password', title: 'Đổi mật khẩu', icon: <Lock /> },
-    { segment: 'user-page', title: 'Trang người dùng', icon: <AccountCircle /> },
+    { segment: '', title: 'Tổng quan', icon: <Dashboard sx={{ color: '#4CAF50' }} /> },
+    {
+        segment: 'moderation',
+        title: 'Kiểm duyệt',
+        icon: <AdminPanelSettings sx={{ color: '#FF9800' }} />,
+    },
+    { segment: 'categories', title: 'Danh mục', icon: <Category sx={{ color: '#2196F3' }} /> },
+    { segment: 'users', title: 'Người dùng', icon: <People sx={{ color: '#9C27B0' }} /> },
+    { segment: 'advertisement', title: 'Quảng cáo', icon: <Category sx={{ color: '#F44336' }} /> },
+    {
+        segment: 'user-page',
+        title: 'Trang người dùng',
+        icon: <AccountCircle sx={{ color: '#009688' }} />,
+    },
 ];
 
 const AdminPage = () => {
     const [open, setOpen] = useState(true);
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const location = useLocation(); // To track the current route
+    const location = useLocation();
+
+    // Fetch user data
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await userApi.getUser();
+                setUser(response.data.data);
+            } catch (err) {
+                // setError('Không thể tải thông tin người dùng');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUser();
+    }, []);
 
     const toggleSidebar = () => setOpen(!open);
 
-    const handleNavigation = (segment: string) => {
+    const handleNavigation = (segment) => {
         if (segment === 'logout') {
             localStorage.removeItem('token');
             sessionStorage.clear();
             navigate('/auth/login');
         } else if (segment === 'user-page') {
-            navigate('/'); // Navigate to root URL (http://localhost:5173/)
+            navigate('/');
         } else {
-            navigate(`/admin/${segment}`); // Navigate to admin routes
+            navigate(`/admin/${segment}`);
         }
     };
 
@@ -79,10 +108,24 @@ const AdminPage = () => {
                                     sx={{ width: 32, height: 32 }}
                                 />
                                 <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                                    <Typography variant="subtitle2">User A</Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Quản trị
-                                    </Typography>
+                                    {loading ? (
+                                        <CircularProgress size={20} />
+                                    ) : error ? (
+                                        <Typography variant="subtitle2" color="error">
+                                            {error}
+                                        </Typography>
+                                    ) : (
+                                        <>
+                                            <Typography variant="subtitle2">
+                                                {user?.firstName && user?.lastName
+                                                    ? `${user.firstName} ${user.lastName}`
+                                                    : 'Bảo Đức'}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Quản trị viên
+                                            </Typography>
+                                        </>
+                                    )}
                                 </Box>
                             </Box>
                         </Stack>
@@ -110,13 +153,35 @@ const AdminPage = () => {
                                     },
                                 }}
                             >
-                                <ListItemIcon sx={{ color: isActive ? '#1976d2' : 'inherit' }}>
+                                <ListItemIcon
+                                    sx={{
+                                        color: isActive ? '#1976d2' : '#757575', // Active: blue, Inactive: grey
+                                    }}
+                                >
                                     {item.icon}
                                 </ListItemIcon>
                                 <ListItemText primary={item.title} />
                             </ListItem>
                         );
                     })}
+                    {/* Logout Item */}
+                    <ListItem
+                        onClick={() => handleNavigation('logout')}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '10px 20px',
+                            textDecoration: 'none',
+                            '&:hover': {
+                                backgroundColor: '#f0f0f0',
+                            },
+                        }}
+                    >
+                        <ListItemIcon sx={{ color: '#757575' }}>
+                            <Logout />
+                        </ListItemIcon>
+                        <ListItemText primary="Đăng xuất" />
+                    </ListItem>
                 </List>
             </Drawer>
             <Box sx={{ flexGrow: 1, p: 3, minHeight: '100vh' }}>

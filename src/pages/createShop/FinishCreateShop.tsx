@@ -1,7 +1,6 @@
 import shopApi from '@/api/shopApi';
 import { OpenTime, StoreCreation } from '@/models';
 import { AppDispatch, RootState } from '@/redux/stores';
-import OpeningHours from '@/utils/OpeningHours';
 import {
     Alert,
     Box,
@@ -11,19 +10,38 @@ import {
     Snackbar,
     TextField,
     Typography,
+    IconButton,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import MapComponent from './MapComponent';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useNavigate } from 'react-router-dom';
+import CreationStepper from './StepperComponent';
+import GoogleLocation from '@/components/location/GoogleLocation';
+import DeleteIcon from '@mui/icons-material/Delete';
+import OpeningHours from './OpenHouring';
+
+interface Location {
+    name: string;
+    lat: number;
+    lng: number;
+}
+
+const daysOfWeekLabel: { [key: string]: string } = {
+    MONDAY: 'Thứ Hai',
+    TUESDAY: 'Thứ Ba',
+    WEDNESDAY: 'Thứ Tư',
+    THURSDAY: 'Thứ Năm',
+    FRIDAY: 'Thứ Sáu',
+    SATURDAY: 'Thứ Bảy',
+    SUNDAY: 'Chủ Nhật',
+};
 
 const App: React.FC = () => {
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
     const store = useSelector((state: RootState) => state.newShop.newShop);
-    console.log(store?.imageBusiness);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState<StoreCreation>({
         name: '',
@@ -42,152 +60,184 @@ const App: React.FC = () => {
         categoryEnum: 'RESTAURANT',
         idCategory: '',
         phone: '',
-        // owner: false,
+        codeCity: undefined,
+        codeWard: undefined,
+        codeDistrict: undefined,
     });
-
     const [imagePreviews, setImagePreviews] = useState<{
         avatar: string | null;
         imageBusiness: string | null;
-        mediaUrls: string[] | null;
+        mediaUrls: string[];
     }>({
         avatar: null,
         mediaUrls: [],
         imageBusiness: null,
     });
-
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
-    const [openTimes, setOpenTimes] = useState<OpenTime[]>([]);
+    const [openTimes, setOpenTimes] = useState<OpenTime[]>([
+        { id: '1', dayOfWeekEnum: 'MONDAY', openTime: '09:00', closeTime: '17:00', dayOff: false },
+        { id: '2', dayOfWeekEnum: 'TUESDAY', openTime: '09:00', closeTime: '17:00', dayOff: false },
+        {
+            id: '3',
+            dayOfWeekEnum: 'WEDNESDAY',
+            openTime: '09:00',
+            closeTime: '17:00',
+            dayOff: false,
+        },
+        {
+            id: '4',
+            dayOfWeekEnum: 'THURSDAY',
+            openTime: '09:00',
+            closeTime: '17:00',
+            dayOff: false,
+        },
+        { id: '5', dayOfWeekEnum: 'FRIDAY', openTime: '09:00', closeTime: '17:00', dayOff: false },
+        {
+            id: '6',
+            dayOfWeekEnum: 'SATURDAY',
+            openTime: '09:00',
+            closeTime: '17:00',
+            dayOff: false,
+        },
+        { id: '7', dayOfWeekEnum: 'SUNDAY', openTime: '09:00', closeTime: '17:00', dayOff: false },
+    ]);
+    const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
     const bizEmail = localStorage.getItem('EMAIL_BIZ');
     const bizIdCategory = localStorage.getItem('IDCATEGORY_BIZ');
-    useEffect(() => {
-        if (bizEmail) {
-            setFormData((prev) => ({
-                ...prev,
-                email: bizEmail || '',
-                openTimeRequests: openTimes,
-            }));
-        }
-        if (bizIdCategory) {
-            setFormData((prev) => ({
-                ...prev,
-                idCategory: bizIdCategory || '',
-            }));
-        }
-    }, [bizIdCategory, bizEmail]);
 
-    const handleInputChange = (
-        field: keyof StoreCreation,
-        value: string | number | boolean | string[]
-    ) => {
+    useEffect(() => {
+        setFormData((prev) => ({
+            ...prev,
+            email: bizEmail || '',
+            idCategory: bizIdCategory || '',
+            openTimeRequests: openTimes,
+            city: store?.city || '',
+            ward: store?.ward || '',
+            district: store?.district || '',
+            longitude: selectedLocation?.lat || store?.latitude || 0,
+            latitude: selectedLocation?.lng || store?.latitude || 0,
+            phone: store?.phone || '',
+            codeCity: store?.codeCity,
+            codeDistrict: store?.codeDistrict,
+            codeWard: store?.codeWard,
+        }));
+    }, [bizEmail, bizIdCategory, store, openTimes, selectedLocation]);
+
+    const handleInputChange = (field: keyof StoreCreation, value: string | number | string[]) => {
         setFormData((prev) => ({
             ...prev,
             [field]: value,
         }));
     };
 
-    const handleFileChange = () => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files ? Array.from(event.target.files) : [];
-
         if (files.length > 0) {
             setFormData((prev) => ({
                 ...prev,
-                mediaUrls: files,
+                mediaUrls: [...(prev.mediaUrls as File[]), ...files],
             }));
-
             setImagePreviews((prev) => ({
                 ...prev,
-                mediaUrls: files.map((file) => URL.createObjectURL(file)),
+                mediaUrls: [...prev.mediaUrls, ...files.map((file) => URL.createObjectURL(file))],
             }));
         }
     };
 
-    const handleRemoveOpenTime = (index: number) => {
+    const handleRemoveImage = (index: number) => {
         setFormData((prev) => ({
             ...prev,
-            openTimeRequests: prev?.openTimeRequests?.filter((_, i) => i !== index),
+            mediaUrls: (prev.mediaUrls as File[]).filter((_, i) => i !== index),
+        }));
+        setImagePreviews((prev) => ({
+            ...prev,
+            mediaUrls: prev.mediaUrls.filter((_, i) => i !== index),
         }));
     };
 
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const handleOpenTimeChange = (id: string, field: keyof OpenTime, value: string | boolean) => {
-        setOpenTimes(
-            openTimes.map((time) => (time.id === id ? { ...time, [field]: value } : time))
-        );
-    };
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
-
         if (!formData.name) newErrors.name = 'Tên cửa hàng là trường bắt buộc';
-
+        if (!formData.email) newErrors.email = 'Email là trường bắt buộc';
+        if (openTimes.length !== 7) {
+            newErrors.openTimes = 'Phải có thời gian hoạt động cho cả 7 ngày trong tuần';
+        } else {
+            openTimes.forEach((time, index) => {
+                if (!time.dayOfWeekEnum) {
+                    newErrors[`openTime_${index}_day`] = 'Ngày trong tuần là bắt buộc';
+                }
+                if (!time.dayOff && (!time.openTime || !time.closeTime)) {
+                    newErrors[`openTime_${index}_time`] =
+                        'Giờ mở và đóng cửa là bắt buộc nếu không nghỉ';
+                }
+                if (
+                    !time.dayOff &&
+                    time.openTime &&
+                    time.closeTime &&
+                    time.openTime >= time.closeTime
+                ) {
+                    newErrors[`openTime_${index}_time`] = 'Giờ mở cửa phải trước giờ đóng cửa';
+                }
+            });
+            // Ensure all 7 days are present
+            const uniqueDays = new Set(openTimes.map((time) => time.dayOfWeekEnum));
+            if (uniqueDays.size !== 7) {
+                newErrors.openTimes = 'Mỗi ngày trong tuần phải được chọn đúng một lần';
+            }
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-    const handleAddOpenTime = () => {
-        setFormData((prev) => ({
-            ...prev,
-            openTimeRequests: [
-                ...(prev?.openTimeRequests || []),
-                { dayOfWeekEnum: 'MONDAY', openTime: '', closeTime: '', dayOff: false },
-            ],
-        }));
+
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+    const handleOpenTimeChange = (id: string, field: keyof OpenTime, value: string | boolean) => {
+        setOpenTimes((prev) =>
+            prev.map((time) => (time.id === id ? { ...time, [field]: value } : time))
+        );
     };
 
     const handleSubmit = async () => {
         try {
             setLoading(true);
-
-            if (validateForm()) {
-                await shopApi.uploadMultipleImage(
-                    formData.mediaUrls as File[],
-                    formData.email as string
-                );
-            } else {
-                console.log('Validation failed. Fix errors and try again.');
-
-                setSnackbarMessage('Please fix the errors in the form.');
+            if (!validateForm()) {
+                setSnackbarMessage('Vui lòng sửa các lỗi trong biểu mẫu.');
                 setSnackbarSeverity('error');
                 setSnackbarOpen(true);
                 return;
             }
 
-            const meadiaUrls = await shopApi.uploadMultipleImage(
+            const mediaUrlsResponse = await shopApi.uploadMultipleImage(
                 formData.mediaUrls as File[],
-                formData.email as string
+                formData.email
             );
+
             const response = await shopApi.createShop({
-                name: formData.name,
+                ...formData,
                 avatar: localStorage.getItem('AVATAR') || '',
                 imageBusiness: localStorage.getItem('IMAGE_BUSINESS') || '',
-                email: localStorage.getItem('EMAIL_BIZ'),
-                mediaUrls: meadiaUrls.data.data,
-                description: formData.description,
-                urlWebsite: formData.urlWebsite,
+                mediaUrls: mediaUrlsResponse.data.data,
                 openTimeRequests: openTimes,
-                city: store?.city,
-                ward: store?.ward,
-                district: store?.district,
-                longitude: 0,
-                latitude: 0,
-                categoryEnum: 'RESTAURANT',
-                idCategory: store?.idCategory,
-                phone: store?.phone,
-                owner: formData.owner,
+                longitude: selectedLocation?.lat || formData.longitude,
+                latitude: selectedLocation?.lng || formData.latitude,
             });
-            if (response.data.success) {
-                setSnackbarMessage(response.data.message);
+
+            if (response.data) {
+                setSnackbarMessage(response.data.message || 'Tạo cửa hàng thành công!');
                 setSnackbarSeverity('success');
                 setSnackbarOpen(true);
-                navigate('/');
+                setTimeout(() => navigate('/'), 2000); // Navigate after toast
             } else {
-                setSnackbarMessage(response.data.message);
+                setSnackbarMessage(response.data.message || 'Tạo cửa hàng thất bại.');
                 setSnackbarSeverity('error');
                 setSnackbarOpen(true);
             }
         } catch (error) {
-            setSnackbarMessage('Submission failed. Please try again.');
+            setSnackbarMessage('Gửi biểu mẫu thất bại. Vui lòng thử lại.');
             setSnackbarSeverity('error');
+            setSnackbarOpen(true);
         } finally {
             setLoading(false);
         }
@@ -195,13 +245,25 @@ const App: React.FC = () => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Box className="p-8 rounded-lg">
-                <Grid container spacing={2}>
-                    {/* Left side: Inputs */}
-                    <Grid item xs={6}>
-                        <Typography variant="h4" className="mb-4 font-bold">
-                            Tạo cửa hàng
+            <Box
+                sx={{
+                    p: { xs: 2, md: 4 },
+                    bgcolor: 'background.paper',
+                    borderRadius: 2,
+                    boxShadow: 1,
+                }}
+            >
+                <CreationStepper />
+                <Grid container spacing={4}>
+                    <Grid item xs={12}>
+                        <Typography variant="h4" gutterBottom fontWeight="bold">
+                            Tạo Cửa Hàng
                         </Typography>
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                            Điền thông tin chi tiết để hoàn tất việc tạo cửa hàng của bạn.
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             label="Tên cửa hàng"
                             fullWidth
@@ -209,8 +271,9 @@ const App: React.FC = () => {
                             onChange={(e) => handleInputChange('name', e.target.value)}
                             margin="normal"
                             required
+                            error={!!errors.name}
+                            helperText={errors.name}
                         />
-
                         <TextField
                             label="Website URL"
                             fullWidth
@@ -227,67 +290,94 @@ const App: React.FC = () => {
                             onChange={(e) => handleInputChange('description', e.target.value)}
                             margin="normal"
                         />
-
-                        {/* <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={formData.owner}
-                                onChange={(e) => handleInputChange('owner', e.target.checked)}
-                            />
-                        }
-                        label="Owner"
-                    /> */}
-                        <Grid item xs={24} sm={12}>
-                            <Typography variant="h6">Thời gian hoạt động của cửa hàng</Typography>
+                        <Box mt={3}>
+                            <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 1 }}>
+                                Địa chỉ cửa hàng <span style={{ color: 'red' }}>*</span>
+                            </Typography>
+                            <GoogleLocation />
+                            {errors.address && (
+                                <Typography color="error" variant="caption">
+                                    {errors.address}
+                                </Typography>
+                            )}
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <Box mb={3}>
+                            <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 1 }}>
+                                Thời gian hoạt động
+                            </Typography>
                             <OpeningHours
                                 openTimes={openTimes}
-                                setOpenTimes={setOpenTimes}
                                 handleOpenTimeChange={handleOpenTimeChange}
                             />
-                        </Grid>
-                        <Grid item xs={24} sm={12}>
-                            <Box mt={4}>
-                                <Typography variant="h6" className="mb-2">
-                                    Tải nhiều ảnh
+                            {errors.openTimes && (
+                                <Typography color="error" variant="caption">
+                                    {errors.openTimes}
                                 </Typography>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    onChange={handleFileChange()}
-                                />
-                                <Box mt={2} display="flex" flexWrap="wrap" gap={2}>
-                                    {imagePreviews.mediaUrls &&
-                                        imagePreviews.mediaUrls.map((src, index) => (
-                                            <img
-                                                key={index}
-                                                src={src}
-                                                alt={`Media URL Preview ${index + 1}`}
-                                                style={{
-                                                    width: '100px',
-                                                    height: '100px',
-                                                    objectFit: 'cover',
-                                                    borderRadius: 8,
-                                                }}
-                                            />
-                                        ))}
-                                </Box>
+                            )}
+                        </Box>
+                        <Box>
+                            <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 1 }}>
+                                Tải các ảnh cửa hàng
+                            </Typography>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleFileChange}
+                                style={{ display: 'block', marginBottom: 16 }}
+                            />
+                            <Box display="flex" flexWrap="wrap" gap={2}>
+                                {imagePreviews.mediaUrls.map((src, index) => (
+                                    <Box
+                                        key={index}
+                                        sx={{
+                                            position: 'relative',
+                                            width: 100,
+                                            height: 100,
+                                        }}
+                                    >
+                                        <Box
+                                            component="img"
+                                            src={src}
+                                            alt={`Media Preview ${index + 1}`}
+                                            sx={{
+                                                width: 100,
+                                                height: 100,
+                                                objectFit: 'cover',
+                                                borderRadius: 2,
+                                                boxShadow: 1,
+                                            }}
+                                        />
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleRemoveImage(index)}
+                                            sx={{
+                                                position: 'absolute',
+                                                top: 4,
+                                                right: 4,
+                                                bgcolor: 'background.paper',
+                                                '&:hover': { bgcolor: 'grey.200' },
+                                            }}
+                                        >
+                                            <DeleteIcon fontSize="small" color="error" />
+                                        </IconButton>
+                                    </Box>
+                                ))}
                             </Box>
-                        </Grid>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12}>
                         <Button
                             variant="contained"
                             color="primary"
-                            sx={{ marginTop: 3 }}
                             onClick={handleSubmit}
                             disabled={loading}
+                            sx={{ width: '100%', py: 1.5 }}
                         >
-                            {loading ? <CircularProgress size={24} /> : 'Submit'}
+                            {loading ? <CircularProgress size={24} /> : 'Tạo cửa hàng'}
                         </Button>
-                    </Grid>
-
-                    {/* Right side: Static Text */}
-                    <Grid item xs={6} display="flex" alignItems="center" justifyContent="center">
-                        <MapComponent />
                     </Grid>
                 </Grid>
                 <Snackbar
@@ -295,9 +385,7 @@ const App: React.FC = () => {
                     autoHideDuration={3000}
                     onClose={() => setSnackbarOpen(false)}
                 >
-                    <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
-                        {snackbarMessage}
-                    </Alert>
+                    <Alert severity={snackbarSeverity}>{snackbarMessage}</Alert>
                 </Snackbar>
             </Box>
         </LocalizationProvider>

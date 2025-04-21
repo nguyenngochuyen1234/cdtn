@@ -14,6 +14,7 @@ import {
     SelectChangeEvent,
 } from '@mui/material';
 import { Category } from '@/models';
+import { toast } from 'react-toastify';
 
 interface CategoryModalProps {
     open: boolean;
@@ -68,9 +69,13 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
     };
 
     const handleAddTag = () => {
-        if (newTag.trim() && !tags.includes(newTag.trim())) {
-            setTags((prevTags) => [...prevTags, newTag.trim()]);
-            setNewTag('');
+        if (newTag.trim()) {
+            if (tags.includes(newTag.trim())) {
+                toast.error('Thẻ này đã tồn tại');
+            } else {
+                setTags((prevTags) => [...prevTags, newTag.trim()]);
+                setNewTag('');
+            }
         }
     };
 

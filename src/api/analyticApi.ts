@@ -21,5 +21,13 @@ const analyticApi = {
         const url = '/analytic/count-favorite-review';
         return axiosClient.post(url, data);
     },
+    countViewAdsByShop(){
+        const url = `/analytic/count-view-ads`
+        return axiosClient.get(url); 
+    },
+    countAdsAndRevenue(){
+        const url = `/analytic/count-ads`
+        return axiosClient.get(url);
+    }
 };
 export default analyticApi;

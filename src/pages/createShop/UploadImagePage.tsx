@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
-import axios from 'axios';
-import axiosClient from '@/api/axiosClient';
+import {
+    Box,
+    Button,
+    Typography,
+    CircularProgress,
+    Card,
+    CardMedia,
+    CardContent,
+    Grid,
+    Alert,
+    Snackbar,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { AppDispatch, RootState } from '@/redux/stores';
 import { useDispatch, useSelector } from 'react-redux';
-import { setNewShop } from '@/redux/createShop';
+import CreationStepper from './StepperComponent';
 
 function UploadImagePage() {
     const navigate = useNavigate();
@@ -21,8 +30,15 @@ function UploadImagePage() {
         'food-safety': null,
     });
     const [uploading, setUploading] = useState<boolean>(false);
-    const [uploadError, setUploadError] = useState<string>('');
-    const [uploadSuccess, setUploadSuccess] = useState<string>('');
+    const [snackbar, setSnackbar] = useState<{
+        open: boolean;
+        message: string;
+        severity: 'success' | 'error';
+    }>({
+        open: false,
+        message: '',
+        severity: 'success',
+    });
 
     const handleFileChange = (type: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files ? event.target.files[0] : null;
@@ -35,132 +51,170 @@ function UploadImagePage() {
                 ...prev,
                 [type]: URL.createObjectURL(file),
             }));
-            setUploadError('');
         }
     };
 
     const handleUpload = async () => {
         setUploading(true);
-        setUploadError('');
-        setUploadSuccess('');
         const email = localStorage.getItem('EMAIL_BIZ');
-        if (email) {
-            const uploadPromises = Object.entries(imageFiles).map(async ([type, file], index) => {
-                if (!file) return null;
+        if (!email) {
+            setSnackbar({
+                open: true,
+                message: 'Không tìm thấy email. Vui lòng đăng nhập lại.',
+                severity: 'error',
+            });
+            setUploading(false);
+            return;
+        }
 
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('email', email);
-                try {
-                    const response = await axios.put(
-                        'http://localhost:8080/shops/upload-image-shop',
-                        formData,
-                        {
-                            headers: {
-                                'Content-Type': 'multipart/form-data',
-                                Accept: 'application/json',
-                            },
-                        }
-                    );
-                    if (response.data.success) {
-                        if (index === 0) {
-                            localStorage.setItem('AVATAR', response.data.data);
-                        } else if (index === 1) {
-                            localStorage.setItem('IMAGE_BUSINESS', response.data.data);
-                        }
+        if (!imageFiles['shop-logo'] || !imageFiles['food-safety']) {
+            setSnackbar({
+                open: true,
+                message: 'Vui lòng chọn cả ảnh đại diện và giấy phép kinh doanh.',
+                severity: 'error',
+            });
+            setUploading(false);
+            return;
+        }
+
+        const uploadPromises = Object.entries(imageFiles).map(async ([type, file], index) => {
+            if (!file) return null;
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('email', email);
+            try {
+                const response = await fetch('http://localhost:8080/shops/upload-image-shop', {
+                    method: 'PUT',
+                    body: formData,
+                });
+                const data = await response.json();
+                if (data.success) {
+                    if (index === 0) {
+                        localStorage.setItem('AVATAR', data.data);
+                    } else if (index === 1) {
+                        localStorage.setItem('IMAGE_BUSINESS', data.data);
                     }
-                } catch (error) {
+                    return `Tải lên ${type} thành công`;
+                } else {
                     throw new Error(`Không thể tải lên ${type}.`);
                 }
-            });
-
-            try {
-                const results = await Promise.all(uploadPromises);
-                const successMessages = results.filter((msg) => msg !== null).join('\n');
-                setUploadSuccess(successMessages);
-                navigate('/finish-create-shop');
-            } catch (error: any) {
-                setUploadError(error.message);
-            } finally {
-                setUploading(false);
+            } catch (error) {
+                throw new Error(`Không thể tải lên ${type}.`);
             }
+        });
+
+        try {
+            await Promise.all(uploadPromises);
+            setSnackbar({
+                open: true,
+                message: 'Tải ảnh lên thành công!',
+                severity: 'success',
+            });
+            navigate('/finish-create-shop');
+        } catch (error: any) {
+            setSnackbar({
+                open: true,
+                message: error.message || 'Tải ảnh thất bại. Vui lòng thử lại.',
+                severity: 'error',
+            });
+        } finally {
+            setUploading(false);
         }
     };
+
     return (
-        <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, p: 3, boxShadow: 2, borderRadius: 2 }}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom>
-                Tải ảnh lên hệ thống
+        <Box
+            sx={{
+                maxWidth: 800,
+                mx: 'auto',
+                my: 4,
+                p: 3,
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                boxShadow: 1,
+            }}
+        >
+            <CreationStepper />
+            <Typography variant="h4" fontWeight="bold" gutterBottom>
+                Tải Ảnh Cửa Hàng
             </Typography>
-
-            <Typography variant="body1" sx={{ mt: 3 }}>
-                Chọn ảnh đại diện cửa hàng:
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                Tải lên ảnh đại diện và giấy phép kinh doanh để hoàn tất hồ sơ cửa hàng.
             </Typography>
-            <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange('shop-logo')}
-                style={{ marginTop: 8 }}
-            />
-            {imageFiles['shop-logo'] && (
-                <Typography variant="body2" sx={{ mt: 2 }}>
-                    Đã chọn file: {imageFiles['shop-logo']?.name}
-                </Typography>
-            )}
-            {previewUrls['shop-logo'] && (
-                <Box sx={{ mt: 2 }}>
-                    <img
-                        src={previewUrls['shop-logo']}
-                        alt="Shop Logo Preview"
-                        style={{ width: '100%', maxHeight: 200, objectFit: 'contain' }}
-                    />
-                </Box>
-            )}
-
-            <Typography variant="body1" sx={{ mt: 3 }}>
-                Chọn ảnh giấy phép kinh doanh của cửa hàng
-            </Typography>
-            <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange('food-safety')}
-                style={{ marginTop: 8 }}
-            />
-            {imageFiles['food-safety'] && (
-                <Typography variant="body2" sx={{ mt: 2 }}>
-                    Đã chọn file: {imageFiles['food-safety']?.name}
-                </Typography>
-            )}
-            {previewUrls['food-safety'] && (
-                <Box sx={{ mt: 2 }}>
-                    <img
-                        src={previewUrls['food-safety']}
-                        alt="Food Safety Certificate Preview"
-                        style={{ width: '100%', maxHeight: 200, objectFit: 'contain' }}
-                    />
-                </Box>
-            )}
-
-            {uploadError && (
-                <Typography color="error" sx={{ mt: 2 }}>
-                    {uploadError}
-                </Typography>
-            )}
-
-            {uploadSuccess && (
-                <Typography color="success.main" sx={{ mt: 2 }}>
-                    {uploadSuccess}
-                </Typography>
-            )}
-
+            <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                    <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
+                        <CardContent>
+                            <Typography variant="h6" gutterBottom>
+                                Ảnh đại diện cửa hàng <span style={{ color: 'red' }}>*</span>
+                            </Typography>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange('shop-logo')}
+                                style={{ display: 'block', marginBottom: 16 }}
+                            />
+                            {imageFiles['shop-logo'] && (
+                                <Typography variant="body2" color="text.secondary">
+                                    Đã chọn: {imageFiles['shop-logo']?.name}
+                                </Typography>
+                            )}
+                        </CardContent>
+                        {previewUrls['shop-logo'] && (
+                            <CardMedia
+                                component="img"
+                                image={previewUrls['shop-logo']}
+                                alt="Shop Logo Preview"
+                                sx={{ height: 200, objectFit: 'contain', borderRadius: 2 }}
+                            />
+                        )}
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
+                        <CardContent>
+                            <Typography variant="h6" gutterBottom>
+                                Giấy phép kinh doanh <span style={{ color: 'red' }}>*</span>
+                            </Typography>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange('food-safety')}
+                                style={{ display: 'block', marginBottom: 16 }}
+                            />
+                            {imageFiles['food-safety'] && (
+                                <Typography variant="body2" color="text.secondary">
+                                    Đã chọn: {imageFiles['food-safety']?.name}
+                                </Typography>
+                            )}
+                        </CardContent>
+                        {previewUrls['food-safety'] && (
+                            <CardMedia
+                                component="img"
+                                image={previewUrls['food-safety']}
+                                alt="Food Safety Certificate Preview"
+                                sx={{ height: 200, objectFit: 'contain', borderRadius: 2 }}
+                            />
+                        )}
+                    </Card>
+                </Grid>
+            </Grid>
             <Button
                 variant="contained"
                 color="primary"
                 onClick={handleUpload}
-                sx={{ mt: 3, width: '100%' }}
+                sx={{ mt: 4, width: '100%' }}
                 disabled={uploading}
             >
-                {uploading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Tải ảnh lên'}
+                {uploading ? <CircularProgress size={24} /> : 'Tải ảnh lên'}
             </Button>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
+            >
+                <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+            </Snackbar>
         </Box>
     );
 }
