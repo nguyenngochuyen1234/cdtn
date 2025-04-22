@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
 import authApi from '@/api/authApi';
+import { toast } from 'react-toastify';
 
 const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
@@ -48,7 +49,25 @@ const RegisterPage: React.FC = () => {
     };
 
     const handleSubmit = async () => {
-        setLoading(true);
+        const { username, email, password, phone } = formData;
+
+        if (!username) {
+            toast.error('Vui lòng nhập họ và tên');
+            return;
+        }
+        if (!email) {
+            toast.error('Vui lòng nhập email');
+            return;
+        }
+        if (!password) {
+            toast.error('Vui lòng nhập mật khẩu');
+            return;
+        }
+        if (!phone) {
+            toast.error('Vui lòng nhập số điện thoại');
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
             setSnackbarMessage('Mật khẩu và xác nhận mật khẩu không khớp!');
             setSnackbarSeverity('error');
@@ -56,9 +75,9 @@ const RegisterPage: React.FC = () => {
             setLoading(false);
             return;
         }
+        setLoading(true);
 
         try {
-            const { username, email, password, phone } = formData;
             const result = await authApi.register({ username, email, password, phone });
             if (result?.data.success) {
                 setSnackbarMessage(result.data.message);

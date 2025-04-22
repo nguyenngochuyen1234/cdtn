@@ -322,14 +322,23 @@ const AdvertisementPage: React.FC = () => {
 
         try {
             if (editingItem) {
-               const response = await adsApi.updateAds(adData, editingItem.id);
-                toast.success(response.data.message)
+                const response = await adsApi.updateAds(adData, editingItem.id);
+                if (response.data.success) {
+                    toast.success(response.data.message);
+                    setModalVisible(false);
+                } else {
+                    toast.error(response.data.message);
+                }
             } else {
-              const response =   await adsApi.createAds(adData);
-              toast.success(response.data.message)
+                const response = await adsApi.createAds(adData);
+                if (response.data.success) {
+                    toast.success(response.data.message);
+                    setModalVisible(false);
+                } else {
+                    toast.error(response.data.message);
+                }
             }
             fetchAdvertisements();
-            setModalVisible(false);
         } catch (error) {
             console.error('Error submitting form', error);
         }
@@ -789,7 +798,9 @@ const AdvertisementPage: React.FC = () => {
                                             Loại:
                                         </Typography>
                                         <Typography variant="body2" fontWeight="medium">
-                                            {getDisplayType(formValues.advertisementTypeEnum || 'PREMIUM')}
+                                            {getDisplayType(
+                                                formValues.advertisementTypeEnum || 'PREMIUM'
+                                            )}
                                         </Typography>
                                     </Box>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>

@@ -130,7 +130,7 @@ export const HeaderComponent = () => {
                                 py: isMobile ? 0.5 : 1,
                                 px: isMobile ? 1 : 2,
                             }}
-                            onClick={() => navigate('/search')}
+                            onClick={() => navigate('/write-review')}
                         >
                             <Typography
                                 variant="subtitle2"
@@ -157,7 +157,7 @@ export const HeaderComponent = () => {
                             startIcon={
                                 <Avatar
                                     sx={{
-                                         // Màu nền mặc định nếu ảnh không tải được
+                                        // Màu nền mặc định nếu ảnh không tải được
                                         width: isMobile ? 24 : 32,
                                         height: isMobile ? 24 : 32,
                                     }}

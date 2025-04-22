@@ -18,6 +18,7 @@ import {
 import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getRoleByToken } from '@/utils/JwtService';
+import { toast } from 'react-toastify';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -33,10 +34,18 @@ const LoginPage: React.FC = () => {
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
     useEffect(() => {
-        // Kiểm tra nếu đã có access_token
+        const savedUsername = localStorage.getItem('saved_username');
+        const savedPassword = localStorage.getItem('saved_password');
+        const savedRememberMe = localStorage.getItem('remember_me') === 'true';
+
+        if (savedUsername && savedPassword && savedRememberMe) {
+            setUsername(savedUsername);
+            setPassword(savedPassword);
+            setRememberMe(true);
+        }
+
         const token = localStorage.getItem('access_token');
         if (token) {
-            // Điều hướng đến trang trước đó hoặc trang mặc định
             const from = location.state?.from || '/';
             navigate(from, { replace: true });
         }
@@ -52,6 +61,14 @@ const LoginPage: React.FC = () => {
     const handleLogin = async () => {
         setIsLoading(true);
         try {
+            if (!username) {
+                toast.error('Vui lòng nhập tên đăng nhập');
+                return;
+            }
+            if (!password) {
+                toast.error('Vui lòng nhập mật khẩu');
+                return;
+            }
             const result = await authApi.login({ username, password });
             setSnackbarMessage(result.data.message);
             setSnackbarSeverity(result.data.success ? 'success' : 'error');
@@ -60,8 +77,19 @@ const LoginPage: React.FC = () => {
             if (result.data.success) {
                 dispatch(setUser(result.data.data));
                 localStorage.setItem('access_token', result.data.data.accessToken);
+
+                if (rememberMe) {
+                    localStorage.setItem('saved_username', username);
+                    localStorage.setItem('saved_password', password);
+                    localStorage.setItem('remember_me', 'true');
+                } else {
+                    localStorage.removeItem('saved_username');
+                    localStorage.removeItem('saved_password');
+                    localStorage.removeItem('remember_me');
+                }
+
                 const role = getRoleByToken();
-                console.log('Decoded role:', role);
+                toast.success('Đăng nhập thành công');
                 if (role?.[0] === 'OWNER') {
                     navigate('/owner');
                 } else if (role?.[0] === 'ADMIN') {
@@ -71,9 +99,7 @@ const LoginPage: React.FC = () => {
                 }
             }
         } catch (err) {
-            setSnackbarMessage('Đăng nhập thất bại');
-            setSnackbarSeverity('error');
-            setSnackbarOpen(true);
+            toast.error('Đăng nhập thất bại');
         } finally {
             setIsLoading(false);
         }
@@ -107,7 +133,7 @@ const LoginPage: React.FC = () => {
             />
 
             <TextField
-                label="Password"
+                label="Mật khẩu"
                 type="password"
                 variant="outlined"
                 fullWidth

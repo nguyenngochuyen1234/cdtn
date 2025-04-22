@@ -34,6 +34,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ownerApi from '@/api/ownApi';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 interface StoreCreation {
     statusShopEnums?: 'ACTIVE' | 'DEACTIVE' | 'BANNED';
@@ -80,7 +81,7 @@ const shopApi = {
         const formData = new FormData();
         files.forEach((file) => formData.append('files', file));
         formData.append('email', email);
-        return axios.post('http://localhost:8080/shops/upload-multiple-images', formData, {
+        return axios.put('http://localhost:8080/shops/upload-multiple-image', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 Accept: 'application/json',
@@ -257,7 +258,7 @@ const BusinessInfo: React.FC = () => {
                     if (response.data.success) {
                         setRestaurant({
                             ...restaurant,
-                            imageBusiness: [response.data.data], // Chỉ giữ 1 ảnh giấy phép
+                            imageBusiness: [response.data.data],
                         });
                     }
                 }
@@ -292,11 +293,14 @@ const BusinessInfo: React.FC = () => {
     };
 
     const updateRestaurant = async () => {
+        if (!restaurant.name) {
+            toast.error('Vui lòng nhập tên doanh nghiệp');
+            return;
+        }
         setUploading(true);
         setUploadError('');
 
         try {
-            // Merge dữ liệu từ restaurant vào store
             const updatedStore: StoreCreation = {
                 ...store,
                 name: restaurant.name,
@@ -313,7 +317,7 @@ const BusinessInfo: React.FC = () => {
             if (res.data.success) {
                 setSuccessMessage('Cập nhật thông tin thành công!');
                 setOpenSnackbar(true);
-                fetchData(); // Refresh data from server
+                fetchData();
             } else {
                 throw new Error('Cập nhật thông tin doanh nghiệp thất bại!');
             }
@@ -386,7 +390,6 @@ const BusinessInfo: React.FC = () => {
                             Cập nhật thông tin doanh nghiệp
                         </Typography>
                         <Grid container spacing={3}>
-                            {/* Left column - Basic information */}
                             <Grid item xs={12} md={6}>
                                 <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
                                     <Typography
