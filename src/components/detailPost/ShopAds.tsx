@@ -5,18 +5,47 @@ import { useEffect, useState } from 'react';
 import { Box, Typography, Card, CardMedia, CardContent, useTheme } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import shopApi from '@/api/shopApi';
-import type { Shop } from '@/models';
+import type { OpenTime, Shop } from '@/models';
 import { useNavigate } from 'react-router-dom';
 
 interface ShopAdsProps {
     type?: string;
 }
-
+export interface Shops {
+    point?: number;
+    id: string;
+    idUser: string;
+    idCategory: string;
+    name: string;
+    avatar: string;
+    email: string;
+    isVery: boolean;
+    urlWebsite: string;
+    phoneNumber: string;
+    listIdOpenTime: string[];
+    listOpenTimes: OpenTime[];
+    longitude: string;
+    latitude: string;
+    mediaUrls: string[];
+    countReview: number;
+    city: string;
+    ward: string;
+    district: string;
+    hasAnOwner: boolean;
+    type: string;
+    description: string;
+    categoryResponse: string;
+    price: number;
+    statusShop: 'ACTIVE' | 'INACTIVE' | 'BANNED';
+    view: number;
+    categoryName: string;
+    idAdvertisement: string;
+}
 const ShopAds: React.FC<ShopAdsProps> = ({ type }) => {
-    const [shops, setShops] = useState<Shop[]>([]);
+    const [shops, setShops] = useState<Shops[]>([]);
     const navigate = useNavigate();
     const theme = useTheme();
-
+    console.log(type)
     useEffect(() => {
         const fetchShops = async () => {
             try {
@@ -24,7 +53,7 @@ const ShopAds: React.FC<ShopAdsProps> = ({ type }) => {
                 if (type === 'forme') {
                     response = await shopApi.getShopsSuggest({
                         page: 0,
-                        size: 3,
+                        size: 4,
                         checkType: 'forme',
                     });
                     setShops(response?.data.data || []);
@@ -41,10 +70,16 @@ const ShopAds: React.FC<ShopAdsProps> = ({ type }) => {
         };
         fetchShops();
     }, [type]);
-    const handleCardSearch = (id:string ) => {
-        const from = type === 'forme' ? 'suggested' : 'ads';    
-        navigate(`/detailPost/${id}`, { state: { from } });
-    }
+
+    const handleCardSearch = (id: string, idAdvertisement?: string) => {
+        const from = type === 'forme' ? 'suggested' : 'sponsored';
+        navigate(`/detailPost/${id}`, {
+            state: {
+                from,
+                idAdvertisement: from === 'sponsored' ? idAdvertisement : undefined, // Chỉ truyền idAdvertisement nếu from là 'ads'
+            },
+        });
+    };
 
     const renderStars = (rating: number) => {
         return (
@@ -65,7 +100,7 @@ const ShopAds: React.FC<ShopAdsProps> = ({ type }) => {
     return (
         <Box>
             <Typography variant="h6" fontWeight="bold" mb={2}>
-                {type === 'forme' ? 'Có thể bạn nên đến' : 'Được tài trợ'}
+                {type === 'forme' ? 'Cửa hàng được đề xuất' : 'Được tài trợ'}
             </Typography>
             {shops.length > 0 ? (
                 shops.map((shop) => (
@@ -82,7 +117,7 @@ const ShopAds: React.FC<ShopAdsProps> = ({ type }) => {
                                 boxShadow: 3,
                             },
                         }}
-                        onClick={() => handleCardSearch(shop.id)}
+                        onClick={() => handleCardSearch(shop.id, shop.idAdvertisement)} // Truyền cả shop.id và shop.idAdvertisement
                     >
                         <CardMedia
                             component="img"
@@ -94,7 +129,10 @@ const ShopAds: React.FC<ShopAdsProps> = ({ type }) => {
                                     opacity: 0.9,
                                 },
                             }}
-                            image={shop.avatar || '/placeholder.svg?height=120&width=120'}
+                            image={
+                                shop.avatar ||
+                                'http://res.cloudinary.com/dbk09oy6h/image/upload/v1744996768/IMAGE_SHOP/680286055f6b6806678e06b0/1744996767931.jpg.jpg'
+                            }
                             alt={shop.name}
                         />
                         <CardContent sx={{ flex: 1, p: 1.5, overflow: 'hidden' }}>

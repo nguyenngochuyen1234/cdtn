@@ -35,7 +35,7 @@ const MENU_ITEMS: MenuAdminItem[] = [
     { key: 'overview', label: 'Tổng quan', icon: <Dashboard />, path: '/' },
     { key: 'posts', label: 'Bài đăng', icon: <Article />, path: '/posts' },
     { key: 'statistics', label: 'Thống kê', icon: <BarChart />, path: '/statistics' },
-    { key: 'moderation', label: 'Kiểm duyệt', icon: <AdminPanelSettings />, path: '/moderation' },
+    { key: 'moderation', label: 'Quản lý cửa hàng', icon: <AdminPanelSettings />, path: '/moderation' },
     { key: 'categories', label: 'Danh mục', icon: <Category />, path: '/categories' },
     { key: 'users', label: 'Người dùng', icon: <People />, path: '/users' },
 ];

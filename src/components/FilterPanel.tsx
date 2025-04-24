@@ -314,7 +314,7 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
                     onClick={() => setOpenClosingHours(!openClosingHours)}
                 >
                     <Typography variant="subtitle1" fontWeight="medium">
-                        Thời gian đóng cửa
+                        Thời gian hoạt động
                     </Typography>
                     {openClosingHours ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                 </Box>

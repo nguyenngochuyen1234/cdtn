@@ -1,17 +1,50 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Grid, Card, CardMedia, CardContent } from '@mui/material';
+import { Box, Typography, Card, CardMedia, CardContent } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import shopApi from '@/api/shopApi';
-import { Shop } from '@/models';
+import { OpenTime, Shop } from '@/models';
 import { useNavigate } from 'react-router-dom';
 
 interface SuggestShopsProps {
     type: string;
 }
 
+// Đảm bảo interface Shop đã có idAdvertisement
+export interface Shop {
+    point?: number;
+    id: string;
+    idUser: string;
+    idCategory: string;
+    name: string;
+    avatar: string;
+    email: string;
+    isVery: boolean;
+    urlWebsite: string;
+    phoneNumber: string;
+    listIdOpenTime: string[];
+    listOpenTimes: OpenTime[];
+    longitude: string;
+    latitude: string;
+    mediaUrls: string[];
+    countReview: number;
+    city: string;
+    ward: string;
+    district: string;
+    hasAnOwner: boolean;
+    type: string;
+    description: string;
+    categoryResponse: string;
+    price: number;
+    statusShop: 'ACTIVE' | 'INACTIVE' | 'BANNED';
+    view: number;
+    categoryName: string;
+    idAdvertisement: string;
+}
+
 const Sponsored: React.FC<SuggestShopsProps> = ({ type }) => {
     const [shops, setShops] = useState<Shop[]>([]);
     const navigate = useNavigate();
+
     useEffect(() => {
         const fetchDataSuggestShop = async () => {
             try {
@@ -23,9 +56,16 @@ const Sponsored: React.FC<SuggestShopsProps> = ({ type }) => {
         };
         fetchDataSuggestShop();
     }, [type]);
-    const handleShopClick = (shopId: string) => {
-        navigate(`/detailPost/${shopId}`, { state: { from: 'sponsored' } });
+
+    const handleShopClick = (shopId: string, idAdvertisement: string) => {
+        navigate(`/detailPost/${shopId}`, {
+            state: {
+                from: 'sponsored',
+                idAdvertisement, // Truyền idAdvertisement vào state
+            },
+        });
     };
+
     return (
         <Box sx={{ mt: 4 }}>
             <Typography variant="h6" fontWeight="bold">
@@ -36,7 +76,7 @@ const Sponsored: React.FC<SuggestShopsProps> = ({ type }) => {
                 <Card
                     key={shop.id}
                     sx={{ display: 'flex', mb: 2, mt: 2 }}
-                    onClick={() => handleShopClick(shop.id)}
+                    onClick={() => handleShopClick(shop.id, shop.idAdvertisement)} // Truyền cả shop.id và shop.idAdvertisement
                 >
                     <CardMedia
                         component="img"

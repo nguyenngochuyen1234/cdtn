@@ -11,12 +11,11 @@ import {
     Paper,
     Typography,
 } from '@mui/material';
-import { AccountCircle, Article, ChevronRight, HelpOutline, Logout } from '@mui/icons-material';
+import { AccountCircle, Logout } from '@mui/icons-material';
 import { MenuItem, User } from '@/models';
 import { useDispatch } from 'react-redux';
-import { setUser } from '@/redux/userSlice';
-import { getAvatarByToken, getLastNameByToken, logoutAPI } from '@/utils/JwtService';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { getAvatarByToken, getLastNameByToken, logoutAPI, logoutAPI1 } from '@/utils/JwtService';
+import { useNavigate } from 'react-router-dom';
 
 interface ProfileMenuProps {
     user: User;
@@ -25,14 +24,12 @@ interface ProfileMenuProps {
 
 export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps) {
     const dispatch = useDispatch();
-    const navigate = useNavigate(); // Hook for navigation
+    const navigate = useNavigate();
 
     const handleMenuItemClick = (item: MenuItem) => {
         if (item.id === 'logout') {
-            // Call logoutAPI instead of manual logout logic
-            logoutAPI(navigate);
-            // Dispatch setUser(null) is already handled in logoutAPI (if needed)
-            // localStorage and sessionStorage clearing is handled in logoutAPI
+            // Pass both navigate and dispatch to logoutAPI
+            logoutAPI1(navigate, dispatch);
         } else {
             onMenuItemClick(item);
         }
@@ -88,7 +85,6 @@ export default function ProfileMenu({ user, onMenuItemClick }: ProfileMenuProps)
                             primaryTypographyProps={{ sx: { color: '#000' } }}
                             primary={item.label}
                         />
-                        <ChevronRight sx={{ color: '#000' }} />
                     </ListItemButton>
                 ))}
             </List>

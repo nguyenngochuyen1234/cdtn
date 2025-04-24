@@ -232,11 +232,22 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                                     flexDirection={{ xs: 'column', sm: 'row' }}
                                     mb={1}
                                 >
-                                    <Box sx={{ mb: { xs: 1, sm: 0 } }}>
+                                    <Box
+                                        sx={{
+                                            mb: { xs: 1, sm: 0 },
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                        }}
+                                    >
                                         <Rating
-                                            value={shop.point || 0}
+                                            value={
+                                                shop.countReview > 0
+                                                    ? shop.point / shop.countReview
+                                                    : 5
+                                            }
                                             readOnly
                                             size="small"
+                                            precision={0.1}
                                             sx={{ color: '#FF5252', fontSize: { xs: 16, sm: 18 } }}
                                         />
                                         <Typography
@@ -245,17 +256,18 @@ export default function ShopSearch({ shops }: ShopSearchProps) {
                                             sx={{ ml: 0.5 }}
                                         >
                                             {shop.countReview > 0
-                                                ? shop.point / shop.countReview
-                                                : 0}{' '}
+                                                ? (shop.point / shop.countReview).toFixed(1)
+                                                : 5}{' '}
                                             sao
                                         </Typography>
                                     </Box>
+
                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                         <VisibilityOutlinedIcon
                                             sx={{ fontSize: 18, color: 'text.secondary', mr: 0.5 }}
                                         />
                                         <Typography variant="body2" color="text.secondary">
-                                            {shop.view || 10} + lượt xem
+                                            {shop.view || 0} + lượt xem
                                         </Typography>
                                     </Box>
                                 </Box>

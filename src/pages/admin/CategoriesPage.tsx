@@ -70,7 +70,7 @@ const CategoriesPage: React.FC = () => {
         try {
             const body = {
                 page: 0,
-                limit: 12
+                limit: 12,
             }; // Bạn có thể thêm các tham số nếu API yêu cầu
             const dataShopCategories: AxiosResponse = await cmsApi.getListCatShop(body);
             if (dataShopCategories.data.data) {
@@ -154,7 +154,6 @@ const CategoriesPage: React.FC = () => {
             } else {
                 const responseUpdateCategory = await cmsApi.updateCategory({
                     ...newData,
-                    parentId: currentCategory.id,
                 });
                 await cmsApi.updateTags(currentCategory.id || '', tags);
                 const updateCategories = categories.map((item) =>

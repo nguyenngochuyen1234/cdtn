@@ -8,7 +8,8 @@ const CreationStepper: React.FC = () => {
     const theme = useTheme();
     const location = useLocation();
 
-    const getActiveStep = () => {
+    // Tính activeStep một lần duy nhất
+    const activeStep = (() => {
         switch (location.pathname) {
             case '/biz/register-shop':
                 return 0;
@@ -16,24 +17,24 @@ const CreationStepper: React.FC = () => {
                 return 1;
             case '/biz/upload-image':
                 return 2;
-            case '/biz/create-shop':
+            case '/finish-create-shop':
                 return 3;
             default:
-                return 4;
+                return Math.min(3, steps.length - 1);
         }
-    };
+    })();
 
     return (
         <Box sx={{ width: '100%', mb: 4 }}>
-            <Stepper activeStep={getActiveStep()} alternativeLabel>
-                {steps.map((label) => (
+            <Stepper activeStep={activeStep} alternativeLabel>
+                {steps.map((label, index) => (
                     <Step key={label}>
                         <StepLabel
                             sx={{
                                 '& .MuiStepLabel-label': {
                                     fontWeight: 'medium',
                                     color:
-                                        getActiveStep() >= steps.indexOf(label)
+                                        activeStep >= index
                                             ? theme.palette.primary.main
                                             : theme.palette.text.secondary,
                                 },

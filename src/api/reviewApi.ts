@@ -40,5 +40,9 @@ const reviewApi = {
         const url = '/reviews/getall/recently';
         return axiosClient.get(url);
     },
+    getAllReviewRecently1() {
+        const url = '/reviews/getall/recently';
+        return axiosClient.get(url);
+    },
 };
 export default reviewApi;

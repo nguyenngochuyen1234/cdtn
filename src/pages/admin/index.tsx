@@ -31,7 +31,7 @@ const NAVIGATION = [
     { segment: '', title: 'Tổng quan', icon: <Dashboard sx={{ color: '#4CAF50' }} /> },
     {
         segment: 'moderation',
-        title: 'Kiểm duyệt',
+        title: 'Quản lý cửa hàng',
         icon: <AdminPanelSettings sx={{ color: '#FF9800' }} />,
     },
     { segment: 'categories', title: 'Danh mục', icon: <Category sx={{ color: '#2196F3' }} /> },
@@ -165,7 +165,7 @@ const AdminPage = () => {
                         );
                     })}
                     {/* Logout Item */}
-                    <ListItem
+                    {/* <ListItem
                         onClick={() => handleNavigation('logout')}
                         sx={{
                             display: 'flex',
@@ -181,7 +181,7 @@ const AdminPage = () => {
                             <Logout />
                         </ListItemIcon>
                         <ListItemText primary="Đăng xuất" />
-                    </ListItem>
+                    </ListItem> */}
                 </List>
             </Drawer>
             <Box sx={{ flexGrow: 1, p: 3, minHeight: '100vh' }}>

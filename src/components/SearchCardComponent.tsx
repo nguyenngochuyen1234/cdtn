@@ -96,14 +96,15 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ shop }) => {
                 {/* Rating */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                     <Rating
-                        value={shop.point}
+                        value={shop.countReview > 0 ? shop.point / shop.countReview : 5}
                         readOnly
                         size="small"
                         emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
                         sx={{ color: '#FF5722' }}
+                        precision={0.1} 
                     />
                     <Typography variant="body2" sx={{ ml: 0.5, color: '#FF5722' }}>
-                        {shop.point || 0} sao
+                        {shop.countReview > 0 ? (shop.point / shop.countReview).toFixed(1) : 5} sao
                     </Typography>
                 </Box>
 

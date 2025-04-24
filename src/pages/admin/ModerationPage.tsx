@@ -24,6 +24,10 @@ import {
     Modal,
     Divider,
     IconButton,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from '@mui/material';
 import {
     CheckCircleOutline,
@@ -38,7 +42,7 @@ import Pagination from '@mui/material/Pagination';
 import { PROVINCE_API } from '@/common';
 import type { StoreCreation } from '@/models';
 import axios from 'axios';
-import { Image } from 'antd';
+import { Image } from 'antd'; // Ensure Image.PreviewGroup is also imported
 import cmsApi from '@/api/cmsApi';
 import shopApi from '@/api/shopApi';
 
@@ -69,11 +73,14 @@ const ModerationPage: React.FC = () => {
     const [locationCache, setLocationCache] = useState<{ [key: string]: string }>({});
     const [tabIndex, setTabIndex] = useState(0);
     const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
     const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
     const [refreshKey, setRefreshKey] = useState(0);
     const [selectedShop, setSelectedShop] = useState<StoreCreation | null>(null);
     const [detailLoading, setDetailLoading] = useState(false);
     const [detailError, setDetailError] = useState<string | null>(null);
+    const [imageError, setImageError] = useState<string | null>(null); // State to track image loading errors
 
     const fetchLocationName = async (type: 'p' | 'd' | 'w', code: string) => {
         if (!code) return '';
@@ -96,12 +103,13 @@ const ModerationPage: React.FC = () => {
             const isDeActive = tabIndex === 0;
             const response = await cmsApi.getAllListShopDeactive({
                 page,
-                size: 5,
+                size: pageSize,
                 statusShopEnums: isDeActive ? 'ACTIVE' : 'DEACTIVE',
             });
 
             const fetchedShops: StoreCreation[] = response.data.data;
             setTotalPages(response.data.totalPage || 1);
+            setTotalItems(response.data.totalElement || 0);
 
             const updatedShops = await Promise.all(
                 fetchedShops.map(async (shop) => ({
@@ -114,6 +122,8 @@ const ModerationPage: React.FC = () => {
             setShops(updatedShops);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách cửa hàng:', error);
+            setSnackbarMessage('Lỗi khi lấy danh sách cửa hàng.');
+            setSnackbarSeverity('error');
         } finally {
             setLoading(false);
         }
@@ -122,6 +132,7 @@ const ModerationPage: React.FC = () => {
     const fetchShopDetails = async (id: string) => {
         setDetailLoading(true);
         setDetailError(null);
+        setImageError(null); // Reset image error state
         try {
             const response = await shopApi.getShopById(id);
             const shopDetails: StoreCreation = response.data.data;
@@ -131,6 +142,9 @@ const ModerationPage: React.FC = () => {
                 districtName: await fetchLocationName('d', shopDetails.district ?? ''),
                 wardName: await fetchLocationName('w', shopDetails.ward ?? ''),
             };
+            console.log('Shop Details:', updatedDetails); // Debug: Log the shop details
+            console.log('Image Business URL:', updatedDetails.imageBusiness); // Debug: Log the image URL
+            console.log('Media URLs:', updatedDetails.mediaUrls); // Debug: Log the shop image URLs
             setSelectedShop(updatedDetails);
         } catch (error) {
             console.error('Lỗi khi lấy chi tiết cửa hàng:', error);
@@ -142,7 +156,7 @@ const ModerationPage: React.FC = () => {
 
     useEffect(() => {
         fetchShops();
-    }, [tabIndex, page, refreshKey]);
+    }, [tabIndex, page, pageSize, refreshKey]);
 
     const handleShopAction = async (id: string, action: 'activate' | 'block') => {
         setActionLoading((prev) => ({ ...prev, [id]: true }));
@@ -202,6 +216,13 @@ const ModerationPage: React.FC = () => {
     const handleCloseModal = () => {
         setSelectedShop(null);
         setDetailError(null);
+        setImageError(null);
+    };
+
+    const handlePageSizeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        const newSize = event.target.value as number;
+        setPageSize(newSize);
+        setPage(1); // Reset to first page when changing page size
     };
 
     return (
@@ -218,7 +239,7 @@ const ModerationPage: React.FC = () => {
                             Quản lý cửa hàng
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            Kiểm duyệt và quản lý các cửa hàng trong hệ thống
+                            Phê duyệt và quản lý các cửa hàng trong hệ thống
                         </Typography>
                     </Box>
                     <Button
@@ -258,13 +279,13 @@ const ModerationPage: React.FC = () => {
                         variant="fullWidth"
                     >
                         <Tab
-                            label="Đã kiểm duyệt"
+                            label="Đã phê duyệt"
                             icon={<VisibilityOff fontSize="small" />}
                             iconPosition="start"
                             sx={{ textTransform: 'none' }}
                         />
                         <Tab
-                            label="Chưa kiểm duyệt"
+                            label="Chưa phê duyệt"
                             icon={<Visibility fontSize="small" />}
                             iconPosition="start"
                             sx={{ textTransform: 'none' }}
@@ -363,56 +384,102 @@ const ModerationPage: React.FC = () => {
                                     <Typography variant="h6" fontWeight="medium" gutterBottom>
                                         Hình ảnh
                                     </Typography>
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="body1" fontWeight="medium">
-                                            Giấy phép kinh doanh:
-                                        </Typography>
-                                        {selectedShop.imageBusiness ? (
-                                            <Image
-                                                src={selectedShop.imageBusiness as string}
-                                                width={200}
-                                                height={150}
-                                                style={{ objectFit: 'cover', borderRadius: 8 }}
-                                                fallback="/placeholder.svg?height=150&width=200"
-                                            />
-                                        ) : (
-                                            <Typography variant="body2" color="text.secondary">
-                                                Chưa cung cấp
+                                    <Image.PreviewGroup
+                                        preview={{
+                                            zIndex: 10000, // Ensure preview modal appears above MUI Modal
+                                        }}
+                                    >
+                                        <Box sx={{ mb: 2 }}>
+                                            <Typography variant="body1" fontWeight="medium">
+                                                Giấy phép kinh doanh:
                                             </Typography>
-                                        )}
-                                    </Box>
-                                    <Box>
-                                        <Typography variant="body1" fontWeight="medium">
-                                            Hình ảnh cửa hàng:
-                                        </Typography>
-                                        {selectedShop.mediaUrls?.length ? (
-                                            <Stack
-                                                direction="row"
-                                                spacing={2}
-                                                sx={{ overflowX: 'auto', py: 1 }}
-                                            >
-                                                {(selectedShop.mediaUrls as string[]).map(
-                                                    (url, index) => (
-                                                        <Image
-                                                            key={index}
-                                                            src={url}
-                                                            width={150}
-                                                            height={100}
-                                                            style={{
-                                                                objectFit: 'cover',
-                                                                borderRadius: 8,
-                                                            }}
-                                                            fallback="/placeholder.svg?height=100&width=150"
-                                                        />
-                                                    )
-                                                )}
-                                            </Stack>
-                                        ) : (
-                                            <Typography variant="body2" color="text.secondary">
-                                                Chưa cung cấp
+                                            {selectedShop.imageBusiness ? (
+                                                <Image
+                                                    src={selectedShop.imageBusiness as string}
+                                                    width={200}
+                                                    height={150}
+                                                    style={{ objectFit: 'cover', borderRadius: 8 }}
+                                                    fallback="/placeholder.svg?height=150&width=200"
+                                                    preview={{
+                                                        zIndex: 10000, // Match the zIndex for consistency
+                                                    }}
+                                                    onLoad={() =>
+                                                        console.log(
+                                                            'Business license image loaded successfully'
+                                                        )
+                                                    }
+                                                    onError={() => {
+                                                        console.error(
+                                                            'Failed to load business license image'
+                                                        );
+                                                        setImageError(
+                                                            'Không thể tải hình ảnh giấy phép kinh doanh.'
+                                                        );
+                                                    }}
+                                                    alt="Giấy phép kinh doanh của cửa hàng"
+                                                />
+                                            ) : (
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Chưa cung cấp
+                                                </Typography>
+                                            )}
+                                            {imageError && (
+                                                <Typography
+                                                    variant="body2"
+                                                    color="error"
+                                                    sx={{ mt: 1 }}
+                                                >
+                                                    {imageError}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body1" fontWeight="medium">
+                                                Hình ảnh cửa hàng:
                                             </Typography>
-                                        )}
-                                    </Box>
+                                            {selectedShop.mediaUrls?.length ? (
+                                                <Stack
+                                                    direction="row"
+                                                    spacing={2}
+                                                    sx={{ overflowX: 'auto', py: 1 }}
+                                                >
+                                                    {(selectedShop.mediaUrls as string[]).map(
+                                                        (url, index) => (
+                                                            <Image
+                                                                key={index}
+                                                                src={url}
+                                                                width={150}
+                                                                height={100}
+                                                                style={{
+                                                                    objectFit: 'cover',
+                                                                    borderRadius: 8,
+                                                                }}
+                                                                fallback="/placeholder.svg?height=100&width=150"
+                                                                preview={{
+                                                                    zIndex: 10000,
+                                                                }}
+                                                                onLoad={() =>
+                                                                    console.log(
+                                                                        `Shop image ${index} loaded successfully`
+                                                                    )
+                                                                }
+                                                                onError={() =>
+                                                                    console.error(
+                                                                        `Failed to load shop image ${index}`
+                                                                    )
+                                                                }
+                                                                alt={`Hình ảnh cửa hàng ${index + 1}`}
+                                                            />
+                                                        )
+                                                    )}
+                                                </Stack>
+                                            ) : (
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Chưa cung cấp
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    </Image.PreviewGroup>
                                 </Box>
                             </Stack>
                         )
@@ -539,6 +606,7 @@ const ModerationPage: React.FC = () => {
                                                 style={{ objectFit: 'cover' }}
                                                 src={(shop.avatar as string) || '/placeholder.svg'}
                                                 fallback="/placeholder.svg?height=100&width=100"
+                                                alt="Ảnh đại diện cửa hàng"
                                             />
                                         </Box>
                                     </Grid>
@@ -641,16 +709,34 @@ const ModerationPage: React.FC = () => {
                     ))}
                 </Box>
 
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                    <Pagination
-                        count={totalPages}
-                        page={page}
-                        onChange={(_, newPage) => setPage(newPage)}
-                        color="primary"
-                        shape="rounded"
-                        showFirstButton
-                        showLastButton
-                    />
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        py: 2,
+                        px: 3,
+                        borderTop: `1px solid ${theme.palette.divider}`,
+                    }}
+                >
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography variant="body2" color="text.secondary">
+                            Hiển thị
+                        </Typography>
+                        <FormControl size="small" variant="outlined" sx={{ minWidth: 80 }}>
+                            <Select
+                                value={pageSize}
+                                onChange={handlePageSizeChange}
+                                displayEmpty
+                                inputProps={{ 'aria-label': 'số mục mỗi trang' }}
+                            >
+                                <MenuItem value={5}>5</MenuItem>
+                                <MenuItem value={10}>10</MenuItem>
+                                <MenuItem value={20}>20</MenuItem>
+                                <MenuItem value={500}>200+</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Stack>
                 </Box>
             </Box>
         );

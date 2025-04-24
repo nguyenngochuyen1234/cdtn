@@ -21,7 +21,6 @@ import {
     MenuItem,
     Paper,
     Pagination,
-    Select,
     Snackbar,
     Stack,
     Table,
@@ -35,6 +34,7 @@ import {
     useMediaQuery,
     Alert,
     Chip,
+    Select,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -43,10 +43,10 @@ import {
     Delete as DeleteIcon,
     Close as CloseIcon,
     Visibility as VisibilityIcon,
+    Search as SearchIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import ownerApi from '@/api/ownApi';
-import axios from 'axios';
 import shopApi from '@/api/shopApi';
 import userApi from '@/api/userApi';
 import { getLastNameByToken } from '@/utils/JwtService';
@@ -104,7 +104,8 @@ const ServiceManagement: React.FC = () => {
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [limit] = useState(10);
+    const [limit, setLimit] = useState(10); // Now adjustable
+    const [searchKeyword, setSearchKeyword] = useState('');
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: '',
@@ -133,16 +134,21 @@ const ServiceManagement: React.FC = () => {
     const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
     const [mediaPreview, setMediaPreview] = useState<string[]>([]);
 
-    const fetchData = async (currentPage: number = 1) => {
+    const fetchData = async (currentPage: number = 1, keyword: string = '') => {
         setLoading(true);
         try {
             const res = await ownerApi.getAllService({
                 limit,
-                page: currentPage - 1,
+                page: currentPage - 1, // API expects 0-based page
+                keyword,
             });
             if (res.data.success) {
                 setServices(res.data.data || []);
                 setTotalPages(res.data.data.totalPages || 1);
+                // If current page is greater than total pages, reset to last page
+                if (currentPage > res.data.data.totalPages) {
+                    setPage(res.data.data.totalPages || 1);
+                }
             }
         } catch (err) {
             console.error('Error fetching services:', err);
@@ -153,8 +159,19 @@ const ServiceManagement: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchData(page);
-    }, [page]);
+        fetchData(page, searchKeyword);
+    }, [page, limit, searchKeyword]); // Add limit to dependencies
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const keyword = e.target.value;
+        setSearchKeyword(keyword);
+        setPage(1); // Reset to page 1 when search changes
+    };
+
+    const handleLimitChange = (e: any) => {
+        setLimit(Number(e.target.value));
+        setPage(1); // Reset to page 1 when limit changes
+    };
 
     const resetForm = () => {
         setFormData({
@@ -206,13 +223,11 @@ const ServiceManagement: React.FC = () => {
 
         try {
             await ownerApi.deleteService(selectedService.id);
-            setServices(services.filter((service) => service.id !== selectedService.id));
             showSnackbar('Xóa dịch vụ thành công', 'success');
             if (services.length === 1 && page > 1) {
                 setPage(page - 1);
-            } else {
-                fetchData(page);
             }
+            fetchData(page, searchKeyword);
         } catch (err) {
             console.error('Error deleting service:', err);
             showSnackbar('Không thể xóa dịch vụ. Vui lòng thử lại sau.', 'error');
@@ -348,7 +363,7 @@ const ServiceManagement: React.FC = () => {
 
             setIsFormOpen(false);
             resetForm();
-            fetchData(page);
+            fetchData(page, searchKeyword);
         } catch (err) {
             console.error('Error saving service:', err);
             showSnackbar('Không thể lưu dịch vụ. Vui lòng thử lại sau.', 'error');
@@ -371,15 +386,30 @@ const ServiceManagement: React.FC = () => {
                     <Typography variant="h5" component="h1">
                         Quản lý dịch vụ
                     </Typography>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<AddIcon />}
-                        onClick={handleAdd}
-                        sx={{ borderRadius: 2 }}
-                    >
-                        Thêm dịch vụ
-                    </Button>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <TextField
+                            label="Tìm kiếm dịch vụ"
+                            value={searchKeyword}
+                            onChange={handleSearchChange}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{ minWidth: { xs: 150, sm: 250 } }}
+                        />
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<AddIcon />}
+                            onClick={handleAdd}
+                            sx={{ borderRadius: 2 }}
+                        >
+                            Thêm dịch vụ
+                        </Button>
+                    </Box>
                 </Box>
 
                 {loading ? (
@@ -404,7 +434,9 @@ const ServiceManagement: React.FC = () => {
                                         <TableRow>
                                             <TableCell colSpan={5} align="center">
                                                 <Typography variant="body1" sx={{ py: 3 }}>
-                                                    Chưa có dịch vụ nào. Hãy thêm dịch vụ mới.
+                                                    {searchKeyword
+                                                        ? 'Không tìm thấy dịch vụ phù hợp.'
+                                                        : 'Chưa có dịch vụ nào. Hãy thêm dịch vụ mới.'}
                                                 </Typography>
                                             </TableCell>
                                         </TableRow>
@@ -486,16 +518,38 @@ const ServiceManagement: React.FC = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        {totalPages > 1 && (
-                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                mt: 3,
+                                flexDirection: { xs: 'column', sm: 'row' },
+                                gap: 2,
+                            }}
+                        >
+                            <FormControl sx={{ minWidth: 120 }}>
+                                <InputLabel>Số lượng mỗi trang</InputLabel>
+                                <Select
+                                    value={limit}
+                                    onChange={handleLimitChange}
+                                    label="Số lượng mỗi trang"
+                                >
+                                    <MenuItem value={5}>5</MenuItem>
+                                    <MenuItem value={10}>10</MenuItem>
+                                    <MenuItem value={20}>20</MenuItem>
+                                </Select>
+                            </FormControl>
+                            {totalPages > 1 && (
                                 <Pagination
                                     count={totalPages}
                                     page={page}
                                     onChange={handlePageChange}
                                     color="primary"
+                                    siblingCount={isMobile ? 0 : 1}
                                 />
-                            </Box>
-                        )}
+                            )}
+                        </Box>
                     </>
                 )}
             </Paper>
@@ -628,7 +682,7 @@ const ServiceManagement: React.FC = () => {
                             >
                                 <Grid container spacing={1}>
                                     {mediaPreview.map((url, index) => (
-                                        <Grid item xs={6} sm={4} key={index}>
+                                        <Grid item xs={6} sm= {4} key={index}>
                                             <Box sx={{ position: 'relative' }}>
                                                 <ImagePreview
                                                     src={url || '/placeholder.svg'}

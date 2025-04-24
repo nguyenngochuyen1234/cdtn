@@ -255,7 +255,7 @@ export default function SearchPage() {
                                 mb={1}
                             >
                                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                    Danh sách cửa hàng ({totalShops})
+                                    Danh sách cửa hàng
                                 </Typography>
                                 <FormControl sx={{ minWidth: 120, maxWidth: 150 }}>
                                     <InputLabel>Sắp xếp</InputLabel>
@@ -266,9 +266,7 @@ export default function SearchPage() {
                                         size="small"
                                     >
                                         <MenuItem value="name_asc">Tên (A-Z)</MenuItem>
-                                        <MenuItem value="name_desc">Tên (Z-A)</MenuItem>
-                                        <MenuItem value="reviews_asc">Số review (Tăng)</MenuItem>
-                                        <MenuItem value="reviews_desc">Số review (Giảm)</MenuItem>
+                                        <MenuItem value="reviews_desc">Số review</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Box>
@@ -300,7 +298,7 @@ export default function SearchPage() {
                             <Card
                                 sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}
                             >
-                                <ShopAds />
+                                <ShopAds type= "ads" />
                             </Card>
                             <Divider orientation="horizontal" flexItem />
                             <Card

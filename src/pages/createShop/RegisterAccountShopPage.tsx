@@ -255,11 +255,6 @@ const RegisterAccountShopPage = () => {
                                                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                                                   message: 'Email không hợp lệ',
                                               }
-                                            : name === 'phone'
-                                              ? {
-                                                    value: /^[0-9]{10}$/,
-                                                    message: 'Số điện thoại phải có 10 chữ số',
-                                                }
                                               : undefined,
                                 }}
                                 render={({ field }) => (

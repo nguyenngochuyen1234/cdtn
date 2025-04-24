@@ -113,14 +113,10 @@ const PurchasedPackageDetailDialog: React.FC<PurchasedPackageDetailDialogProps> 
                         <strong>Mô tả:</strong> {pack.description}
                     </Typography>
                     <Typography variant="body1">
-                        <strong>Tổng lượt truy cập:</strong>{' '}
-                        {pack.totalAccess ? pack.totalAccess.toLocaleString() : 'Không giới hạn'}
-                    </Typography>
-                    <Typography variant="body1">
                         <strong>Trạng thái quảng cáo:</strong> {pack.statusAds}
                     </Typography>
                     <Typography variant="body1">
-                        <strong>Tổng lượt xem:</strong> {pack.totalView ?? 10}
+                        <strong>Tổng lượt xem:</strong> {pack.totalView ?? 0}
                     </Typography>
                     {pack.thumbnail && (
                         <Box sx={{ mt: 2 }}>
@@ -165,7 +161,7 @@ const PurchasedPackagesList = ({
     const [detailDialogOpen, setDetailDialogOpen] = useState(false);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const limit = 12;
+    const limit = 15;
 
     // Convert array date format [year, month, day, hour, minute, second, nanosecond] to Date
     const convertToDate = (dateArray: number[]): Date => {
@@ -214,6 +210,7 @@ const PurchasedPackagesList = ({
                                 <Card
                                     sx={{
                                         height: '100%',
+                                        minHeight: 350, // Ensure consistent height
                                         display: 'flex',
                                         flexDirection: 'column',
                                         borderRadius: 2,
@@ -229,55 +226,88 @@ const PurchasedPackagesList = ({
                                         alt={pack.name}
                                         sx={{ objectFit: 'cover' }}
                                     />
-                                    <CardContent sx={{ flexGrow: 1 }}>
-                                        <Typography
-                                            gutterBottom
-                                            variant={isMobile ? 'h6' : 'h5'}
-                                            component="div"
-                                            sx={{ fontWeight: 'bold' }}
-                                        >
-                                            {pack.name}
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                            sx={{ mb: 1 }}
-                                        >
-                                            <strong>Tổng lượt truy cập:</strong>{' '}
-                                            {pack.totalView
-                                                ? pack.totalView.toLocaleString()
-                                                : 'Không giới hạn'}
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                            sx={{ mb: 1 }}
-                                        >
-                                            <strong>Bắt đầu:</strong>{' '}
-                                            {pack.issuedAt
-                                                ? convertToDate(pack.issuedAt).toLocaleString()
-                                                : 'N/A'}
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                            sx={{ mb: 1 }}
-                                        >
-                                            <strong>Kết thúc:</strong>{' '}
-                                            {pack.expiredAt
-                                                ? convertToDate(pack.expiredAt).toLocaleString()
-                                                : 'N/A'}
-                                        </Typography>
-                                        <Chip
-                                            label={pack.statusAds}
-                                            size="small"
-                                            sx={{ fontWeight: 'bold', mb: 2 }}
-                                        />
+                                    <CardContent
+                                        sx={{
+                                            flexGrow: 1,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'space-between', // Push button to bottom
+                                            pb: 2, // Consistent padding
+                                        }}
+                                    >
+                                        <Box>
+                                            <Typography
+                                                gutterBottom
+                                                variant={isMobile ? 'h6' : 'h5'}
+                                                component="div"
+                                                sx={{ fontWeight: 'bold' }}
+                                            >
+                                                {pack.name}
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{ mb: 1 }}
+                                            >
+                                                <strong>Tổng lượt truy cập:</strong>{' '}
+                                                {pack.totalAccess
+                                                    ? pack.totalAccess.toLocaleString()
+                                                    : 'Không giới hạn'}
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{ mb: 1 }}
+                                            >
+                                                <strong>Bắt đầu:</strong>{' '}
+                                                {pack.issuedAt
+                                                    ? convertToDate(pack.issuedAt).toLocaleString()
+                                                    : 'N/A'}
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{ mb: 1 }}
+                                            >
+                                                <strong>Kết thúc:</strong>{' '}
+                                                {pack.expiredAt
+                                                    ? convertToDate(pack.expiredAt).toLocaleString()
+                                                    : 'N/A'}
+                                            </Typography>
+                                            <Chip
+                                                label={
+                                                    pack.statusAds === 'Đang sử dụng'
+                                                        ? 'Đang sử dụng'
+                                                        : 'Hết hạn'
+                                                }
+                                                size="small"
+                                                sx={{
+                                                    fontWeight: 'bold',
+                                                    mb: 2,
+                                                    backgroundColor:
+                                                        pack.statusAds === 'OPEN'
+                                                            ? 'success.light'
+                                                            : 'error.light',
+                                                    color:
+                                                        pack.statusAds === 'OPEN'
+                                                            ? 'success.dark'
+                                                            : 'error.dark',
+                                                }}
+                                            />
+                                        </Box>
                                         <Button
                                             variant="contained"
                                             fullWidth
                                             onClick={() => handleViewDetails(pack)}
-                                            sx={{ textTransform: 'none', mt: 1 }}
+                                            sx={{
+                                                textTransform: 'none',
+                                                mt: 'auto', // Push button to bottom
+                                                backgroundColor: '#d32f2f', // Match red color from image
+                                                '&:hover': {
+                                                    backgroundColor: '#b71c1c', // Darker red on hover
+                                                },
+                                                borderRadius: 1,
+                                            }}
                                         >
                                             Xem chi tiết
                                         </Button>

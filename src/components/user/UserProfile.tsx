@@ -48,6 +48,7 @@ interface Ward {
 
 export default function UserProfile() {
     const [openAddressDialog, setOpenAddressDialog] = useState(false);
+    const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [date, setDate] = useState<Date | null>(new Date());
     const [provinces, setProvinces] = useState<Province[]>([]);
@@ -56,6 +57,12 @@ export default function UserProfile() {
     const [selectedProvince, setSelectedProvince] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
     const [selectedWard, setSelectedWard] = useState('');
+    const [passwordData, setPasswordData] = useState({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+    });
+    const [passwordError, setPasswordError] = useState('');
     const [formData, setFormData] = useState<User>({
         username: '',
         id: '',
@@ -92,7 +99,7 @@ export default function UserProfile() {
                 if (response?.data) {
                     const userData = response.data.data;
                     console.log(userData);
-                    setFormData({ ...userData }); // Spread toàn bộ dữ liệu từ userData
+                    setFormData({ ...userData });
                     setDate(userData.dateOfBirth ? new Date(userData.dateOfBirth) : new Date());
                     setSelectedProvince(userData.city || '');
                     setSelectedDistrict(userData.district || '');
@@ -166,6 +173,13 @@ export default function UserProfile() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Xử lý thay đổi password fields
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setPasswordData((prev) => ({ ...prev, [name]: value }));
+        setPasswordError('');
+    };
+
     // Xử lý lưu thông tin
     const handleSave = async () => {
         const updatedData: User = {
@@ -183,11 +197,53 @@ export default function UserProfile() {
             }
             const response = await userApi.updateProfile(updatedData);
             if (response.data) {
-                setFormData({ ...response.data.data }); // Cập nhật state cục bộ
-                setIsEditing(false); // Tắt chế độ chỉnh sửa
+                setFormData({ ...response.data.data });
+                setIsEditing(false);
             }
         } catch (error) {
             console.error('Error updating profile:', error);
+        }
+    };
+
+    // Xử lý đổi mật khẩu
+    const handleChangePassword = async () => {
+        // Validate passwords
+        if (
+            !passwordData.oldPassword ||
+            !passwordData.newPassword ||
+            !passwordData.confirmPassword
+        ) {
+            setPasswordError('Vui lòng điền đầy đủ các trường');
+            return;
+        }
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setPasswordError('Mật khẩu mới và xác nhận mật khẩu không khớp');
+            return;
+        }
+        if (passwordData.newPassword.length < 6) {
+            setPasswordError('Mật khẩu mới phải có ít nhất 6 ký tự');
+            return;
+        }
+
+        try {
+            const response = await userApi.changePassword({
+                newPassword: passwordData.newPassword,
+            });
+            if (response.data.success) {
+                // Clear password fields
+                setPasswordData({
+                    oldPassword: '',
+                    newPassword: '',
+                    confirmPassword: '',
+                });
+                setOpenPasswordDialog(false);
+                // Logout
+                localStorage.removeItem('access_token');
+                window.location.href = '/auth/login'; // Redirect to login page
+            }
+        } catch (error) {
+            console.error('Error changing password:', error);
+            setPasswordError('Đổi mật khẩu thất bại. Vui lòng thử lại.');
         }
     };
 
@@ -216,14 +272,26 @@ export default function UserProfile() {
                                     </Button>
                                 </Box>
                             ) : (
-                                <Button variant="outlined" onClick={() => setIsEditing(true)}>
-                                    Chỉnh sửa
-                                </Button>
+                                <Box>
+                                    <Button
+                                        variant="outlined"
+                                        onClick={() => setIsEditing(true)}
+                                        sx={{ mr: 1 }}
+                                    >
+                                        Chỉnh sửa
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => setOpenPasswordDialog(true)}
+                                    >
+                                        Đổi mật khẩu
+                                    </Button>
+                                </Box>
                             )}
                         </Box>
 
                         <Stack spacing={3}>
-                            <Grid container >
+                            <Grid container>
                                 <Grid item xs={12} sm={6}>
                                     <TextField
                                         label="Họ"
@@ -413,6 +481,54 @@ export default function UserProfile() {
                 <DialogActions>
                     <Button onClick={() => setOpenAddressDialog(false)}>Hủy</Button>
                     <Button onClick={() => setOpenAddressDialog(false)} variant="contained">
+                        Lưu
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Dialog đổi mật khẩu */}
+            <Dialog
+                open={openPasswordDialog}
+                onClose={() => setOpenPasswordDialog(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Đổi mật khẩu</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={3} sx={{ py: 2 }}>
+                        <TextField
+                            label="Mật khẩu cũ"
+                            name="oldPassword"
+                            type="password"
+                            value={passwordData.oldPassword}
+                            onChange={handlePasswordChange}
+                            fullWidth
+                            error={!!passwordError}
+                        />
+                        <TextField
+                            label="Mật khẩu mới"
+                            name="newPassword"
+                            type="password"
+                            value={passwordData.newPassword}
+                            onChange={handlePasswordChange}
+                            fullWidth
+                            error={!!passwordError}
+                        />
+                        <TextField
+                            label="Xác nhận mật khẩu mới"
+                            name="confirmPassword"
+                            type="password"
+                            value={passwordData.confirmPassword}
+                            onChange={handlePasswordChange}
+                            fullWidth
+                            error={!!passwordError}
+                            helperText={passwordError}
+                        />
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenPasswordDialog(false)}>Hủy</Button>
+                    <Button onClick={handleChangePassword} variant="contained">
                         Lưu
                     </Button>
                 </DialogActions>

@@ -31,9 +31,9 @@ interface FavoriteShopCardProps {
 }
 
 const FavoriteShopCard: React.FC<FavoriteShopCardProps> = ({ shop, onFavoriteChange }) => {
-    const [isFavorite, setIsFavorite] = useState(true); 
+    const [isFavorite, setIsFavorite] = useState(true);
     const [openDialog, setOpenDialog] = useState(false);
-    const [openConfirmDialog, setOpenConfirmDialog] = useState(false); 
+    const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
     const navigate = useNavigate();
     const user = useSelector((state: RootState) => state.user.user);
 
@@ -132,6 +132,7 @@ const FavoriteShopCard: React.FC<FavoriteShopCardProps> = ({ shop, onFavoriteCha
                             <Typography
                                 variant="subtitle1"
                                 component="div"
+                                title={shop.name} // Tooltip mặc định
                                 sx={{
                                     fontWeight: 'bold',
                                     overflow: 'hidden',
@@ -139,7 +140,7 @@ const FavoriteShopCard: React.FC<FavoriteShopCardProps> = ({ shop, onFavoriteCha
                                     whiteSpace: 'nowrap',
                                 }}
                             >
-                                {shop.name || 'Unknown Shop'}
+                                {shop.name || ' Shop'}
                             </Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                 <Rating
@@ -180,7 +181,7 @@ const FavoriteShopCard: React.FC<FavoriteShopCardProps> = ({ shop, onFavoriteCha
                                     {shop.city || 'Unknown Location'}
                                 </Typography>
                             </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            {/* <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                 <AccessTimeOutlinedIcon
                                     fontSize="small"
                                     color="action"
@@ -197,7 +198,7 @@ const FavoriteShopCard: React.FC<FavoriteShopCardProps> = ({ shop, onFavoriteCha
                                 >
                                     Đóng cửa {shop.openTimeResponses?.[0]?.closeTime || '20:00'}
                                 </Typography>
-                            </Box>
+                            </Box> */}
                         </Stack>
                         <Typography
                             variant="body2"

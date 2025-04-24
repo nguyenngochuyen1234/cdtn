@@ -21,9 +21,9 @@ const userApi = {
         const url = '/users/change-profile';
         return axiosClient.put(url, data);
     },
-    changePassword() {
+    changePassword(data: any) {
         const url = '/users/change-password';
-        return axiosClient.put(url);
+        return axiosClient.put(url, data);
     },
     forgotPassword() {
         const url = '/users/forgot-password';

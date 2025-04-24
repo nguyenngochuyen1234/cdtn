@@ -58,7 +58,8 @@ const AdvertisementPackageCard: React.FC<AdvertisementPackageCardProps> = ({
     return (
         <Card
             sx={{
-                height: 450, // Giữ chiều cao cố định nhưng tăng lên một chút
+                height: '100%', // Đảm bảo card co giãn đều trong Grid
+                minHeight: 450, // Chiều cao tối thiểu
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',

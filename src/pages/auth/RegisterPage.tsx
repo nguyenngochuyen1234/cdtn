@@ -93,7 +93,7 @@ const RegisterPage: React.FC = () => {
             </Typography>
 
             <TextField
-                label="Họ và tên"
+                label="Username"
                 variant="outlined"
                 fullWidth
                 margin="normal"

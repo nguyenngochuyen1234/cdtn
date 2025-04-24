@@ -148,7 +148,7 @@ export default function BusinessHoursSection({ shop, shopId }: BusinessHoursSect
                                 </MapContainer>
                             </Box>
 
-                            {detailedAddress && (
+                            {/* {detailedAddress && (
                                 <Stack spacing={1}>
                                     <Typography variant="body2" color="text.secondary">
                                         Địa chỉ:
@@ -157,7 +157,7 @@ export default function BusinessHoursSection({ shop, shopId }: BusinessHoursSect
                                         {detailedAddress}
                                     </Typography>
                                 </Stack>
-                            )}
+                            )} */}
                         </Grid>
                     )}
 

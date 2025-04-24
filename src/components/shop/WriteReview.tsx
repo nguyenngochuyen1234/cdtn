@@ -123,8 +123,8 @@ const WriteReview: React.FC = () => {
             toast.error('Nội dung đánh giá không được để trống');
             return;
         }
-        if (reviewContent.length < 20) {
-            toast.error('Đánh giá phải có ít nhất 30 ký tự');
+        if (reviewContent.length < 10) {
+            toast.error('Đánh giá phải có ít nhất 15 ký tự');
             return;
         }
 

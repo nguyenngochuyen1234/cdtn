@@ -108,6 +108,8 @@ const App: React.FC = () => {
     const bizIdCategory = localStorage.getItem('IDCATEGORY_BIZ');
 
     useEffect(() => {
+        const storedLocation = localStorage.getItem('userLocation');
+        const locationFromStorage = storedLocation ? JSON.parse(storedLocation) : null;
         setFormData((prev) => ({
             ...prev,
             email: bizEmail || '',
@@ -116,8 +118,8 @@ const App: React.FC = () => {
             city: store?.city || '',
             ward: store?.ward || '',
             district: store?.district || '',
-            longitude: selectedLocation?.lat || store?.latitude || 0,
-            latitude: selectedLocation?.lng || store?.latitude || 0,
+            longitude: locationFromStorage?.lng || prev.longitude, // Lấy trực tiếp từ localStorage
+            latitude: locationFromStorage?.lat || prev.latitude, // Lấy trực tiếp từ localStorage
             phone: store?.phone || '',
             codeCity: store?.codeCity,
             codeDistrict: store?.codeDistrict,
@@ -220,8 +222,8 @@ const App: React.FC = () => {
                 imageBusiness: localStorage.getItem('IMAGE_BUSINESS') || '',
                 mediaUrls: mediaUrlsResponse.data.data,
                 openTimeRequests: openTimes,
-                longitude: selectedLocation?.lat || formData.longitude,
-                latitude: selectedLocation?.lng || formData.latitude,
+                longitude: selectedLocation?.lng || formData.longitude, // Sửa: lng cho longitude
+                latitude: selectedLocation?.lat || formData.latitude, // Sửa: lat cho latitude
             });
 
             if (response.data) {
@@ -253,7 +255,6 @@ const App: React.FC = () => {
                     boxShadow: 1,
                 }}
             >
-                <CreationStepper />
                 <Grid container spacing={4}>
                     <Grid item xs={12}>
                         <Typography variant="h4" gutterBottom fontWeight="bold">
@@ -292,7 +293,7 @@ const App: React.FC = () => {
                         />
                         <Box mt={3}>
                             <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 1 }}>
-                                Địa chỉ cửa hàng <span style={{ color: 'red' }}>*</span>
+                                Vị trí cửa hàng <span style={{ color: 'red' }}>*</span>
                             </Typography>
                             <GoogleLocation />
                             {errors.address && (

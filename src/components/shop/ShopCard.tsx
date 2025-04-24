@@ -145,12 +145,13 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap',
                             }}
+                            title= {shop.name}
                         >
                             {shop.name}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <Rating
-                                value={shop.countReview > 0 ? shop.point / shop.countReview : 1}
+                                value={shop.countReview > 0 ? shop.point / shop.countReview : 5}
                                 readOnly
                                 size="small"
                                 precision={0.5}
@@ -164,7 +165,7 @@ const ShopCard = ({ shop }: ShopCardProps) => {
                             >
                                 {shop.countReview > 0
                                     ? (shop.point / shop.countReview).toFixed(0)
-                                    : '1'}
+                                    : '5'}
                             </Typography>
                         </Box>
                     </Box>

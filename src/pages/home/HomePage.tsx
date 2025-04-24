@@ -15,8 +15,6 @@ import SearchBarComponent from '@/components/search/SearchBarComponent';
 import ShopCard from '@/components/shop/ShopCard';
 import reviewApi from '@/api/reviewApi';
 import shopApi from '@/api/shopApi';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/redux/stores';
 import axiosClient from '@/api/axiosClient';
 
 const categories = [
@@ -41,12 +39,12 @@ const categories = [
 const HomePage = () => {
     const [dataReviews, setDataReview] = useState<Review[] | null>(null);
     const [shops, setShops] = useState([]);
-    const navigate = useNavigate();
-    const user = useSelector((state: RootState) => state.user.user);
     const [initialLocation, setInitialLocation] = useState<
         { latitude: number; longitude: number } | undefined
     >(undefined);
+    const navigate = useNavigate();
 
+    // Fetch user location from localStorage
     useEffect(() => {
         const storedLocation = localStorage.getItem('userLocation');
         if (storedLocation) {
@@ -58,6 +56,7 @@ const HomePage = () => {
         }
     }, []);
 
+    // Fetch recent reviews
     const fetchReviewRecently = async () => {
         try {
             const response = await reviewApi.getAllReviewRecently();
@@ -72,10 +71,16 @@ const HomePage = () => {
         fetchReviewRecently();
     }, []);
 
+    // Fetch shops based on authentication status
     useEffect(() => {
         const fetchShops = async () => {
+            // Kiểm tra trạng thái đăng nhập ngay trong useEffect này
+            const accessToken = localStorage.getItem('access_token');
+            const isAuthenticated = !!accessToken; // True nếu có token, false nếu không
+
             try {
-                if (user) {
+                if (isAuthenticated) {
+                    // Fetch personalized recommendations if authenticated
                     const userLocation = localStorage.getItem('userLocation');
                     let longitude = null;
                     let latitude = null;
@@ -104,8 +109,11 @@ const HomePage = () => {
                     const response = await shopApi.getShopsSuggest(requestBody);
                     if (response.data.success) {
                         setShops(response.data.data);
+                    } else {
+                        setShops([]);
                     }
                 } else {
+                    // Fetch sponsored shops if not authenticated
                     const response = await shopApi.getShopAds();
                     if (response.data.success) {
                         const sponsoredShops = response.data.data;
@@ -139,6 +147,8 @@ const HomePage = () => {
                             })
                         );
                         setShops(shopsWithOpenTimes);
+                    } else {
+                        setShops([]);
                     }
                 }
             } catch (error) {
@@ -148,19 +158,20 @@ const HomePage = () => {
         };
 
         fetchShops();
-    }, [user]);
+    }, []); // Dependency array rỗng, chỉ chạy một lần khi component mount
 
     const handleSearch = (keyword: string, location?: { latitude: number; longitude: number }) => {
         navigate('/search', { state: { keyword, location } });
     };
 
+    // Logic hiển thị giao diện giữ nguyên
     return (
         <div
             className="bg-[#FAFBFC]"
             style={{
-                padding: '20px 15px', // Reduced padding for smaller screens
+                padding: '20px 15px',
                 '@media (min-width: 600px)': {
-                    padding: '30px 50px', // Larger padding for desktop
+                    padding: '30px 50px',
                 },
             }}
         >
@@ -172,7 +183,7 @@ const HomePage = () => {
                             <img
                                 style={{
                                     width: '100%',
-                                    height: '80vh', // Desktop height
+                                    height: '80vh',
                                     objectFit: 'cover',
                                     borderRadius: 10,
                                 }}
@@ -211,7 +222,7 @@ const HomePage = () => {
                     <img
                         style={{
                             width: '100%',
-                            height: '50vh', // Reduced height for mobile
+                            height: '50vh',
                             objectFit: 'cover',
                             borderRadius: 10,
                         }}
@@ -223,9 +234,9 @@ const HomePage = () => {
                 <div
                     className="absolute bg-[#fff] rounded-md shadow-lg p-4 bottom-[-40px] left-1/2 transform -translate-x-1/2 w-full"
                     style={{
-                        width: 'min(90%, 800px)', // Default width for desktop
-                        bottom: '-20px', // Adjusted for mobile
-                        padding: '10px', // Reduced padding for mobile
+                        width: 'min(90%, 800px)',
+                        bottom: '-20px',
+                        padding: '10px',
                         '@media (min-width: 600px)': {
                             bottom: '-40px',
                             padding: '15px',
@@ -254,18 +265,22 @@ const HomePage = () => {
                         <Typography
                             variant="h5"
                             sx={{
-                                fontSize: { xs: '1.25rem', md: '1.5rem' }, // Smaller font on mobile
+                                fontSize: { xs: '1.25rem', md: '1.5rem' },
                                 fontWeight: 'bold',
                             }}
                         >
-                            {user ? 'Các cửa hàng bạn nên đến' : 'Các cửa hàng được tài trợ'}
+                            {localStorage.getItem('access_token')
+                                ? 'Đề xuất các cửa hàng bạn nên đến'
+                                : 'Các cửa hàng được tài trợ'}
                         </Typography>
                         <Typography
                             variant="body2"
                             color="text.secondary"
                             sx={{ fontSize: { xs: '0.875rem', md: '1rem' } }}
                         >
-                            {user ? 'Gợi ý những cửa hàng phù hợp' : 'Các cửa hàng được quảng cáo'}
+                            {localStorage.getItem('access_token')
+                                ? 'Gợi ý những cửa hàng phù hợp'
+                                : 'Các cửa hàng được quảng cáo'}
                         </Typography>
                     </Box>
                     <Link to={'/search'}>
@@ -294,7 +309,7 @@ const HomePage = () => {
                                 key={index}
                                 sx={{
                                     display: 'flex',
-                                    justifyContent: 'center', // Center cards on mobile
+                                    justifyContent: 'center',
                                 }}
                             >
                                 <Box sx={{ width: '100%', maxWidth: 300 }}>

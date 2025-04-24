@@ -30,23 +30,31 @@ const HeaderDetailPost: React.FC<HeaderDetailPostProps> = ({ shop, shopId }) => 
                 sx={{
                     position: 'absolute',
                     bottom: 0,
-                    left: 180,
+                    left: 0, // Remove fixed left: 180 to make it responsive
                     width: '100%',
+                    maxWidth: { xs: '90%', sm: '80%', md: '70%' }, // Constrain width for responsiveness
                     background:
                         'linear-gradient(to top, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.01) 50%, rgba(0,0,0,0.02) 100%)',
                     color: 'white',
-                    p: { xs: 2, sm: 3 },
+                    p: { xs: 1, sm: 2, md: 3 }, // Responsive padding
+                    mx: { xs: 1, sm: 2 }, // Add margin for smaller screens
                 }}
             >
                 <Stack
                     direction={{ xs: 'column', sm: 'row' }}
-                    spacing={2}
+                    spacing={{ xs: 1, sm: 2 }}
                     alignItems={{ xs: 'flex-start', sm: 'center' }}
                 >
                     <Typography
                         variant="h4"
                         fontWeight="bold"
-                        sx={{ textShadow: '1px 1px 3px rgba(0,0,0,0.5)' }}
+                        sx={{
+                            textShadow: '1px 1px 3px rgba(0,0,0,0.5)',
+                            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.25rem' }, // Responsive font size
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: { xs: 'normal', sm: 'nowrap' }, // Wrap text on small screens
+                        }}
                     >
                         {shop.name}
                     </Typography>
@@ -70,7 +78,7 @@ const HeaderDetailPost: React.FC<HeaderDetailPostProps> = ({ shop, shopId }) => 
 
                 <Stack
                     direction={{ xs: 'column', sm: 'row' }}
-                    spacing={{ xs: 1, sm: 3 }}
+                    spacing={{ xs: 1, sm: 2 }}
                     alignItems={{ xs: 'flex-start', sm: 'center' }}
                     mt={1}
                 >
@@ -83,7 +91,7 @@ const HeaderDetailPost: React.FC<HeaderDetailPostProps> = ({ shop, shopId }) => 
                                         i < Math.floor(parseFloat(averageRating))
                                             ? '#FFD700'
                                             : '#e5e7eb',
-                                    fontSize: 20,
+                                    fontSize: { xs: 16, sm: 20 }, // Responsive star size
                                 }}
                             />
                         ))}
@@ -91,9 +99,10 @@ const HeaderDetailPost: React.FC<HeaderDetailPostProps> = ({ shop, shopId }) => 
                             variant="body1"
                             sx={{
                                 ml: 1,
-                                fontWeight: '500px',
-                                color: '#FFFF', // Đổi màu thành vàng để dễ đọc trên nền gradient
-                                textShadow: '1px 1px 2px rgba(0,0,0,0.5)', // Thêm bóng chữ để tăng độ tương phản
+                                fontWeight: '500',
+                                color: '#FFFF',
+                                textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                                fontSize: { xs: '0.875rem', sm: '1rem' }, // Responsive font size
                             }}
                         >
                             {averageRating} ({shop.countReview || 0} đánh giá)

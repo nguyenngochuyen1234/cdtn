@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import {
     Box,
     Typography,
@@ -18,15 +17,13 @@ import {
     DialogContent,
     DialogActions,
     CircularProgress,
-    Snackbar,
-    Alert,
     Chip,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import adsSubAPI from '@/api/adssubAPI';
 import shopApi from '@/api/shopApi';
-import CustomPagination from '@/components/shop/CustomPagination'; // Assuming this exists
+import CustomPagination from '@/components/shop/CustomPagination';
 
 interface Transaction {
     id: string;
@@ -42,7 +39,7 @@ interface Transaction {
     adsName?: string;
 }
 
-interface Panigation {
+interface Pagination {
     limit: number;
     page: number;
     sort?: string;
@@ -109,7 +106,6 @@ const TransactionDetailDialog: React.FC<{
 };
 
 const PaymentStatus: React.FC = () => {
-    const [searchParams] = useSearchParams();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -118,19 +114,14 @@ const PaymentStatus: React.FC = () => {
     const [page, setPage] = useState(1);
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [toast, setToast] = useState<{
-        open: boolean;
-        message: string;
-        severity: 'success' | 'error';
-    }>({ open: false, message: '', severity: 'success' });
 
-    const limit = 10;
+    const limit = 6;
 
     // Fetch transaction history
     const fetchTransactionHistory = async (page: number) => {
         try {
             setLoading(true);
-            const pagination: Panigation = {
+            const pagination: Pagination = {
                 limit,
                 page: page - 1, // Adjust for 0-based API
             };
@@ -154,43 +145,18 @@ const PaymentStatus: React.FC = () => {
             setTotalTransactions(response.data.meta?.total || 0);
         } catch (error) {
             console.error('Error fetching transaction history:', error);
-            setToast({
-                open: true,
-                message: 'Lỗi khi tải lịch sử giao dịch.',
-                severity: 'error',
-            });
         } finally {
             setLoading(false);
         }
     };
 
-    // Handle toast based on URL params
     useEffect(() => {
-        const transactionStatus = searchParams.get('vnp_TransactionStatus');
-        if (transactionStatus === '00') {
-            setToast({
-                open: true,
-                message: 'Thanh toán thành công!',
-                severity: 'success',
-            });
-        } else if (transactionStatus) {
-            setToast({
-                open: true,
-                message: 'Thanh toán thất bại!',
-                severity: 'error',
-            });
-        }
-        // Fetch transaction history regardless of transactionStatus
         fetchTransactionHistory(page);
-    }, [searchParams, page]);
+    }, [page]);
 
     const handleViewDetails = (txn: Transaction) => {
         setSelectedTransaction(txn);
         setDialogOpen(true);
-    };
-
-    const handleToastClose = () => {
-        setToast({ ...toast, open: false });
     };
 
     return (
@@ -240,8 +206,22 @@ const PaymentStatus: React.FC = () => {
                                     <TableCell>
                                         <Chip
                                             label={txn.statusPayment}
-                                            
                                             size="small"
+                                            sx={{
+                                                fontWeight: 'bold',
+                                                backgroundColor:
+                                                    txn.statusPayment === 'SUCCESS'
+                                                        ? 'success.light'
+                                                        : txn.statusPayment === 'PENDING'
+                                                          ? 'warning.light'
+                                                          : 'error.light',
+                                                color:
+                                                    txn.statusPayment === 'SUCCESS'
+                                                        ? 'success.dark'
+                                                        : txn.statusPayment === 'PENDING'
+                                                          ? 'warning.dark'
+                                                          : 'error.dark',
+                                            }}
                                         />
                                     </TableCell>
                                     <TableCell align="right">
@@ -278,17 +258,6 @@ const PaymentStatus: React.FC = () => {
                 transaction={selectedTransaction}
                 onClose={() => setDialogOpen(false)}
             />
-
-            <Snackbar
-                open={toast.open}
-                autoHideDuration={6000}
-                onClose={handleToastClose}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-            >
-                <Alert onClose={handleToastClose} severity={toast.severity} sx={{ width: '100%' }}>
-                    {toast.message}
-                </Alert>
-            </Snackbar>
         </Box>
     );
 };

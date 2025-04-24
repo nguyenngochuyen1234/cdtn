@@ -97,7 +97,7 @@ const AdminPage = () => {
             >
                 <List>
                     {/* User Info */}
-                    <ListItem sx={{ padding: '10px 20px' }}>
+                    {/* <ListItem sx={{ padding: '10px 20px' }}>
                         <Stack flexDirection="row" sx={{ width: '100%' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Avatar
@@ -113,7 +113,7 @@ const AdminPage = () => {
                                 </Box>
                             </Box>
                         </Stack>
-                    </ListItem>
+                    </ListItem> */}
 
                     {/* Navigation Items */}
                     {NAVIGATION.map((item) => {

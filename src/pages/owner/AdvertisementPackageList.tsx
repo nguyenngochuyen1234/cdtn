@@ -26,7 +26,6 @@ interface AdvertisementPackage {
     discount?: string;
 }
 
-
 export default function AdvertisementPackageList() {
     const [selectedPackage, setSelectedPackage] = useState<AdvertisementPackage | null>(null);
     const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -143,6 +142,11 @@ export default function AdvertisementPackageList() {
                                     container
                                     spacing={{ xs: 2, sm: 3 }}
                                     columns={{ xs: 1, sm: 2, md: 3 }}
+                                    sx={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        alignItems: 'stretch', // Đảm bảo các card có chiều cao bằng nhau
+                                    }}
                                 >
                                     {packages.map((pack) => (
                                         <Grid item key={pack.id} xs={1}>

@@ -51,6 +51,7 @@ import ServiceDetailPage from './components/shop/ServiceDetailPage';
 import FavoriteStores from './components/shop/FavoritePage';
 import AdvertisementPackageList from './pages/owner/AdvertisementPackageList';
 import PaymentStatus from './pages/owner/PaymentCard';
+import PaymentResult from './pages/owner/PaymentResult';
 
 export default function App() {
     const dispatch = useDispatch();
@@ -112,6 +113,7 @@ export default function App() {
                     <Route path="verify-account" element={<ActiveCodeUser />} />
                 </Route>
                 <Route path="/owner" element={<OwnerPage />}>
+                    <Route path="payment-result" element={<PaymentResult />} />
                     <Route index element={<StatisticsPageOwner />} />
                     <Route path="profile" element={<OwnerProfile />} />
                     <Route path="business-info" element={<BusinessInfo />} />
@@ -132,6 +134,7 @@ export default function App() {
                     <Route path="upload-image" element={<UploadImagePage />} />
                 </Route>
                 <Route path="finish-create-shop" element={<FinishCreateShop />} />
+
                 {/* <Route path="writeareview" element={<BusinessSearch />} /> */}
                 <Route path="writeareview/biz/:id" element={<ReviewBusiness />} />
                 <Route path="/admin" element={<AdminPage />}>

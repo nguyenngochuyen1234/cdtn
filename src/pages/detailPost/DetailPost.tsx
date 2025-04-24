@@ -88,9 +88,11 @@ function DetailPost() {
     useEffect(() => {
         if (id) {
             const isFromSponsored = location.state?.from === 'sponsored';
+            const idAdvertisement = location.state?.idAdvertisement || ''; // Lấy idAdvertisement từ state, mặc định là chuỗi rỗng nếu không có
             const body = {
                 idShop: id,
                 type: isFromSponsored ? 'ads' : '',
+                idAdvertisement: idAdvertisement
             };
             shopApi.increView(body);
         }

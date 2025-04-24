@@ -141,7 +141,7 @@ export const HeaderComponent = () => {
                                     display: isMobile ? 'none' : 'block',
                                 }}
                             >
-                                Viết bài đánh giá
+                                Viết đánh giá
                             </Typography>
                             {isMobile && (
                                 <FavoriteIcon sx={{ color: colors.textColor, fontSize: '16px' }} />

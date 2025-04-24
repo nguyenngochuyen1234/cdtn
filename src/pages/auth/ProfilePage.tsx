@@ -101,7 +101,6 @@ export default function ProfilePage() {
                 logoutAPI(navigate);
             } catch (error) {
                 console.error('Error uploading avatar or updating profile:', error);
-                alert('Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.');
             }
         }
     };
